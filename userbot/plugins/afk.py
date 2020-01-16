@@ -19,6 +19,7 @@ import asyncio
 import datetime
 import os
 import time
+import random
 
 from telethon.events import StopPropagation
 from telethon.tl import types, functions
@@ -38,6 +39,33 @@ AFK = plugins_data.AFK
 AFK.privates = plugins_data.load_data('userbot_afk_privates')
 AFK.groups = plugins_data.load_data('userbot_afk_groups')
 AFK.sent = plugins_data.load_data('userbot_afk_sent')
+
+AFKMEMEZ = [
+    "You missed me, next time aim better.",
+    "Me no here, Me go bye.\nLeave me message. Me reply.",
+    "I'll be back in a few minutes and if I'm not...,\nwait longer.",
+    "I'm not here right now, so I'm probably somewhere else.",
+    "Roses are red, violets are blue.\
+        \nLeave me a message, and I'll get back to you.",
+    "I'll be right back,\nbut if I'm not right back,\nI'll be back later.",
+    "If you haven't figured it out already,\nI'm not here.",
+    "Hello, welcome to my away message, how may I ignore you today?",
+    "You know the drill, you leave a message, and I'll ignore it.",
+    "I'm away from the keyboard at the moment,\
+        \nbut if you'll scream loud enough at your screen, \
+        I might just hear you.",
+    "I went that way\n---->",
+    "This is an away message and I am away... so leave a message.",
+    "I went this way\n<----",
+    "If I were here,\nI'd tell you where I am.\
+        \nBut I'm not,\nso ask me when I return...",
+    "I am away!\nI don't know when I'll be back!\
+        \nHopefully a few minutes from now!",
+    "I bet you were expecting an away message!",
+    "Life is so short, there are so many things to do...\
+        \nI'm away doing one of them..",
+    "I am not here right now...\nbut if I was...\n\nwouldn't that be awesome?",
+]
 
 
 @client.onMessage(
@@ -150,9 +178,13 @@ async def inc_listner(event: NewMessage.Event) -> None:
     now = datetime.datetime.now(datetime.timezone.utc)
     reason = os.environ.get('userbot_afk_reason', False)
     elapsed = await _humanfriendly_seconds((now - since).total_seconds())
-    text = "`I am currently AFK{}.`\n`Last seen: {} ago.`".format(
-        ' because ' + reason if reason else '', elapsed
-    )
+    if reason:
+        text = "**I am currently AFK.**\
+            \n__Last seen: {} ago.__\nReason: `{}`".format(
+            elapsed, reason)
+    else:
+        text = "**{}**\n__Last seen: {} ago.__".format(
+            random.choice(AFKMEMEZ), elapsed)
 
     chat = await event.get_chat()
     if event.is_private:
@@ -161,8 +193,9 @@ async def inc_listner(event: NewMessage.Event) -> None:
         await _append_msg(AFK.groups, chat.id, event.id)
 
     if chat.id in AFK.sent:
-        # Default timeout is 150 seconds / 2.5 minutes
-        if round((now - AFK.sent[chat.id][-1][1]).total_seconds()) <= 150:
+        # Floodwait prevention, in case some retards spam tag/PM you.
+        timeout = random.randint(60, 180)
+        if round((now - AFK.sent[chat.id][-1][1]).total_seconds()) <= timeout:
             return
 
     result = await event.answer(message=text, reply_to=None)
