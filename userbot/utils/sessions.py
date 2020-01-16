@@ -39,6 +39,7 @@ class RedisSession(MemorySession):
     """Session to store the authentication information in Redis.
     The entities and files are cached in memory instead of Redis.
     """
+
     def __init__(self, session_name=None, redis_connection=None):
         if not isinstance(session_name, (str, bytes)):
             raise TypeError("Session name must be a string or bytes.")

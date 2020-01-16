@@ -23,7 +23,7 @@ from userbot.utils.events import NewMessage
 
 
 plugin_category: str = "helper"
-link: str = "https://tg-userbot.readthedocs.io/en/latest/userbot/commands.html"
+link: str = "https://github.com/AvinashReddy3108/PaperplaneRemix/wiki"
 chunk: int = 5
 
 

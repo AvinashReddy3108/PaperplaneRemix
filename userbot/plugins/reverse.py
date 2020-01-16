@@ -195,7 +195,7 @@ async def _scrape_url(googleurl):
             for similar_image in search.findAll(*fifth):
                 result['similar_images'] = (
                     "https://www.google.com" + similar_image.get('href')
-                    )
+                )
 
             for match_text in search.findAll(*sixth):
                 result['matching_text'] = match_text.get_text()

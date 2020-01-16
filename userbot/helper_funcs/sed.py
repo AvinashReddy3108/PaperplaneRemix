@@ -22,6 +22,7 @@ from typing import Tuple, Union
 
 class UnknownFlagError(Exception):
     """Used to raise an Exception for an unknown flag."""
+
     def __init__(self, flag):
         super().__init__(flag)
         self.flag = flag

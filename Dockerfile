@@ -19,10 +19,10 @@ RUN apk add --no-cache --update \
     zlib-dev
 
 COPY . /tmp/userbot_local
-WORKDIR /usr/src/app/TG-UserBot/
+WORKDIR /usr/src/app/PaperplaneRemix/
 
-RUN git clone https://github.com/kandnub/TG-UserBot.git /usr/src/app/TG-UserBot/
-RUN rsync --ignore-existing --recursive /tmp/userbot_local/ /usr/src/app/TG-UserBot/
+RUN git clone https://github.com/AvinashReddy3108/PaperplaneRemix.git /usr/src/app/PaperplaneRemix/
+RUN rsync --ignore-existing --recursive /tmp/userbot_local/ /usr/src/app/PaperplaneRemix/
 
 RUN python3 -m pip install --upgrade pip
 RUN python3 -m pip install --no-warn-script-location --no-cache-dir -r requirements.txt

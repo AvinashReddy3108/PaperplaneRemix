@@ -1,10 +1,10 @@
 {
-    "name": "TG-UserBot",
-    "description": "A modular Telegram UserBot for Python which uses the Telethon library. It is made to help you do your usual client tasks without the hassle and also has some additional useful features.",
-    "repository": "https://github.com/kandnub/TG-UserBot/",
-    "logo": "https://i.imgur.com/qctfOGK.png",
-    "keywords": ["tg-userbot", "telegram-userbot", "userbot", "python"],
-    "success_url": "https://t.me/tg_userbot_support/",
+    "name": "PaperplaneRemix",
+    "description": "A modular Telegram userbot.",
+    "repository": "https://github.com/AvinashReddy3108/PaperplaneRemix",
+    "logo": "https://i.imgur.com/KmAZsPV.png",
+    "keywords": ["paperplaneremix", "telegram-userbot", "userbot", "python"],
+    "success_url": "https://t.me/MemezByAvinashReddy",
     "stack": "container",
     "image": "Dockerfile",
     "env": {
@@ -15,7 +15,7 @@
             "description": "Get your own Telegram API key from https://my.telegram.org/apps"
         },
         "api_hash": {
-            "description": "Get your own Telegram API key from https://my.telegram.org/apps"
+            "description": "Get your own Telegram API hash from https://my.telegram.org/apps"
         },
         "redis_endpoint": {
             "description": "Get your own free 30 MB databse from https://redislabs.com/"

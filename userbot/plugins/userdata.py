@@ -221,7 +221,7 @@ async def pfp(event: NewMessage.Event) -> None:
             await event.answer(
                 '`' + type(e).__name__ + ': ' + str(e) + '`',
                 reply=True
-                )
+            )
             temp_file.close()
             return
         temp_file.seek(0)

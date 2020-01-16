@@ -23,6 +23,7 @@ from .. import LOGGER
 
 class YTdlLogger(object):
     """Logger used for YoutubeDL which logs to UserBot logger."""
+
     def debug(self, msg: str) -> None:
         """Logs debug messages with youtube-dl tag to UserBot logger."""
         LOGGER.debug("youtube-dl: " + msg)
