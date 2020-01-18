@@ -14,4 +14,4 @@
 <p align="center"><em>... and <a href="https://github.com/AvinashReddy3108/PaperplaneRemix/graphs/contributors">others</a> whose names are not mentioned here.</em></p>
 <p align="center">&nbsp;</p>
 <h2 align="center">License</h2>
-<p align="center">Unless specified otherwise, the code is licensed under the terms of the <a href="https://github.com/AvinashReddy3108/PaperplaneRemix/blob/master/LICENSE">GNU General Public License v3.0</a> and above.</p>
+<p align="center">Unless specified otherwise, the code is licensed under the terms of the <a href="https://github.com/AvinashReddy3108/PaperplaneRemix/blob/master/LICENSE">GNU General Public License v3.0</a> and copyrighted by <a href="https://github.com/kandnub">Kan</a>.</p>
