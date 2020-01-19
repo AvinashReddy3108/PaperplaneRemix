@@ -76,7 +76,7 @@ async def awayfromkeyboard(event: NewMessage.Event) -> None:
     """Set your status as AFK until you send a message again."""
     arg = event.matches[0].group(1)
     os.environ['userbot_afk'] = time.time().__str__()
-    text = "**I am AFK!**"
+    text = "**AFK AF!**"
     if arg:
         os.environ['userbot_afk_reason'] = arg.strip()
         text += f"\n**Reason:** __{arg.strip()}__"
