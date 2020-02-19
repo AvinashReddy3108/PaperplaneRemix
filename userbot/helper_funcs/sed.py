@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import re
 from enum import Enum
 from typing import Tuple, Union
@@ -22,7 +21,6 @@ from typing import Tuple, Union
 
 class UnknownFlagError(Exception):
     """Used to raise an Exception for an unknown flag."""
-
     def __init__(self, flag):
         super().__init__(flag)
         self.flag = flag
@@ -93,14 +91,12 @@ async def resolve_flags(fl: str) -> Tuple[int, Union[int, Enum]]:
     return count, flags
 
 
-async def substitute(
-    fr: str,
-    to: str,
-    original: str,
-    line: (str, int, None) = None,
-    count: int = 1,
-    flags: Union[Enum, int] = 0
-) -> Union[str, None]:
+async def substitute(fr: str,
+                     to: str,
+                     original: str,
+                     line: (str, int, None) = None,
+                     count: int = 1,
+                     flags: Union[Enum, int] = 0) -> Union[str, None]:
     """Substitute a (specific) string.
     Match the regular-expression against the content of the pattern space.
     If found, replace matched string with replacement.
@@ -128,9 +124,7 @@ async def substitute(
         lines = original.splitlines()
         if len(lines) < line:
             return
-        newLine, i = re.subn(
-            fr, to, lines[line - 1], count=count, flags=flags
-        )
+        newLine, i = re.subn(fr, to, lines[line - 1], count=count, flags=flags)
         if i > 0:
             lines[line - 1] = newLine
             newStr = '\n'.join(lines)
@@ -167,14 +161,12 @@ async def sub_matches(matches: list, original: str) -> Union[str, None]:
             exc = f"`Unknown flag:` `{f}`"
             return exc
 
-        newStr = await substitute(
-            fr,
-            to,
-            string,
-            line=line,
-            count=count,
-            flags=flags
-        )
+        newStr = await substitute(fr,
+                                  to,
+                                  string,
+                                  line=line,
+                                  count=count,
+                                  flags=flags)
         if newStr:
             string = newStr
             total_subs += 1

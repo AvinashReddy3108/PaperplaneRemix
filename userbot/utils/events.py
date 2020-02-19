@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import re
 from typing import Tuple
 
@@ -23,21 +22,17 @@ from telethon.tl import custom, types
 
 from .custom import answer
 
-
 custom.Message.answer = answer
 
 
 @events.common.name_inner_event
 class NewMessage(events.NewMessage):
     """Custom NewMessage event inheriting the default Telethon event"""
-
-    def __init__(
-        self,
-        disable_prefix: bool = None,
-        regex: Tuple[str, int] or str = None,
-        require_admin: bool = None,
-        **kwargs
-    ):
+    def __init__(self,
+                 disable_prefix: bool = None,
+                 regex: Tuple[str, int] or str = None,
+                 require_admin: bool = None,
+                 **kwargs):
         """Overriding the default init to add additional attributes"""
         super().__init__(**kwargs)
 
@@ -46,8 +41,7 @@ class NewMessage(events.NewMessage):
                 exp, flags = regex
                 if not isinstance(exp, str):
                     raise TypeError(
-                        "Make sure you're using a string for a pattern!"
-                    )
+                        "Make sure you're using a string for a pattern!")
                 self.regex = (exp, flags)
             elif isinstance(regex, str):
                 self.regex = (regex, 0)
@@ -74,10 +68,8 @@ class NewMessage(events.NewMessage):
             exp, flags = self.regex
 
             if not self.disable_prefix:
-                pattern = re.compile(
-                    "(?i)^" + prefix + exp,
-                    flags=flags
-                ).finditer
+                pattern = re.compile("(?i)^" + prefix + exp,
+                                     flags=flags).finditer
             else:
                 pattern = re.compile(exp, flags=flags).finditer
 
@@ -93,13 +85,10 @@ class NewMessage(events.NewMessage):
                 if not event.chat.creator:
                     if not event.chat.admin_rights:
                         if self.outgoing and event.message.out:
-                            event._client.loop.create_task(
-                                event.answer(text)
-                            )
+                            event._client.loop.create_task(event.answer(text))
                         elif self.incoming and not event.message.out:
                             event._client.loop.create_task(
-                                event.answer(text, reply=True)
-                            )
+                                event.answer(text, reply=True))
                         return
         return event
 
@@ -107,12 +96,12 @@ class NewMessage(events.NewMessage):
 @events.common.name_inner_event
 class MessageEdited(NewMessage):
     """Custom MessageEdited event inheriting the custom NewMessage event"""
-
     @classmethod
     def build(cls, update, others=None, self_id=None):
         """Required to check if message is edited, double events"""
-        if isinstance(update, (types.UpdateEditMessage,
-                               types.UpdateEditChannelMessage)):
+        if isinstance(
+                update,
+            (types.UpdateEditMessage, types.UpdateEditChannelMessage)):
             return cls.Event(update.message)
 
     class Event(NewMessage.Event):

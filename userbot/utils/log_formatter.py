@@ -14,10 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import logging
 import os
-
 
 HEROKU = os.environ.get('DYNO', False)
 CCRI = '\033[48;5;124m' if not HEROKU else ''
@@ -67,6 +65,5 @@ class CustomPercentStyle(logging.PercentStyle):
 
 class CustomFormatter(logging.Formatter):
     """Update the default Formatter's _STYLES dict to use our custom one"""
-    _STYLES = logging._STYLES.update({
-        '%': (CustomPercentStyle, logging.BASIC_FORMAT)
-    })
+    _STYLES = logging._STYLES.update(
+        {'%': (CustomPercentStyle, logging.BASIC_FORMAT)})

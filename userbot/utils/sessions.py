@@ -14,10 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
-
 # This was purely based on https://github.com/ezdev128/telethon-session-redis/
 # since it hasn't been updated for a while now and missed a few things.
-
 
 import logging
 
@@ -31,7 +29,6 @@ from telethon.sessions.memory import _SentFileType
 from telethon.tl import types
 """
 
-
 LOGGER = logging.getLogger(__name__)
 
 
@@ -39,18 +36,14 @@ class RedisSession(MemorySession):
     """Session to store the authentication information in Redis.
     The entities and files are cached in memory instead of Redis.
     """
-
     def __init__(self, session_name=None, redis_connection=None):
         if not isinstance(session_name, (str, bytes)):
             raise TypeError("Session name must be a string or bytes.")
 
-        if (
-            not redis_connection or
-            not isinstance(redis_connection, redis.Redis)
-        ):
+        if (not redis_connection
+                or not isinstance(redis_connection, redis.Redis)):
             raise TypeError(
-                'The given redis_connection must be a Redis instance.'
-            )
+                'The given redis_connection must be a Redis instance.')
 
         super().__init__()
 
@@ -60,11 +53,8 @@ class RedisSession(MemorySession):
         self._auth_key = None
         self._takeout_id = None
 
-        self.session_name = (
-            session_name
-            if isinstance(session_name, str) else
-            session_name.decode()
-        )
+        self.session_name = (session_name if isinstance(session_name, str) else
+                             session_name.decode())
         self.redis_connection = redis_connection
         self.sess_prefix = "telethon:session:{}".format(self.session_name)
         self.feed_session()
@@ -86,11 +76,8 @@ class RedisSession(MemorySession):
             self._dc_id = s.get(b'dc_id').decode()
             self._server_address = s.get(b'server_address').decode()
             self._port = s.get(b'port').decode()
-            self._takeout_id = (
-                s.get(b'takeout_id').decode()
-                if s.get(b'takeout_id', False) else
-                None
-            )
+            self._takeout_id = (s.get(b'takeout_id').decode() if s.get(
+                b'takeout_id', False) else None)
 
             if s.get(b'auth_key', False):
                 self._auth_key = AuthKey(s.get(b'auth_key'))
@@ -104,8 +91,7 @@ class RedisSession(MemorySession):
             sessions = self.redis_connection.keys(key_pattern + '*')
             return [
                 s.decode().replace(key_pattern, '')
-                if strip_prefix else
-                s.decode() for s in sessions
+                if strip_prefix else s.decode() for s in sessions
             ]
         except Exception as ex:
             LOGGER.exception(ex.args)

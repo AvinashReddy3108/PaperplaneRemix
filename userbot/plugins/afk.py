@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import asyncio
 import datetime
 import os
@@ -30,11 +29,8 @@ from userbot.plugins import plugins_data
 from userbot.utils.helpers import _humanfriendly_seconds, get_chat_link
 from userbot.utils.events import NewMessage
 
-
 DEFAULT_MUTE_SETTINGS = types.InputPeerNotifySettings(
-    silent=True,
-    mute_until=datetime.timedelta(days=365)
-)
+    silent=True, mute_until=datetime.timedelta(days=365))
 AFK = plugins_data.AFK
 AFK.privates = plugins_data.load_data('userbot_afk_privates')
 AFK.groups = plugins_data.load_data('userbot_afk_groups')
@@ -68,10 +64,7 @@ AFKMEMEZ = [
 ]
 
 
-@client.onMessage(
-    command="afk",
-    outgoing=True, regex="afk(?: |$)(.*)?$"
-)
+@client.onMessage(command="afk", outgoing=True, regex="afk(?: |$)(.*)?$")
 async def awayfromkeyboard(event: NewMessage.Event) -> None:
     """Set your status as AFK until you send a message again."""
     arg = event.matches[0].group(1)
@@ -81,10 +74,7 @@ async def awayfromkeyboard(event: NewMessage.Event) -> None:
         os.environ['userbot_afk_reason'] = arg.strip()
         text += f"\n**Reason:** __{arg.strip()}__"
     extra = await get_chat_link(event, event.id)
-    await event.answer(
-        text,
-        log=("afk", f"You just went AFK in {extra}!")
-    )
+    await event.answer(text, log=("afk", f"You just went AFK in {extra}!"))
     raise StopPropagation
 
 
@@ -109,13 +99,11 @@ async def out_listner(event: NewMessage.Event) -> None:
             await _update_notif_settings(key, value['PeerNotifySettings'])
             total_mentions += len(value['mentions'])
             msg = "  `{} total mentions from `[{}](tg://user?id={})`.`"
-            to_log.append(msg.format(
-                len(value['mentions']), value['title'], key
-            ))
+            to_log.append(
+                msg.format(len(value['mentions']), value['title'], key))
 
         pr_text = "`Received {} message{} from {} private chat{}.`".format(
-            *(await _correct_grammer(total_mentions, len(AFK.privates)))
-        )
+            *(await _correct_grammer(total_mentions, len(AFK.privates))))
         pr_log = pr_log + "\n".join("  " + t for t in to_log)
     if AFK.groups:
         total_mentions = 0
@@ -135,19 +123,17 @@ async def out_listner(event: NewMessage.Event) -> None:
             to_log.append(msg)
 
         gr_text = "`Received {} mention{} from {} group{}.`".format(
-            *(await _correct_grammer(total_mentions, len(AFK.groups)))
-        )
+            *(await _correct_grammer(total_mentions, len(AFK.groups))))
         gr_log = gr_log + "\n".join("  " + t for t in to_log)
 
     main_text = '\n'.join([pr_text, gr_text]).strip()
     if not client.logger:
         main_text += "\n`Use a logger group for more detailed AFK mentions!`"
     status = await event.answer("`I am no longer AFK!`", reply_to=event.id)
-    toast = await event.answer(
-        message=main_text or def_text,
-        reply_to=status.id,
-        log=("afk", '\n'.join([pr_log, gr_log]).strip() or def_text)
-    )
+    toast = await event.answer(message=main_text or def_text,
+                               reply_to=status.id,
+                               log=("afk", '\n'.join([pr_log, gr_log]).strip()
+                                    or def_text))
 
     for chat, msg in AFK.sent.items():
         msgs = [m for m, _ in msg]
@@ -171,20 +157,17 @@ async def inc_listner(event: NewMessage.Event) -> None:
     if not (afk and (event.is_private or event.mentioned)):
         return
 
-    since = datetime.datetime.fromtimestamp(
-        float(afk),
-        tz=datetime.timezone.utc
-    )
+    since = datetime.datetime.fromtimestamp(float(afk),
+                                            tz=datetime.timezone.utc)
     now = datetime.datetime.now(datetime.timezone.utc)
     reason = os.environ.get('userbot_afk_reason', False)
     elapsed = await _humanfriendly_seconds((now - since).total_seconds())
     if reason:
         text = "**I am currently AFK.**\
-            \n__Last seen: {} ago.__\nReason: `{}`".format(
-            elapsed, reason)
+            \n__Last seen: {} ago.__\nReason: `{}`".format(elapsed, reason)
     else:
-        text = "**{}**\n__Last seen: {} ago.__".format(
-            random.choice(AFKMEMEZ), elapsed)
+        text = "**{}**\n__Last seen: {} ago.__".format(random.choice(AFKMEMEZ),
+                                                       elapsed)
 
     chat = await event.get_chat()
     if event.is_private:
@@ -206,9 +189,8 @@ async def _append_msg(variable: dict, chat: int, event: int) -> None:
     if chat in variable:
         variable[chat]['mentions'].append(event)
     else:
-        notif = await client(functions.account.GetNotifySettingsRequest(
-            peer=chat
-        ))
+        notif = await client(
+            functions.account.GetNotifySettingsRequest(peer=chat))
         notif = types.InputPeerNotifySettings(**vars(notif))
         await _update_notif_settings(chat)
         async for dialog in client.iter_dialogs():
@@ -219,10 +201,7 @@ async def _append_msg(variable: dict, chat: int, event: int) -> None:
                 break
         x = 1
         messages = []
-        async for message in client.iter_messages(
-            chat,
-            max_id=last_msg
-        ):
+        async for message in client.iter_messages(chat, max_id=last_msg):
             if x >= unread_count:
                 if not messages:
                     messages.append(message.id)
@@ -243,15 +222,13 @@ async def _update_notif_settings(
     peer: int,
     settings: types.InputPeerNotifySettings = DEFAULT_MUTE_SETTINGS
 ) -> None:
-    await client(functions.account.UpdateNotifySettingsRequest(
-        peer=peer,
-        settings=settings
-    ))
+    await client(
+        functions.account.UpdateNotifySettingsRequest(peer=peer,
+                                                      settings=settings))
 
 
-async def _correct_grammer(
-    mentions: int, chats: int
-) -> Tuple[str, str, str, str]:
+async def _correct_grammer(mentions: int,
+                           chats: int) -> Tuple[str, str, str, str]:
     a1 = "one" if mentions == 1 else mentions
     a2 = '' if mentions == 1 else 's'
     a3 = "one" if chats == 1 else chats

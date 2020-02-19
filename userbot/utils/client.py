@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import configparser
 import dataclasses
 import logging
@@ -24,7 +23,6 @@ from telethon import TelegramClient, events
 
 from .pluginManager import PluginManager
 from .events import MessageEdited, NewMessage
-
 
 LOGGER = logging.getLogger(__name__)
 no_info = "There is no help available for this command!"
@@ -54,14 +52,12 @@ class UserBotClient(TelegramClient):
     running_processes: dict = {}
     version: int = 0
 
-    def onMessage(
-        self,
-        builtin: bool = False,
-        command: str or tuple = None,
-        edited: bool = True,
-        info: str = None,
-        **kwargs
-    ) -> callable:
+    def onMessage(self,
+                  builtin: bool = False,
+                  command: str or tuple = None,
+                  edited: bool = True,
+                  info: str = None,
+                  **kwargs) -> callable:
         """Method to register a function without the client"""
 
         kwargs.setdefault('forwards', False)
@@ -82,12 +78,8 @@ class UserBotClient(TelegramClient):
                     else:
                         raise ValueError
 
-                UBcommand = Command(
-                    func,
-                    handlers,
-                    info or func.__doc__ or no_info,
-                    builtin
-                )
+                UBcommand = Command(func, handlers, info or func.__doc__
+                                    or no_info, builtin)
                 category = category.lower()
                 self.commands.update({com: UBcommand})
 

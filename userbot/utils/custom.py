@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import asyncio
 import io
 import logging
@@ -24,18 +23,15 @@ from telethon import errors
 from telethon.extensions import markdown
 from telethon.tl import custom, functions, types
 
-
 LOGGER = logging.getLogger(__name__)
 MAXLIM: int = 4096
 
 
-async def answer(
-    self,
-    *args,
-    log: str or Tuple[str, str] = None,
-    reply: bool = False,
-    **kwargs
-) -> Union[custom.Message, List[custom.Message]]:
+async def answer(self,
+                 *args,
+                 log: str or Tuple[str, str] = None,
+                 reply: bool = False,
+                 **kwargs) -> Union[custom.Message, List[custom.Message]]:
     """Custom bound method for the Message object"""
     message_out = None
     message = await self.client.get_messages(self.chat_id, ids=self.id)
@@ -46,12 +42,9 @@ async def answer(
         text = args[0]
         msg, msg_entities = markdown.parse(text)
         if len(msg) <= MAXLIM:
-            if (
-                not (message and message.out) or is_reply or self.fwd_from or
-                (self.media and not isinstance(
-                    self.media, types.MessageMediaWebPage
-                ))
-            ):
+            if (not (message and message.out) or is_reply or self.fwd_from or
+                (self.media
+                 and not isinstance(self.media, types.MessageMediaWebPage))):
                 kwargs.setdefault('reply_to', reply_to)
                 try:
                     kwargs.setdefault('silent', True)
@@ -85,10 +78,8 @@ async def answer(
                     except Exception as e:
                         LOGGER.exception(e)
         else:
-            if (
-                message and message.out and
-                not (message.fwd_from or message.media)
-            ):
+            if (message and message.out
+                    and not (message.fwd_from or message.media)):
                 try:
                     await self.edit("`Output exceeded the limit.`")
                 except errors.rpcerrorlist.MessageIdInvalidError:
@@ -101,10 +92,7 @@ async def answer(
             output.name = "output.txt"
             try:
                 kwargs.setdefault('silent', True)
-                message_out = await self.respond(
-                    file=output,
-                    **kwargs
-                )
+                message_out = await self.respond(file=output, **kwargs)
                 output.close()
             except Exception as e:
                 output.close()
@@ -127,8 +115,7 @@ async def answer(
             text = f"**USERBOT LOG** `Executed command:` #{log}"
         if self.client.logger:
             logger_group = self.client.config['userbot'].getint(
-                'logger_group_id', False
-            )
+                'logger_group_id', False)
             entity = False
             try:
                 entity = await self.client.get_input_entity(logger_group)
@@ -153,9 +140,7 @@ async def answer(
                                 message=text,
                                 no_webpage=True,
                                 silent=True,
-                                entities=entities
-                            )
-                        )
+                                entities=entities))
                         await asyncio.sleep(2)
                     except Exception as e:
                         print("Report this error to the support group.")
@@ -169,10 +154,8 @@ async def _resolve_entities(message: str, entities: list) -> dict:
     while entities:
         end = 100 if len(entities) >= 100 else len(entities)
         if len(message) > MAXLIM:
-            end, _ = min(
-                enumerate(entities[:end]),
-                key=lambda x: abs(x[1].offset + x[1].length - MAXLIM)
-            )
+            end, _ = min(enumerate(entities[:end]),
+                         key=lambda x: abs(x[1].offset + x[1].length - MAXLIM))
             if end == 0:
                 msg_end = entities[0].offset + entities[0].length
                 if msg_end > MAXLIM:
@@ -180,7 +163,7 @@ async def _resolve_entities(message: str, entities: list) -> dict:
                     kwargs = vars(entities[0])
                     kwargs.update({'offset': 0})
                     for i in range(0, msg_end, MAXLIM):
-                        end = i+MAXLIM if i+MAXLIM <= msg_end else msg_end
+                        end = i + MAXLIM if i + MAXLIM <= msg_end else msg_end
                         m_chunk = message[i:end]
                         kwargs.update({'length': len(m_chunk)})
                         messages.append((m_chunk, [entity_type(**kwargs)]))
@@ -195,7 +178,7 @@ async def _resolve_entities(message: str, entities: list) -> dict:
 
         _, last_chunk = await _next_offset(end, entities)
         if not last_chunk:
-            last_end = entities[end+1].offset + entities[end+1].length
+            last_end = entities[end + 1].offset + entities[end + 1].length
             if end > 3 and not message[last_end:].startswith('\n'):
                 for e in entities[:end:-1]:
                     start = e.offset + e.length
@@ -228,7 +211,7 @@ async def _reset_entities(entities: list, end: int, next_offset: int) -> None:
 async def _next_offset(end, entities) -> Tuple[int, bool]:
     """Find out how much length we need to skip ahead for the next entities"""
     last_chunk = False
-    if len(entities) >= end+1:
+    if len(entities) >= end + 1:
         next_offset = entities[end].offset
     else:
         # It's always the last entity so just grab the last index

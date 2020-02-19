@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import dataclasses
 import importlib
 import inspect
@@ -25,7 +24,6 @@ import types
 from typing import List, Tuple, Union
 
 from telethon import events, TelegramClient
-
 
 LOGGER = logging.getLogger(__name__)
 
@@ -54,8 +52,7 @@ class PluginManager:
             client.config["plugins"] = {}
         config = client.config["plugins"]
         self.plugin_path: str = os.path.relpath(
-            config.setdefault("root", "./userbot/plugins")
-        )
+            config.setdefault("root", "./userbot/plugins"))
         self.include: list = self._split_plugins(config.get("include", []))
         self.exclude: list = self._split_plugins(config.get("exclude", []))
 
@@ -67,13 +64,11 @@ class PluginManager:
                     self._import_module(plugin_name, path)
                 else:
                     self.inactive_plugins.append(
-                        Plugin(plugin_name, [], path, None)
-                    )
+                        Plugin(plugin_name, [], path, None))
             elif not self.include and self.exclude:
                 if plugin_name in self.exclude:
                     self.inactive_plugins.append(
-                        Plugin(plugin_name, [], path, None)
-                    )
+                        Plugin(plugin_name, [], path, None))
                     LOGGER.debug("Skipped importing %s", plugin_name)
                 else:
                     self._import_module(plugin_name, path)
@@ -84,18 +79,15 @@ class PluginManager:
         for plugin in self.active_plugins:
             for callback in plugin.callbacks:
                 self.client.add_event_handler(callback.callback)
-                LOGGER.debug(
-                    "Added event handler for %s.", callback.callback.__name__
-                )
+                LOGGER.debug("Added event handler for %s.",
+                             callback.callback.__name__)
 
     def remove_handlers(self) -> None:
         for plugin in self.active_plugins:
             for callback in plugin.callbacks:
                 self.client.remove_event_handler(callback.callback)
-                LOGGER.debug(
-                    "Removed event handlers for %s.",
-                    callback.callback.__name__
-                )
+                LOGGER.debug("Removed event handlers for %s.",
+                             callback.callback.__name__)
 
     def _list_plugins(self) -> List[Union[Tuple[str, str], None]]:
         plugins: List[Tuple[str, str]] = []
@@ -111,10 +103,8 @@ class PluginManager:
     def _import_module(self, name: str, path: str) -> None:
         for plugin in self.active_plugins:
             if plugin.name == name:
-                LOGGER.error(
-                    "Rename the plugin %s in %s or %s and try again.",
-                    name, path, plugin.path
-                )
+                LOGGER.error("Rename the plugin %s in %s or %s and try again.",
+                             name, path, plugin.path)
                 exit(1)
         try:
             spec = importlib.util.find_spec(path)
@@ -130,9 +120,8 @@ class PluginManager:
             LOGGER.info("Successfully Imported %s", name)
         except Exception as E:
             self.client.failed_imports.append(path)
-            LOGGER.error(
-                "Failed to import %s due to the error(s) below.", path
-            )
+            LOGGER.error("Failed to import %s due to the error(s) below.",
+                         path)
             LOGGER.exception(E)
 
     def _split_plugins(self, to_split: str or list) -> None:

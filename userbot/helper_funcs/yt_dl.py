@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import concurrent
 import youtube_dl
 
@@ -23,7 +22,6 @@ from .. import LOGGER
 
 class YTdlLogger(object):
     """Logger used for YoutubeDL which logs to UserBot logger."""
-
     def debug(self, msg: str) -> None:
         """Logs debug messages with youtube-dl tag to UserBot logger."""
         LOGGER.debug("youtube-dl: " + msg)
@@ -50,11 +48,8 @@ def hook(d: dict) -> None:
         spdstr = d['_speed_str']
         etastr = d['_eta_str']
 
-        finalStr = (
-            "Downloading {}: {} of {} at {} ETA: {}".format(
-                filen, prcnt, ttlbyt, spdstr, etastr
-            )
-        )
+        finalStr = ("Downloading {}: {} of {} at {} ETA: {}".format(
+            filen, prcnt, ttlbyt, spdstr, etastr))
         LOGGER.info(finalStr)
 
     elif d['status'] == 'finished':
@@ -62,11 +57,8 @@ def hook(d: dict) -> None:
         ttlbyt = d['_total_bytes_str']
         elpstr = d['_elapsed_str']
 
-        finalStr = (
-            "Downloaded {}: 100% of {} in {}".format(
-                filen, ttlbyt, elpstr
-            )
-        )
+        finalStr = ("Downloaded {}: 100% of {} in {}".format(
+            filen, ttlbyt, elpstr))
         LOGGER.warning(finalStr)
 
     elif d['status'] == 'error':
@@ -86,27 +78,25 @@ async def list_formats(info_dict: dict) -> str:
             All available formats in order as a string instead of stdout.
     """
     formats = info_dict.get('formats', [info_dict])
-    table = [
-        [f['format_id'], f['ext'], youtube_dl.YoutubeDL.format_resolution(f)]
-        for f in formats
-        if f.get('preference') is None or f['preference'] >= -1000]
+    table = [[
+        f['format_id'], f['ext'],
+        youtube_dl.YoutubeDL.format_resolution(f)
+    ] for f in formats
+             if f.get('preference') is None or f['preference'] >= -1000]
     if len(formats) > 1:
         table[-1][-1] += (' ' if table[-1][-1] else '') + '(best)'
 
     header_line = ['format code', 'extension', 'resolution']
     fmtStr = (
         '`Available formats for %s:`\n`%s`' %
-        (info_dict['title'], youtube_dl.render_table(header_line, table))
-    )
+        (info_dict['title'], youtube_dl.render_table(header_line, table)))
     return fmtStr
 
 
-async def extract_info(
-    executor: concurrent.futures.Executor,
-    params: dict,
-    url: str,
-    download: bool = False
-) -> str:
+async def extract_info(executor: concurrent.futures.Executor,
+                       params: dict,
+                       url: str,
+                       download: bool = False) -> str:
     """Runs YoutubeDL's extract_info method without blocking the event loop.
 
     Args:
@@ -136,8 +126,7 @@ async def extract_info(
         except youtube_dl.utilsGeoRestrictedError:
             return (
                 "`Video is not available from your geographic location due "
-                "to geographic restrictions imposed by a website.`"
-            )
+                "to geographic restrictions imposed by a website.`")
         except youtube_dl.utilsMaxDownloadsReached:
             return "`Max-downloads limit has been reached.`"
         except youtube_dl.utilsPostProcessingError:
@@ -155,9 +144,8 @@ async def extract_info(
         if download is False:
             return info_dict
         else:
-            title = info_dict.get(
-                'title', info_dict.get('id', 'Unknown title')
-            )
+            title = info_dict.get('title',
+                                  info_dict.get('id', 'Unknown title'))
             return f"`Successfully downloaded {title}.`"
 
     fut = executor.submit(downloader, download)

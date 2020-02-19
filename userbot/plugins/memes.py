@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import aiohttp
 from typing import Tuple, Union
 
@@ -24,10 +23,9 @@ from userbot.utils.events import NewMessage
 plugin_category = "memes"
 
 
-@client.onMessage(
-    command=("shibe", plugin_category),
-    outgoing=True, regex="shibe$"
-)
+@client.onMessage(command=("shibe", plugin_category),
+                  outgoing=True,
+                  regex="shibe$")
 async def shibes(event: NewMessage.Event) -> None:
     """Get random pictures of Shibes."""
     shibe = await _request('http://shibe.online/api/shibes')
@@ -40,10 +38,9 @@ async def shibes(event: NewMessage.Event) -> None:
     await event.delete()
 
 
-@client.onMessage(
-    command=("cat", plugin_category),
-    outgoing=True, regex="cat$"
-)
+@client.onMessage(command=("cat", plugin_category),
+                  outgoing=True,
+                  regex="cat$")
 async def cats(event: NewMessage.Event) -> None:
     """Get random pictures of Cats."""
     shibe = await _request('http://shibe.online/api/cats')
@@ -56,10 +53,9 @@ async def cats(event: NewMessage.Event) -> None:
     await event.delete()
 
 
-@client.onMessage(
-    command=("bird", plugin_category),
-    outgoing=True, regex="bird$"
-)
+@client.onMessage(command=("bird", plugin_category),
+                  outgoing=True,
+                  regex="bird$")
 async def birds(event: NewMessage.Event) -> None:
     """Get random pictures of Birds."""
     shibe = await _request('http://shibe.online/api/birds')

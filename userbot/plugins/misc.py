@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import aiohttp
 import functools
 import io
@@ -29,7 +28,6 @@ from userbot import client, LOGGER
 from userbot.helper_funcs import misc
 from userbot.utils.helpers import get_chat_link, restart
 from userbot.utils.events import NewMessage
-
 
 plugin_category = "misc"
 invite_links = {
@@ -50,10 +48,10 @@ def removebg_post(API_KEY: str, media: bytes or str):
     return response
 
 
-@client.onMessage(
-    command=("shutdown", plugin_category),
-    outgoing=True, regex="shutdown$", builtin=True
-)
+@client.onMessage(command=("shutdown", plugin_category),
+                  outgoing=True,
+                  regex="shutdown$",
+                  builtin=True)
 async def shutdown(event: NewMessage.Event) -> None:
     """Shutdown the userbot script."""
     await event.answer("`Disconnecting the client and exiting. Ciao!`")
@@ -63,23 +61,20 @@ async def shutdown(event: NewMessage.Event) -> None:
     await client.disconnect()
 
 
-@client.onMessage(
-    command=("restart", plugin_category),
-    outgoing=True, regex="restart$", builtin=True
-)
+@client.onMessage(command=("restart", plugin_category),
+                  outgoing=True,
+                  regex="restart$",
+                  builtin=True)
 async def restarter(event: NewMessage.Event) -> None:
     """Restart the userbot script."""
-    await event.answer(
-        "`BRB disconnecting and starting the script again!`",
-        log=("restart", "Restarted the userbot script")
-    )
+    await event.answer("`BRB disconnecting and starting the script again!`",
+                       log=("restart", "Restarted the userbot script"))
     await restart(event)
 
 
-@client.onMessage(
-    command=("rmbg", plugin_category),
-    outgoing=True, regex="rmbg(?: |$)(.*)$"
-)
+@client.onMessage(command=("rmbg", plugin_category),
+                  outgoing=True,
+                  regex="rmbg(?: |$)(.*)$")
 async def rmbg(event: NewMessage.Event) -> None:
     """Remove the background from an image or sticker."""
     API_KEY = client.config['api_keys'].get('api_key_removebg', False)
@@ -94,13 +89,10 @@ async def rmbg(event: NewMessage.Event) -> None:
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.get(match) as response:
-                    if not (
-                        response.status == 200 and
-                        response.content_type.startswith('image/')
-                    ):
+                    if not (response.status == 200
+                            and response.content_type.startswith('image/')):
                         await event.answer(
-                            "`The provided link seems to be invalid.`"
-                        )
+                            "`The provided link seems to be invalid.`")
                         return
             except aiohttp.client_exceptions.InvalidURL:
                 await event.answer("`Invalid URL provided!`")
@@ -135,8 +127,7 @@ async def rmbg(event: NewMessage.Event) -> None:
         return
 
     response = await client.loop.run_in_executor(
-        None, functools.partial(removebg_post, API_KEY, media.getvalue())
-    )
+        None, functools.partial(removebg_post, API_KEY, media.getvalue()))
     if not isinstance(media, str):
         media.close()
     if response.status_code == requests.codes.ok:
@@ -154,10 +145,9 @@ async def rmbg(event: NewMessage.Event) -> None:
         await event.answer(text)
 
 
-@client.onMessage(
-    command=("resolve", plugin_category),
-    outgoing=True, regex="resolve(?: |$)(.*)$"
-)
+@client.onMessage(command=("resolve", plugin_category),
+                  outgoing=True,
+                  regex="resolve(?: |$)(.*)$")
 async def resolver(event: NewMessage.Event) -> None:
     """Resolve an invite link or a username."""
     link = event.matches[0].group(1)
@@ -188,17 +178,11 @@ async def resolver(event: NewMessage.Event) -> None:
 
                 if isinstance(chat, types.Channel):
                     result = await client(
-                        functions.channels.GetFullChannelRequest(
-                            channel=chat
-                        )
-                    )
+                        functions.channels.GetFullChannelRequest(channel=chat))
                     text += await misc.resolve_channel(event.client, result)
                 elif isinstance(chat, types.Chat):
                     result = await client(
-                        functions.messages.GetFullChatRequest(
-                            chat_id=chat
-                        )
-                    )
+                        functions.messages.GetFullChatRequest(chat_id=chat))
                     text += await misc.resolve_chat(event.client, result)
                 break
             else:
@@ -220,10 +204,7 @@ async def resolver(event: NewMessage.Event) -> None:
                 elif isinstance(chat, types.Chat):
                     text = f"**Chat:** @{valid}"
                     result = await client(
-                        functions.messages.GetFullChatRequest(
-                            chat_id=chat
-                        )
-                    )
+                        functions.messages.GetFullChatRequest(chat_id=chat))
                     text += await misc.resolve_chat(event.client, result)
 
                 if isinstance(chat, types.ChannelForbidden):
@@ -231,18 +212,14 @@ async def resolver(event: NewMessage.Event) -> None:
                 elif isinstance(chat, types.Channel):
                     text = f"**Channel:** @{valid}"
                     result = await client(
-                        functions.channels.GetFullChannelRequest(
-                            channel=chat
-                        )
-                    )
+                        functions.channels.GetFullChannelRequest(channel=chat))
                     text += await misc.resolve_channel(event.client, result)
     await event.answer(text, link_preview=False)
 
 
-@client.onMessage(
-    command=("mention", plugin_category),
-    outgoing=True, regex=r"mention(?: |$)(@?\w{5,32}|\d+)?(?: |$)(.*)$"
-)
+@client.onMessage(command=("mention", plugin_category),
+                  outgoing=True,
+                  regex=r"mention(?: |$)(@?\w{5,32}|\d+)?(?: |$)(.*)$")
 async def bot_mention(event: NewMessage.Event) -> None:
     """Mention a user in the bot like link with a custom name."""
     user = event.matches[0].group(1)

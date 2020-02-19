@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import asyncio
 import concurrent
 import datetime
@@ -28,7 +27,6 @@ from telethon.tl import functions
 from userbot import client
 from userbot.utils.helpers import get_chat_link
 from userbot.utils.events import NewMessage
-
 
 plugin_category = "www"
 DCs = {
@@ -44,10 +42,9 @@ download = "`Download: %0.2f M%s/s`"
 upload = "`Upload: %0.2f M%s/s`"
 
 
-@client.onMessage(
-    command=("ping", plugin_category),
-    outgoing=True, regex="ping$"
-)
+@client.onMessage(command=("ping", plugin_category),
+                  outgoing=True,
+                  regex="ping$")
 async def ping(event: NewMessage.Event) -> None:
     """Check how long it takes to get an update and respond to it."""
     start = datetime.datetime.now()
@@ -57,25 +54,21 @@ async def ping(event: NewMessage.Event) -> None:
     await event.answer(f"**PONG:** `{milliseconds}ms`")
 
 
-@client.onMessage(
-    command=("nearestdc", plugin_category),
-    outgoing=True, regex="nearestdc$"
-)
+@client.onMessage(command=("nearestdc", plugin_category),
+                  outgoing=True,
+                  regex="nearestdc$")
 async def nearestdc(event: NewMessage.Event) -> None:
     """Get information of your country and data center information."""
     result = await client(functions.help.GetNearestDcRequest())
-    text = (
-        f"**Country:** `{result.country}`\n" +
-        f"**This DC:** `{result.this_dc}`\n" +
-        f"**Nearest DC:** `{result.nearest_dc}`"
-    )
+    text = (f"**Country:** `{result.country}`\n" +
+            f"**This DC:** `{result.this_dc}`\n" +
+            f"**Nearest DC:** `{result.nearest_dc}`")
     await event.answer(text)
 
 
-@client.onMessage(
-    command=("pingdc", plugin_category),
-    outgoing=True, regex=r"pingdc(?: |$)(\d+)?"
-)
+@client.onMessage(command=("pingdc", plugin_category),
+                  outgoing=True,
+                  regex=r"pingdc(?: |$)(\d+)?")
 async def pingdc(event: NewMessage.Event) -> None:
     """Ping your or other data center's IP addresses."""
     if event.matches[0].group(1) in ('1', '2', '3', '4', '5'):
@@ -95,8 +88,7 @@ async def pingdc(event: NewMessage.Event) -> None:
 
     if len(out.strip()) == 0:
         await event.answer(
-            "`Make sure your system's routing access isn't deprecated.`"
-        )
+            "`Make sure your system's routing access isn't deprecated.`")
         return
 
     if err:
@@ -105,10 +97,9 @@ async def pingdc(event: NewMessage.Event) -> None:
     await event.answer(f"DC {dc}'s average response: `{average}`")
 
 
-@client.onMessage(
-    command=("speedtest", plugin_category),
-    outgoing=True, regex=r"speedtest(?: |$)(bit|byte)?(?:s$|$)"
-)
+@client.onMessage(command=("speedtest", plugin_category),
+                  outgoing=True,
+                  regex=r"speedtest(?: |$)(bit|byte)?(?:s$|$)")
 async def speedtest(event: NewMessage.Event) -> None:
     """Perform a speedtest with the best available server based on ping."""
     n = 1
@@ -135,18 +126,13 @@ async def speedtest(event: NewMessage.Event) -> None:
     up = (s.results.upload / 1000.0 / 1000.0) / n
     text = (f"{speed_event.text}\n{upload % (up, unit)}")
     extra = await get_chat_link(event, event.id)
-    await event.answer(
-        text,
-        log=("speedtest", f"Performed a speedtest in {extra}.")
-    )
+    await event.answer(text,
+                       log=("speedtest", f"Performed a speedtest in {extra}."))
 
 
 async def _sub_shell(cmd: str) -> Tuple[str, str]:
     process = await asyncio.create_subprocess_shell(
-        cmd,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE
-    )
+        cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     stdout, stderr = await process.communicate()
 
     return stdout.decode("UTF-8"), stderr.decode("UTF-8")
@@ -154,5 +140,4 @@ async def _sub_shell(cmd: str) -> Tuple[str, str]:
 
 async def _run_sync(func: callable):
     return await client.loop.run_in_executor(
-        concurrent.futures.ThreadPoolExecutor(), func
-    )
+        concurrent.futures.ThreadPoolExecutor(), func)

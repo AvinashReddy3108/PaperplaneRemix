@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import logging
 import sys
 
@@ -23,7 +22,6 @@ from telethon.errors import AuthKeyError, InvalidBufferError
 import userbot
 from userbot import client
 from .utils import helpers, log_formatter, pluginManager
-
 
 handler = logging.StreamHandler()
 LOGGER = logging.getLogger('userbot')
@@ -50,14 +48,11 @@ if __name__ == "__main__":
         client.session.delete()
         LOGGER.error(
             "Your old session was invalid and has been automatically deleted! "
-            "Run the script again to generate a new session."
-        )
+            "Run the script again to generate a new session.")
         sys.exit(1)
 
     userbot.verifyLoggerGroup(client)
-    helpers.printUser(
-        client.loop.run_until_complete(client.get_me())
-    )
+    helpers.printUser(client.loop.run_until_complete(client.get_me()))
     helpers.printVersion(client.version, client.prefix)
     client.loop.create_task(helpers.isRestart(client))
 

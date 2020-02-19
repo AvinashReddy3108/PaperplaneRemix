@@ -14,30 +14,26 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import asyncio
 
 from userbot import client
 from userbot.utils.helpers import get_chat_link
 from userbot.utils.events import NewMessage
 
-
 plugin_category = "user"
 
 
-@client.onMessage(
-    command=("purge", "admin"), require_admin=True,
-    outgoing=True, regex=r"purge(?: |$)(\d+)?(?: |$)(\d+)?$"
-)
+@client.onMessage(command=("purge", "admin"),
+                  require_admin=True,
+                  outgoing=True,
+                  regex=r"purge(?: |$)(\d+)?(?: |$)(\d+)?$")
 async def purge(event: NewMessage.Event) -> None:
     """Delete (AKA purge) multiple messages from a chat all together."""
-    if (
-        (event.is_channel or event.is_group) and
-        not (event.chat.creator or event.chat.admin_rights.delete_messages)
-    ):
-        await event.answer(
-            "`You do not have message deleting rights in here!`"
-        )
+    if ((event.is_channel or event.is_group)
+            and not (event.chat.creator
+                     or event.chat.admin_rights.delete_messages)):
+        await event.answer("`You do not have message deleting rights in here!`"
+                           )
         return
 
     entity = await event.get_chat()
@@ -54,23 +50,20 @@ async def purge(event: NewMessage.Event) -> None:
         entity,
         limit=int(amount) if amount else None,
         offset_id=await _offset(event, skip),
-        reverse=True if event.reply_to_msg_id else False
-    )
+        reverse=True if event.reply_to_msg_id else False)
 
     await client.delete_messages(entity, messages)
     extra = await get_chat_link(entity)
     toast = await event.answer(
         f"`Successfully deleted {len(messages)} message(s)!`",
-        log=("purge", f"Purged {len(messages)} message(s) in {extra}")
-    )
+        log=("purge", f"Purged {len(messages)} message(s) in {extra}"))
     await asyncio.sleep(2)
     await toast.delete()
 
 
-@client.onMessage(
-    command=("delme", plugin_category),
-    outgoing=True, regex=r"delme(?: |$)(\d+)?(?: |$)(\d+)?$"
-)
+@client.onMessage(command=("delme", plugin_category),
+                  outgoing=True,
+                  regex=r"delme(?: |$)(\d+)?(?: |$)(\d+)?$")
 async def delme(event: NewMessage.Event) -> None:
     """Delete YOUR messages in a chat. Similar to purge's logic."""
     entity = await event.get_chat()
@@ -85,21 +78,16 @@ async def delme(event: NewMessage.Event) -> None:
         limit=int(amount) if amount else None,
         offset_id=await _offset(event, skip),
         reverse=True if event.reply_to_msg_id else False,
-        from_user="me"
-    )
+        from_user="me")
 
     await client.delete_messages(entity, messages)
     toast = await event.answer(
-        f"`Successfully deleted {len(messages)} message(s)!`"
-    )
+        f"`Successfully deleted {len(messages)} message(s)!`")
     await asyncio.sleep(2)
     await toast.delete()
 
 
-@client.onMessage(
-    command="del",
-    outgoing=True, regex=r"del$"
-)
+@client.onMessage(command="del", outgoing=True, regex=r"del$")
 async def delete(event: NewMessage.Event) -> None:
     """Delete your or other's replied to message."""
     reply = await event.get_reply_message()
@@ -108,10 +96,8 @@ async def delete(event: NewMessage.Event) -> None:
         return
 
     if not reply.from_id == (await client.get_me()).id:
-        if (
-            event.is_group and
-            (event.chat.creator or event.chat.admin_rights.delete_messages)
-        ):
+        if (event.is_group and
+            (event.chat.creator or event.chat.admin_rights.delete_messages)):
             await reply.delete()
         else:
             await event.answer("`You don't have enough rights in here fool!`")

@@ -14,14 +14,12 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
-
 from typing import Tuple, Union
 
 from telethon.tl import types
 
 from ..utils.client import UserBotClient
 from ..utils.helpers import get_chat_link
-
 
 ChatBannedRights = {
     'until_date': 'Banned until:',
@@ -75,9 +73,8 @@ async def parse_banned_rights(BannedRights: types.ChatBannedRights) -> str:
 async def get_entity_info(
     arg: Union[types.ChatFull, types.ChannelFull]
 ) -> Tuple[int, int, int, int, int, int]:
-    creator, admins, bots, participants, kicked, banned = (
-        None, None, None, None, None, None
-    )
+    creator, admins, bots, participants, kicked, banned = (None, None, None,
+                                                           None, None, None)
     full_chat = arg.full_chat
     if isinstance(full_chat, types.ChannelFull):
         if hasattr(full_chat, 'participants_count'):
@@ -105,15 +102,8 @@ async def get_entity_info(
     return creator, admins, bots, participants, kicked, banned
 
 
-async def unparse_info(
-    client: UserBotClient,
-    creator: int,
-    admins: int,
-    bots: int,
-    users: int,
-    kicked: int,
-    banned: int
-) -> str:
+async def unparse_info(client: UserBotClient, creator: int, admins: int,
+                       bots: int, users: int, kicked: int, banned: int) -> str:
     text = ''
     if creator:
         c = await client.get_entity(creator)
@@ -139,10 +129,8 @@ async def unparse_rights(title: str, rights: str) -> str:
     return text
 
 
-async def resolve_channel(
-    client: UserBotClient,
-    channel: types.ChannelFull
-) -> str:
+async def resolve_channel(client: UserBotClient,
+                          channel: types.ChannelFull) -> str:
     text = ''
     default_banned_rights = None
     banned_rights = None
@@ -162,31 +150,20 @@ async def resolve_channel(
     text += await unparse_info(client, *info)
     if admin_rights:
         parsed = await parse_admin_rights(admin_rights)
-        unparsed = await unparse_rights(
-            "Admin rights:", parsed
-        )
+        unparsed = await unparse_rights("Admin rights:", parsed)
         text += f"\n{unparsed}"
     if banned_rights:
         parsed = await parse_banned_rights(banned_rights)
-        unparsed = await unparse_rights(
-            "Banned rights:", parsed
-        )
+        unparsed = await unparse_rights("Banned rights:", parsed)
         text += f"\n{unparsed}"
     if default_banned_rights:
-        parsed = await parse_banned_rights(
-            default_banned_rights
-        )
-        unparsed = await unparse_rights(
-            "Default banned rights:", parsed
-        )
+        parsed = await parse_banned_rights(default_banned_rights)
+        unparsed = await unparse_rights("Default banned rights:", parsed)
         text += f"\n{unparsed}"
     return text
 
 
-async def resolve_chat(
-    client: UserBotClient,
-    chat: types.ChatFull
-) -> str:
+async def resolve_chat(client: UserBotClient, chat: types.ChatFull) -> str:
     text = f"\n**Chat ID:** `{chat.full_chat.id}``"
     info = await get_entity_info(chat)
     text += await unparse_info(client, *info)
@@ -199,16 +176,10 @@ async def resolve_chat(
             break
     if admin_rights:
         parsed = await parse_admin_rights(admin_rights)
-        unparsed = await unparse_rights(
-            "Admin rights:", parsed
-        )
+        unparsed = await unparse_rights("Admin rights:", parsed)
         text += f"\n{unparsed}"
     if default_banned_rights:
-        parsed = await parse_banned_rights(
-            default_banned_rights
-        )
-        unparsed = await unparse_rights(
-            "Default banned rights:", parsed
-        )
+        parsed = await parse_banned_rights(default_banned_rights)
+        unparsed = await unparse_rights("Default banned rights:", parsed)
         text += f"\n{unparsed}"
     return text

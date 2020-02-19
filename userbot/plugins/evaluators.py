@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import asyncio
 import inspect
 import sys
@@ -23,14 +22,12 @@ from userbot import client
 from userbot.utils.helpers import get_chat_link
 from userbot.utils.events import NewMessage
 
-
 plugin_category = "terminal"
 
 
-@client.onMessage(
-    command=("eval", plugin_category),
-    outgoing=True, regex=r"eval(?: |$)([\s\S]*)"
-)
+@client.onMessage(command=("eval", plugin_category),
+                  outgoing=True,
+                  regex=r"eval(?: |$)([\s\S]*)")
 async def evaluate(event: NewMessage.Event) -> None:
     """Evaluate Python expressions in the running script."""
     expression = event.matches[0].group(1).strip()
@@ -40,9 +37,11 @@ async def evaluate(event: NewMessage.Event) -> None:
         return
 
     try:
-        result = eval(
-            expression, {'client': client, 'event': event, 'reply': reply}
-        )
+        result = eval(expression, {
+            'client': client,
+            'event': event,
+            'reply': reply
+        })
         if inspect.isawaitable(result):
             result = await result
         result = str(result)
@@ -54,26 +53,18 @@ async def evaluate(event: NewMessage.Event) -> None:
     await event.answer(
         "```" + result + "```",
         log=("eval", f"Successfully evaluated {expression} in {extra}!"),
-        reply=True
-    )
+        reply=True)
 
 
-@client.onMessage(
-    command=("exec", plugin_category),
-    outgoing=True, regex=r"exec(?: |$)([\s\S]*)"
-)
+@client.onMessage(command=("exec", plugin_category),
+                  outgoing=True,
+                  regex=r"exec(?: |$)([\s\S]*)")
 async def execute(event: NewMessage.Event) -> None:
     """Execute Python statements in a subprocess."""
-    message = (
-        str(event.chat_id) +
-        ':' +
-        str(event.message.id)
-    )
+    message = (str(event.chat_id) + ':' + str(event.message.id))
     if client.running_processes.get(message, False):
-        await event.answer(
-            "A process for this event is already running!",
-            reply=True
-        )
+        await event.answer("A process for this event is already running!",
+                           reply=True)
         return
 
     code = event.matches[0].group(1).strip()
@@ -82,14 +73,13 @@ async def execute(event: NewMessage.Event) -> None:
         return
 
     process = await asyncio.create_subprocess_exec(
-        sys.executable, '-c', code,
+        sys.executable,
+        '-c',
+        code,
         stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE
-    )
+        stderr=asyncio.subprocess.PIPE)
 
-    client.running_processes.update({
-        message: process
-    })
+    client.running_processes.update({message: process})
     stdout, stderr = await process.communicate()
 
     not_killed = client.running_processes.get(message, False)
@@ -105,31 +95,23 @@ async def execute(event: NewMessage.Event) -> None:
 
     extra = await get_chat_link(event, event.id)
     if stdout or stderr:
-        await event.answer(
-            "```" + text + "```",
-            log=("exec", f"Successfully executed {code} in {extra}!"),
-            reply=True
-        )
+        await event.answer("```" + text + "```",
+                           log=("exec",
+                                f"Successfully executed {code} in {extra}!"),
+                           reply=True)
     else:
         await event.answer("Nice, get off the void.\nNo output for you.")
 
 
-@client.onMessage(
-    command=("term", plugin_category),
-    outgoing=True, regex=r"term(?: |$)([\s\S]*)"
-)
+@client.onMessage(command=("term", plugin_category),
+                  outgoing=True,
+                  regex=r"term(?: |$)([\s\S]*)")
 async def terminal(event: NewMessage.Event) -> None:
     """Execute terminal commands in a subprocess."""
-    message = (
-        str(event.chat_id) +
-        ':' +
-        str(event.message.id)
-    )
+    message = (str(event.chat_id) + ':' + str(event.message.id))
     if client.running_processes.get(message, False):
-        await event.answer(
-            "A process for this event is already running!",
-            reply=True
-        )
+        await event.answer("A process for this event is already running!",
+                           reply=True)
         return
 
     cmd = event.matches[0].group(1).strip()
@@ -138,14 +120,9 @@ async def terminal(event: NewMessage.Event) -> None:
         return
 
     process = await asyncio.create_subprocess_shell(
-        cmd,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE
-    )
+        cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
 
-    client.running_processes.update({
-        message: process
-    })
+    client.running_processes.update({message: process})
     stdout, stderr = await process.communicate()
 
     not_killed = client.running_processes.get(message, False)
@@ -161,32 +138,28 @@ async def terminal(event: NewMessage.Event) -> None:
 
     extra = await get_chat_link(event, event.id)
     if stdout or stderr:
-        await event.answer(
-            "```" + text + "```",
-            log=("term", f"Successfully executed {cmd} in {extra}!"),
-            reply=True
-        )
+        await event.answer("```" + text + "```",
+                           log=("term",
+                                f"Successfully executed {cmd} in {extra}!"),
+                           reply=True)
     else:
         await event.answer("Nice, get off the void.\nNo output for you.")
 
 
-@client.onMessage(
-    command=("kill/terminate", plugin_category),
-    outgoing=True, regex=r"(kill|terminate)$",
-    info="Kill or Terminate a subprocess which is still running."
-)
+@client.onMessage(command=("kill/terminate", plugin_category),
+                  outgoing=True,
+                  regex=r"(kill|terminate)$",
+                  info="Kill or Terminate a subprocess which is still running."
+                  )
 async def killandterminate(event: NewMessage.Event) -> None:
     """Kill or terminate a running subprocess."""
     if not event.reply_to_msg_id:
         await event.answer(
-            "`Reply to a message to kill or terminate the process!`"
-        )
+            "`Reply to a message to kill or terminate the process!`")
         return
 
     reply = await event.get_reply_message()
-    message = (
-        str(reply.chat_id) + ':' + str(reply.id)
-    )
+    message = (str(reply.chat_id) + ':' + str(reply.id))
     running_process = client.running_processes.get(message, False)
 
     if running_process:
@@ -205,8 +178,7 @@ async def killandterminate(event: NewMessage.Event) -> None:
         await event.answer(
             f"`Successfully {option}ed the process.`",
             log=(option, f"Successfully {option}ed a process in {extra}!"),
-            reply=True
-        )
+            reply=True)
         await asyncio.sleep(2)
         await event.delete()
     else:

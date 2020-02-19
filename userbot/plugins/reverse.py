@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import aiohttp
 import asyncio
 import bs4
@@ -34,7 +33,6 @@ from userbot import client
 from userbot.utils.helpers import get_chat_link, is_ffmpeg_there
 from userbot.utils.events import NewMessage
 
-
 opener = urllib.request.build_opener()
 loop = client.loop
 light_useragent = """Mozilla/5.0 (Linux; Android 6.0.1; SM-G920V Build/\
@@ -47,10 +45,10 @@ heavy_ua2 = """Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36"""
 
 
-@client.onMessage(
-    command="reverse", info="Reverse search images on Google",
-    outgoing=True, regex=r"reverse(?: |$)(\d*)"
-)
+@client.onMessage(command="reverse",
+                  info="Reverse search images on Google",
+                  outgoing=True,
+                  regex=r"reverse(?: |$)(\d*)")
 async def reverse(event: NewMessage.Event) -> None:
     """Reverse search supported media types on Google images."""
     reply = await event.get_reply_message()
@@ -76,8 +74,7 @@ async def reverse(event: NewMessage.Event) -> None:
             process = await asyncio.create_subprocess_shell(
                 f'ffmpeg -i media.mp4 -t 25 -vf "{filters}" -loop 0 media.gif',
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
-            )
+                stderr=asyncio.subprocess.PIPE)
             client.running_processes[message] = process
             await event.answer("`Converting the mp4 to a gif...`")
             await process.communicate()
@@ -93,9 +90,8 @@ async def reverse(event: NewMessage.Event) -> None:
         return
 
     await event.answer("`Uploading media...`")
-    response = await _run_sync(functools.partial(
-        _post, f"media{ext}", photo.getvalue()
-    ))
+    response = await _run_sync(
+        functools.partial(_post, f"media{ext}", photo.getvalue()))
 
     fetchUrl = response.headers['Location']
     photo.close()
@@ -135,27 +131,17 @@ async def reverse(event: NewMessage.Event) -> None:
     if imgspage:
         images, gifs = await _get_similar_links(imgspage, lim)
         if images:
-            await event.answer(
-                file=images,
-                reply_to=event.message.id
-            )
+            await event.answer(file=images, reply_to=event.message.id)
         if gifs:
             for gif in gifs:
-                await event.answer(
-                    file=gif,
-                    reply_to=event.message.id
-                )
+                await event.answer(file=gif, reply_to=event.message.id)
 
 
 def _post(name: str, media: io.BytesIO):
     searchUrl = 'https://www.google.com/searchbyimage/upload'
     multipart = {'encoded_image': (name, media), 'image_content': ''}
 
-    response = requests.post(
-        searchUrl,
-        files=multipart,
-        allow_redirects=False
-    )
+    response = requests.post(searchUrl, files=multipart, allow_redirects=False)
 
     return response
 
@@ -193,9 +179,8 @@ async def _scrape_url(googleurl):
 
         for search in main.find(*fourth):
             for similar_image in search.findAll(*fifth):
-                result['similar_images'] = (
-                    "https://www.google.com" + similar_image.get('href')
-                )
+                result['similar_images'] = ("https://www.google.com" +
+                                            similar_image.get('href'))
 
             for match_text in search.findAll(*sixth):
                 result['matching_text'] = match_text.get_text()
@@ -205,9 +190,8 @@ async def _scrape_url(googleurl):
                     if len(links.attrs) == 2:
                         text = links.h3.get_text().strip()
                         text = text.replace('[', '').replace(']', '')
-                        link = urllib.parse.quote_plus(
-                            links.get('href'), safe=":/-&"
-                        )
+                        link = urllib.parse.quote_plus(links.get('href'),
+                                                       safe=":/-&")
                         result['matching'][text] = link
 
     return result
@@ -237,10 +221,8 @@ async def _get_similar_links(link: str, lim: int = 2):
     async with aiohttp.ClientSession() as session:
         for link in matches:
             async with session.get(link) as response:
-                if (
-                    response.status == 200 and
-                    response.content_type.startswith('image/')
-                ):
+                if (response.status == 200
+                        and response.content_type.startswith('image/')):
                     counter += 1
                     if response.content_type.endswith('gif'):
                         gifs.append(link)
@@ -255,7 +237,6 @@ async def _get_similar_links(link: str, lim: int = 2):
 async def _run_sync(func: callable):
     try:
         return await loop.run_in_executor(
-            concurrent.futures.ThreadPoolExecutor(), func
-        )
+            concurrent.futures.ThreadPoolExecutor(), func)
     except urllib.error.HTTPError as e:
         return e

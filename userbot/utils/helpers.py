@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import asyncio
 import configparser
 import datetime
@@ -35,30 +34,24 @@ from .log_formatter import CEND, CUSR
 from .events import NewMessage
 from userbot.plugins import plugins_data
 
-
 LOGGER = logging.getLogger(__name__)
 sample_config_file = os.path.join(
     os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
-    'sample_config.ini'
-)
+    'sample_config.ini')
 
 
 def printUser(entity: types.User) -> None:
     """Print the user's first name + last name upon start"""
     user = get_display_name(entity)
-    print(
-        "\nSuccessfully logged in as {0}{2}{1}".format(CUSR, CEND, user)
-    )
+    print("\nSuccessfully logged in as {0}{2}{1}".format(CUSR, CEND, user))
 
 
 def printVersion(version: int, prefix: str) -> None:
     """Print the version of the bot with the default prefix"""
     if not prefix:
         prefix = '.'
-    print(
-        "{0}UserBot v{2}{1} is running, test it by sending {3}ping in"
-        " any chat.\n".format(CUSR, CEND, version, prefix)
-    )
+    print("{0}UserBot v{2}{1} is running, test it by sending {3}ping in"
+          " any chat.\n".format(CUSR, CEND, version, prefix))
 
 
 def resolve_env(config: configparser.ConfigParser):
@@ -89,22 +82,21 @@ def resolve_env(config: configparser.ConfigParser):
         config['telethon']['redis_password'] = redis_password
 
     userbot = {
-        'console_logger_level': os.getenv('console_logger_level', None),
-        'logger_group_id': os.getenv('logger_group_id', None),
-        'userbot_prefix': os.getenv('userbot_prefix', None),
-        'default_sticker_pack': os.getenv('default_sticker_pack', None),
-        'default_animated_sticker_pack': os.getenv(
-            'default_animated_sticker_pack', None
-        )
+        'console_logger_level':
+        os.getenv('console_logger_level', None),
+        'logger_group_id':
+        os.getenv('logger_group_id', None),
+        'userbot_prefix':
+        os.getenv('userbot_prefix', None),
+        'default_sticker_pack':
+        os.getenv('default_sticker_pack', None),
+        'default_animated_sticker_pack':
+        os.getenv('default_animated_sticker_pack', None)
     }
 
     api_keys = {
-        'api_key_heroku': os.getenv(
-            'api_key_heroku', None
-        ),
-        'api_key_removebg': os.getenv(
-            'api_key_removebg', None
-        )
+        'api_key_heroku': os.getenv('api_key_heroku', None),
+        'api_key_removebg': os.getenv('api_key_removebg', None)
     }
 
     make_config(config, 'userbot', userbot)
@@ -123,10 +115,8 @@ async def isRestart(client: UserBotClient) -> None:
         message = int(userbot_restarted.split('/')[1])
         try:
             await client.edit_message(entity, message, text)
-        except (
-            ValueError, errors.MessageAuthorRequiredError,
-            errors.MessageNotModifiedError, errors.MessageIdInvalidError
-        ):
+        except (ValueError, errors.MessageAuthorRequiredError,
+                errors.MessageNotModifiedError, errors.MessageIdInvalidError):
             LOGGER.debug(f"Failed to edit message ({message}) in {entity}.")
             pass
 
@@ -149,8 +139,7 @@ async def isRestart(client: UserBotClient) -> None:
                     del app.config()['userbot_update']
                     await success_edit(
                         "`Successfully deployed a new image to heroku "
-                        "and restarted the userbot.`"
-                    )
+                        "and restarted the userbot.`")
                 else:
                     await success_edit(text)
                 del app.config()['userbot_restarted']
@@ -158,9 +147,8 @@ async def isRestart(client: UserBotClient) -> None:
                 del app.config()['userbot_disabled_commands']
         else:
             await success_edit(text)
-            disabled_commands = os.environ.get(
-                'userbot_disabled_commands', False
-            )
+            disabled_commands = os.environ.get('userbot_disabled_commands',
+                                               False)
 
         if "userbot_disabled_commands" in os.environ:
             del os.environ['userbot_disabled_commands']
@@ -192,10 +180,8 @@ async def restart(event: NewMessage.Event) -> None:
         await event.client.disconnect()
 
 
-def make_config(
-    config: configparser.ConfigParser,
-    section: str, section_dict: dict
-) -> None:
+def make_config(config: configparser.ConfigParser, section: str,
+                section_dict: dict) -> None:
     UNACCETPABLE = ['', '0', 'None', 'none', 0, None]
     for key, value in section_dict.items():
         if value is not None and value not in UNACCETPABLE:
@@ -234,10 +220,9 @@ async def _human_friendly_timedelta(timedelta: str) -> str:
     return text
 
 
-async def get_chat_link(
-    arg: Union[types.User, types.Chat, types.Channel, NewMessage.Event],
-    reply=None
-) -> str:
+async def get_chat_link(arg: Union[types.User, types.Chat, types.Channel,
+                                   NewMessage.Event],
+                        reply=None) -> str:
     if isinstance(arg, (types.User, types.Chat, types.Channel)):
         entity = arg
     else:
@@ -275,10 +260,8 @@ async def disable_commands(client: UserBotClient, commands: str) -> None:
 
 
 async def is_ffmpeg_there():
-    cmd = await asyncio.create_subprocess_shell(
-        'ffmpeg -version',
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE
-    )
+    cmd = await asyncio.create_subprocess_shell('ffmpeg -version',
+                                                stdout=asyncio.subprocess.PIPE,
+                                                stderr=asyncio.subprocess.PIPE)
     await cmd.communicate()
     return True if cmd.returncode == 0 else False
