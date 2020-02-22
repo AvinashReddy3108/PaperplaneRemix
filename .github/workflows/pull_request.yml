@@ -1,4 +1,4 @@
-name: [YAPF] Check PR for lint.
+name: Check PR for lint.
 
 on: [pull_request]
 
