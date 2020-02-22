@@ -32,12 +32,7 @@ __license__ = "GNU General Public License v3.0"
 __author__ = 'Kandarp <https://github.com/kandnub>'
 __copyright__ = (
     "TG-UserBot  Copyright (C) 2019  Kandarp <https://github.com/kandnub>")
-LEVELS = {
-    'DEBUG': logging.DEBUG,
-    'INFO': logging.INFO,
-    'ERROR': logging.ERROR,
-    'CRITICAL': logging.CRITICAL
-}
+LEVELS = {'DEBUG': logging.DEBUG, 'INFO': logging.INFO, 'ERROR': logging.ERROR, 'CRITICAL': logging.CRITICAL}
 config = configparser.ConfigParser()
 
 config_file = os.path.join(os.path.dirname(os.path.dirname(__file__)),
