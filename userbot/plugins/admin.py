@@ -31,7 +31,7 @@ plugin_category = "admin"
                   require_admin=True)
 async def promote(event: NewMessage.Event) -> None:
     """Promote a user in a group or channel."""
-    if not event.is_private and not await get_rights(event, add_admins=True):
+if not event.is_private and not await get_rights(event, add_admins=True):
         await event.answer("`You do not have rights to add admins in here!`")
         return
     elif event.is_private:
