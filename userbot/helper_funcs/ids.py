@@ -61,12 +61,12 @@ async def get_entity_from_msg(
     entity = None
     match = event.matches[0].group(1)
 
-    pattern = re.compile(r"(@\w*|\w*|\d*)(?: |$)(.*)")
-    user = pattern.match(match).group(1)
-    extra = pattern.match(match).group(2)
+    pattern = re.compile(r"(@?\w+|\d+)(?: |$)(.*)")
+    user = pattern.match(match).group(1) if match else None
+    extra = pattern.match(match).group(2) if match else None
     reply = await event.get_reply_message()
 
-    if reply:
+    if reply and not (user and extra):
         user = reply.from_id
         extra = match.strip()
 

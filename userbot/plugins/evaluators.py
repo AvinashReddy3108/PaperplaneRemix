@@ -27,7 +27,7 @@ plugin_category = "terminal"
 
 @client.onMessage(command=("eval", plugin_category),
                   outgoing=True,
-                  regex=r"eval(?: |$)([\s\S]*)")
+                  regex=r"eval(?: |$|\n)([\s\S]*)")
 async def evaluate(event: NewMessage.Event) -> None:
     """Evaluate Python expressions in the running script."""
     expression = event.matches[0].group(1).strip()
@@ -58,7 +58,7 @@ async def evaluate(event: NewMessage.Event) -> None:
 
 @client.onMessage(command=("exec", plugin_category),
                   outgoing=True,
-                  regex=r"exec(?: |$)([\s\S]*)")
+                  regex=r"exec(?: |$|\n)([\s\S]*)")
 async def execute(event: NewMessage.Event) -> None:
     """Execute Python statements in a subprocess."""
     message = (str(event.chat_id) + ':' + str(event.message.id))
@@ -105,7 +105,7 @@ async def execute(event: NewMessage.Event) -> None:
 
 @client.onMessage(command=("term", plugin_category),
                   outgoing=True,
-                  regex=r"term(?: |$)([\s\S]*)")
+                  regex=r"term(?: |$|\n)([\s\S]*)")
 async def terminal(event: NewMessage.Event) -> None:
     """Execute terminal commands in a subprocess."""
     message = (str(event.chat_id) + ':' + str(event.message.id))
