@@ -44,8 +44,9 @@ ffurl = ("https://tg-userbot.readthedocs.io/en/latest/"
 
 async def progress(current, total):
     """ Logs the upload progress """
-    LOGGER.info("Uploaded %s of %s\nCompleted: %s%", current, total,
-                (current / total) * 100)
+    LOGGER.info(
+        f"Uploaded {current} of {total}\nCompleted: {(current / total) * 100}%"
+    )
 
 
 @client.onMessage(command="yt_dl",
