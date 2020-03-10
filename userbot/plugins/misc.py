@@ -37,6 +37,9 @@ invite_links = {
     'username': re.compile(r'^@?(\w{5,32})$')
 }
 
+usernexp = re.compile(r'@(\w{3,32})\[(.+?)\]')
+nameexp = re.compile(r'\[([\w\S]+)\]\(tg://user\?id=(\d+)\)\[(.+?)\]')
+
 
 def removebg_post(API_KEY: str, media: bytes or str):
     image_parameter = 'image_url' if isinstance(media, str) else 'image_file'
@@ -158,7 +161,7 @@ async def resolver(event: NewMessage.Event) -> None:
     text = f"`Couldn't resolve:` {link}"
     for link_type, pattern in invite_links.items():
         match = pattern.match(link)
-        if match is not None:
+        if match:
             valid = match.group(1)
             if link_type == "private":
                 creatorid, cid, _ = utils.resolve_invite_link(valid)
@@ -168,7 +171,7 @@ async def resolver(event: NewMessage.Event) -> None:
                 try:
                     creator = await client.get_entity(creatorid)
                     creator = await get_chat_link(creator)
-                except (TabError, ValueError):
+                except (TypeError, ValueError):
                     creator = f"`{creatorid}`"
                 text = f"**Link:** {link}"
                 text += f"\n**Link creator:** {creator}\n**ID:** `{cid}`"
@@ -220,20 +223,18 @@ async def resolver(event: NewMessage.Event) -> None:
 
 @client.onMessage(command=("mention", plugin_category),
                   outgoing=True,
-                  regex=r"mention(?: |$)(.*)$")
+                  regex="mention")
 async def bot_mention(event: NewMessage.Event) -> None:
     """Mention a user in the bot like link with a custom name."""
-    user, text, exception = await get_entity_from_msg(event)
-    if user and text:
-        if exception:
-            await event.answer(f"`Mention machine broke!\n{user}`")
-            return
-    else:
-        await event.answer("`Mentioned the void.`")
-        return
-
-    if not isinstance(user, types.User):
-        await event.answer("`Cannot mention non-users.`")
-        return
-    text = f"[{text}](tg://user?id={user.id})"
-    await event.answer(text)
+    newstr = event.text
+    if event.entities:
+        newstr = nameexp.sub(r'<a href="tg://user?id=\2">\3</a>', newstr, 0)
+        for match in usernexp.finditer(newstr):
+            user = match.group(1)
+            text = match.group(2)
+            entity = await client.get_peer_id(user)
+            newstr = re.sub(re.escape(match.group(0)),
+                            f'<a href="tg://user?id={entity}">{text}</a>',
+                            newstr)
+    if newstr != event.text:
+        await event.answer(newstr, parse_mode='html')

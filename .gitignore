@@ -1,9 +1,10 @@
-# Pyrogram files and folders
+# PaperplaneRemix's files and folders
 config.ini
 userbot.session
 userbot.session-journal
 unknown_errors.txt
 downloads/
+YT_DL/
 
 # Python's cache folders
 __pycache__/*
@@ -11,10 +12,6 @@ userbot/__pycache__/*
 userbot/plugins/__pycache__/*
 userbot/helper_funcs/__pycache__/*
 userbot/utils/__pycache__/*
-
-# Sphinx build folders
-docs/build/
-docs/source/_build/
 
 # Visual Studio Code folder for settings, etc
 .vscode/
