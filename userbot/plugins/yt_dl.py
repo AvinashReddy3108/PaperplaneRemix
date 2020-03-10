@@ -16,7 +16,7 @@
 
 import concurrent
 
-from userbot import client
+from userbot import client, LOGGER
 from userbot.utils.helpers import is_ffmpeg_there
 from userbot.helper_funcs.yt_dl import (extract_info, hook, list_formats,
                                         YTdlLogger)
@@ -40,6 +40,12 @@ ydl_opts = {
 
 ffurl = ("https://tg-userbot.readthedocs.io/en/latest/"
          "faq.html#how-to-install-ffmpeg")
+
+
+async def progress(current, total):
+    """ Logs the upload progress """
+    LOGGER.info("Uploaded %s of %s\nCompleted: %s%", current, total,
+                (current / total) * 100)
 
 
 @client.onMessage(command="yt_dl",
@@ -108,6 +114,7 @@ async def yt_dl(event):
         await client.send_file(event.chat_id,
                                path,
                                force_document=True,
+                               progress_callback=progress,
                                reply_to=event)
         await event.answer(result,
-                           log=("YT_DL", f"Successfully downloaded {huh}!"))
+                           log=("YT_DL", f"Successfully uploaded {huh}!"))
