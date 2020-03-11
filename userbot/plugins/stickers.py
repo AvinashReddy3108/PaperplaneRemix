@@ -19,6 +19,7 @@ import re
 import io
 import itertools
 import PIL
+import random
 from typing import BinaryIO, List, Sequence, Tuple, Union
 
 from telethon.tl import functions, types
@@ -41,6 +42,25 @@ Check your packs and update it in the config or use \
 FALSE_DEFAULT = """`Couldn't find {} in your \
 packs! Check your packs and update it in the config \
 or use {}stickerpack reset for deafult packs.`"""
+
+KANGING_STR = [
+    "Using Witchery to kang this sticker...",
+    "Plagiarising hehe...",
+    "Inviting this sticker over to my pack...",
+    "Kanging this sticker...",
+    "Hey that's a nice sticker!\
+    \nMind if I kang?!..",
+    "hehe me stel ur stikér\
+    \nhehe.",
+    "Ay look over there (☉｡☉)!→\
+    \nWhile I kang this...",
+    "Roses are red \
+    \nviolets are blue, \
+    \nkanging this sticker \
+    \nso my pacc looks cool",
+    "Imprisoning this sticker...",
+    "Mr.Steal Your Sticker is stealing this sticker... ",
+]
 
 
 @client.onMessage(command=("getsticker", plugin_category),
@@ -262,7 +282,7 @@ async def kang(event: NewMessage.Event) -> None:
             pack = await _verify_cs_name(animated, packs)
             if not pack:
                 if "_kang_pack" in animated:
-                    await event.answer("`Making a custom TG-UserBot pack!`")
+                    await event.answer("`Making a new animated kang pack!`")
                     user = await client.get_me()
                     tag = '@' + user.username if user.username else user.id
                     new_pack = True
@@ -278,7 +298,7 @@ async def kang(event: NewMessage.Event) -> None:
             pack = await _verify_cs_name(basic, packs)
             if not pack:
                 if "_kang_pack" in basic:
-                    await event.answer("`Making a custom TG-UserBot pack!`")
+                    await event.answer("`Making a new kang pack!`")
                     user = await client.get_me()
                     tag = '@' + user.username if user.username else user.id
                     new_pack = True
@@ -291,8 +311,7 @@ async def kang(event: NewMessage.Event) -> None:
                     await _update_stickers_notif(notif)
                     return
 
-    await event.answer(
-        "`Turning on the kang machine... Your sticker? My sticker!`")
+    await event.answer(f"`{random.choice(KANGING_STR)}`")
     async with client.conversation(**conversation_args) as conv:
         if new_pack:
             packtype = "/newanimated" if is_animated else "/newpack"
@@ -316,7 +335,7 @@ async def kang(event: NewMessage.Event) -> None:
             if "120 stickers" in r2.text:
                 if "_kang_pack" in pack:
                     await event.answer(
-                        "`Current userbot pack is full, making a new one!`")
+                        "`Current kang pack is full, making a new one!`")
                     await conv.send_message('/cancel')
                     r11 = await conv.get_response()
                     LOGGER.debug("Stickers:" + r11.text)
