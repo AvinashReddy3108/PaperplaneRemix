@@ -221,9 +221,7 @@ async def resolver(event: NewMessage.Event) -> None:
     await event.answer(text, link_preview=False)
 
 
-@client.onMessage(command=("mention", plugin_category),
-                  outgoing=True,
-                  regex="mention")
+@client.onMessage(command=("mention", plugin_category), outgoing=True)
 async def bot_mention(event: NewMessage.Event) -> None:
     """Mention a user in the bot like link with a custom name."""
     newstr = event.text

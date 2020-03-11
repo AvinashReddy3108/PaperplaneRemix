@@ -89,7 +89,7 @@ async def updater(event: NewMessage.Event) -> None:
 
     if arg == "add":
         repo.index.add(untracked_files, force=True)
-        repo.index.commit("[TG-UserBot] Updater: Untracked files")
+        repo.index.commit("[PaperplaneRemix] Updater: Untracked files")
     elif arg == "reset":
         repo.head.reset('--hard')
 
@@ -115,7 +115,7 @@ async def updater(event: NewMessage.Event) -> None:
         remote_url = remote_url + '/'
 
     now = datetime.datetime.now(datetime.timezone.utc)
-    def_changelog = changelog = "**TG-UserBot changelog:**"
+    def_changelog = changelog = "**PaperplaneRemix changelog:**"
     for commit in fetched_commits:
         changelog += summary.format(rev=repo.git.rev_parse(commit.hexsha,
                                                            short=7),
@@ -189,7 +189,7 @@ async def updater(event: NewMessage.Event) -> None:
                 repo.create_remote('heroku', url)
             if repo.untracked_files:
                 repo.index.add(untracked_files, force=True)
-                repo.index.commit("[TG-UserBot] Updater: Untracked files")
+                repo.index.commit("[PaperplaneRemix] Updater: Untracked files")
             app.enable_feature('runtime-dyno-metadata')
             await event.answer(
                 "`Pushing all the changes to Heroku. Might take a while.`")
