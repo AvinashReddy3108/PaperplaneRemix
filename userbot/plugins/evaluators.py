@@ -27,7 +27,7 @@ plugin_category = "terminal"
 
 @client.onMessage(command=("eval", plugin_category),
                   outgoing=True,
-                  regex=r"eval(?: |$|\n)([\s\S]*)")
+                  regex=r"eval(?: |$)([\s\S]*)")
 async def evaluate(event: NewMessage.Event) -> None:
     """Evaluate Python expressions in the running script."""
     expression = event.matches[0].group(1).strip()

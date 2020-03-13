@@ -229,7 +229,8 @@ async def get_chat_link(arg: Union[types.User, types.Chat, types.Channel,
         entity = await arg.get_chat()
 
     if isinstance(entity, types.User):
-        extra = f"[{get_display_name(entity)}](tg://user?id={entity.id})"
+        name = get_display_name(entity) or "Deleted Account?"
+        extra = f"[{name}](tg://user?id={entity.id})"
     else:
         if hasattr(entity, 'username') and entity.username is not None:
             username = '@' + entity.username
@@ -244,7 +245,9 @@ async def get_chat_link(arg: Union[types.User, types.Chat, types.Channel,
         else:
             if isinstance(username, int):
                 username = f"`{username}`"
-            extra = f"{entity.title} ( {username} )"
+                extra = f"{entity.title} ( {username} )"
+            else:
+                extra = f"[{entity.title}](tg://resolve?domain={username})"
     return extra
 
 

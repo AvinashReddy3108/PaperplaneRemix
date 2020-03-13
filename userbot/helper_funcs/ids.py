@@ -61,6 +61,7 @@ async def get_entity_from_msg(
     entity = None
     match = event.matches[0].group(1)
 
+    # TODO: Find better logic to differentiate user and reason
     pattern = re.compile(r"(@?\w+|\d+)(?: |$)(.*)")
     user = pattern.match(match).group(1) if match else None
     extra = pattern.match(match).group(2) if match else None

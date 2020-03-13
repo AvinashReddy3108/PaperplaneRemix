@@ -49,9 +49,9 @@ async def progress(current, total):
     )
 
 
-@client.onMessage(command="yt_dl",
+@client.onMessage(command="ytdl",
                   outgoing=True,
-                  regex=r"yt_dl (.+?)?(?: |$)(.+)?$")
+                  regex=r"ytdl(?: |$)(.+?)?(?: |$)(.+)?$")
 async def yt_dl(event):
     """Download videos from YouTube with their url in multiple formats."""
     url = event.matches[0].group(1)
@@ -59,6 +59,7 @@ async def yt_dl(event):
     if not url:
         await event.answer("`.ytdl <url>` or `.ytdl <url> <format>`")
         return
+
     ffmpeg = await is_ffmpeg_there()
     params = ydl_opts.copy()
 
@@ -102,7 +103,7 @@ async def yt_dl(event):
                                 url,
                                 download=True)
     warning = (
-        "`WARNING: FFMPEG is not installed!` [FFMPEG install guide]({ffurl})"
+        f"`WARNING: FFMPEG is not installed!` [FFMPEG install guide]({ffurl})"
         " `If you requested multiple formats, they won't be merged.`\n\n")
     if isinstance(output, str):
         result = warning + output if not ffmpeg else output
@@ -118,4 +119,4 @@ async def yt_dl(event):
                                progress_callback=progress,
                                reply_to=event)
         await event.answer(result,
-                           log=("YT_DL", f"Successfully uploaded {huh}!"))
+                           log=("YTDL", f"Successfully uploaded {huh}!"))
