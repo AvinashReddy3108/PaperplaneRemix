@@ -83,7 +83,7 @@ def resolve_env(config: configparser.ConfigParser):
 
     userbot = {
         'pm_permit':
-        os.getenv('pm_permit', False),
+        bool(os.getenv('pm_permit', None)),
         'console_logger_level':
         os.getenv('console_logger_level', None),
         'logger_group_id':
