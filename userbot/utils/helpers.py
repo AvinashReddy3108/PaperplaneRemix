@@ -82,6 +82,8 @@ def resolve_env(config: configparser.ConfigParser):
         config['telethon']['redis_password'] = redis_password
 
     userbot = {
+        'pm_permit':
+        os.getenv('pm_permit', False),
         'console_logger_level':
         os.getenv('console_logger_level', None),
         'logger_group_id':
