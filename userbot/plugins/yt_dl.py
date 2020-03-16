@@ -15,6 +15,9 @@
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
 import concurrent
+import io
+
+from telethon.utils import get_attributes
 
 from userbot import client, LOGGER
 from userbot.utils.helpers import is_ffmpeg_there
@@ -41,11 +44,13 @@ ydl_opts = {
 ffurl = ("https://tg-userbot.readthedocs.io/en/latest/"
          "faq.html#how-to-install-ffmpeg")
 
+success = "`Successfully downloaded` {}"
+
 
 async def progress(current, total):
     """ Logs the upload progress """
     LOGGER.info(
-        f"Uploaded {current} of {total}\nCompleted: {(current / total) * 100}%"
+        f"Uploaded {current} of {total}\nCompleted: {(current / total) * 100:.2f}%"
     )
 
 
@@ -76,24 +81,24 @@ async def yt_dl(event):
                 await event.answer(info)
             return
         elif fmt in audioFormats and ffmpeg:
-            params.update({'format': 'bestaudio'})
+            params.update(format='bestaudio')
             params['postprocessors'].append({
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': fmt,
                 'preferredquality': '320',
             })
         elif fmt in videoFormats and ffmpeg:
-            params.update({'format': 'bestvideo'})
+            params.update(format='bestvideo')
             params['postprocessors'].append({
                 'key': 'FFmpegVideoConvertor',
                 'preferedformat': fmt
             })
         else:
-            params.update({'format': fmt})
+            params.update(format=fmt)
             if ffmpeg:
-                params.update({'key': 'FFmpegMetadata'})
+                params.update(key='FFmpegMetadata')
                 if fmt in ['mp3', 'mp4', 'm4a']:
-                    params.update({'writethumbnail': True})
+                    params.update(writethumbnail=True)
                     params['postprocessors'].append({'key': 'EmbedThumbnail'})
 
     await event.answer("`Processing...`")
@@ -109,14 +114,20 @@ async def yt_dl(event):
         result = warning + output if not ffmpeg else output
         await event.answer(result, link_preview=False)
     else:
-        text, title, link, path = output
+        title, link, path = output
         huh = f"[{title}]({link})"
+        text = success.format(huh)
         result = warning + text if not ffmpeg else text
         await event.answer(f"`Uploading` {huh}`...`", link_preview=False)
+        dl = io.open(path, 'rb')
+        uploaded = await client.fast_upload_file(dl, upload_progress)
+        dl.close()
+        attributes, _ = get_attributes(path)
         await client.send_file(event.chat_id,
-                               path,
+                               uploaded,
+                               attributes=attributes,
                                force_document=True,
-                               progress_callback=progress,
                                reply_to=event)
         await event.answer(result,
+                           link_preview=False,
                            log=("YTDL", f"Successfully uploaded {huh}!"))

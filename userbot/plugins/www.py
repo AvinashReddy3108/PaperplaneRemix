@@ -38,8 +38,8 @@ DCs = {
 }
 testing = "`Testing from %(isp)s`"
 hosted = "`Hosted by %(sponsor)s (%(name)s) [%(d)0.2f km]: %(latency)s ms`"
-download = "`Download: %0.2f M%s/s`"
-upload = "`Upload: %0.2f M%s/s`"
+download = "`Download: %0.2f %s%s/s`"
+upload = "`Upload: %0.2f %s%s/s`"
 
 
 @client.onMessage(command=("ping", plugin_category),
@@ -102,12 +102,10 @@ async def pingdc(event: NewMessage.Event) -> None:
                   regex=r"speedtest(?: |$)(bit|byte)?(?:s$|$)")
 async def speedtest(event: NewMessage.Event) -> None:
     """Perform a speedtest with the best available server based on ping."""
-    n = 1
-    unit = "bit"
+    unit = ("bit", 1)
     arg = event.matches[0].group(1)
     if arg and arg.lower() == "byte":
-        n = 8
-        unit = "byte"
+        unit = ("byte", 8)
 
     s = Speedtest()
     speed_event = await event.answer(testing % s.results.client)
@@ -118,13 +116,13 @@ async def speedtest(event: NewMessage.Event) -> None:
     speed_event = await event.answer(text)
 
     await _run_sync(s.download)
-    down = (s.results.download / 1000.0 / 1000.0) / n
-    text = (f"{speed_event.text}\n{download % (down, unit)}")
+    down, unit0, unit1 = await _format_speed(s.results.download, unit)
+    text = (f"{speed_event.text}\n{download % (down, unit0, unit1)}")
     speed_event = await event.answer(text)
 
     await _run_sync(s.upload)
-    up = (s.results.upload / 1000.0 / 1000.0) / n
-    text = (f"{speed_event.text}\n{upload % (up, unit)}")
+    up, unit0, unit1 = await _format_speed(s.results.upload, unit)
+    text = (f"{speed_event.text}\n{upload % (up, unit0, unit1)}")
     extra = await get_chat_link(event, event.id)
     await event.answer(text,
                        log=("speedtest", f"Performed a speedtest in {extra}."))
@@ -141,3 +139,13 @@ async def _sub_shell(cmd: str) -> Tuple[str, str]:
 async def _run_sync(func: callable):
     return await client.loop.run_in_executor(
         concurrent.futures.ThreadPoolExecutor(), func)
+
+
+async def _format_speed(speed_bytes_per_second, unit):
+    base = 1024 if unit[0] == 'byte' else 1000
+    seq = ['', 'K', 'M', 'G']
+    speed = speed_bytes_per_second / unit[1]
+    for i in seq:
+        if speed / base < 1:
+            return speed, i, unit[0]
+        speed /= base

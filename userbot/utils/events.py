@@ -39,7 +39,7 @@ class NewMessage(events.NewMessage):
         if regex:
             if isinstance(regex, tuple):
                 exp, flags = regex
-                if not isinstance(exp, str):
+                if isinstance(exp, tuple):
                     raise TypeError(
                         "Make sure you're using a string for a pattern!")
                 self.regex = (exp, flags)

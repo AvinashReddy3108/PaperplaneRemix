@@ -14,8 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
-import asyncio
-
 from userbot import client
 from userbot.utils.helpers import get_chat_link
 from userbot.utils.events import NewMessage
@@ -41,9 +39,7 @@ async def purge(event: NewMessage.Event) -> None:
     skip = event.matches[0].group(2)
 
     if not event.reply_to_msg_id and not amount:
-        await event.answer("`Purge yourself!`")
-        await asyncio.sleep(2)
-        await event.delete()
+        await event.answer("`Purge yourself!`", self_destruct=2)
         return
 
     messages = await client.get_messages(
@@ -54,11 +50,10 @@ async def purge(event: NewMessage.Event) -> None:
 
     await client.delete_messages(entity, messages)
     extra = await get_chat_link(entity)
-    toast = await event.answer(
-        f"`Successfully deleted {len(messages)} message(s)!`",
-        log=("purge", f"Purged {len(messages)} message(s) in {extra}"))
-    await asyncio.sleep(2)
-    await toast.delete()
+    await event.answer(f"`Successfully deleted {len(messages)} message(s)!`",
+                       self_destruct=2,
+                       log=("purge",
+                            f"Purged {len(messages)} message(s) in {extra}"))
 
 
 @client.onMessage(command=("delme", plugin_category),
@@ -81,10 +76,8 @@ async def delme(event: NewMessage.Event) -> None:
         from_user="me")
 
     await client.delete_messages(entity, messages)
-    toast = await event.answer(
-        f"`Successfully deleted {len(messages)} message(s)!`")
-    await asyncio.sleep(2)
-    await toast.delete()
+    await event.answer(f"`Successfully deleted {len(messages)} message(s)!`",
+                       self_destruct=2)
 
 
 @client.onMessage(command="del", outgoing=True, regex=r"del$")

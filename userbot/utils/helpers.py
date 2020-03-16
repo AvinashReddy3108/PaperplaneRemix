@@ -82,6 +82,8 @@ def resolve_env(config: configparser.ConfigParser):
         config['telethon']['redis_password'] = redis_password
 
     userbot = {
+        'userbot_regexninja':
+        bool(os.getenv('userbot_regexninja', None)),
         'pm_permit':
         bool(os.getenv('pm_permit', None)),
         'console_logger_level':
@@ -231,7 +233,10 @@ async def get_chat_link(arg: Union[types.User, types.Chat, types.Channel,
         entity = await arg.get_chat()
 
     if isinstance(entity, types.User):
-        name = get_display_name(entity) or "Deleted Account?"
+        if entity.is_self:
+            name = "yourself"
+        else:
+            name = get_display_name(entity) or "Deleted Account?"
         extra = f"[{name}](tg://user?id={entity.id})"
     else:
         if hasattr(entity, 'username') and entity.username is not None:
@@ -259,7 +264,7 @@ async def disable_commands(client: UserBotClient, commands: str) -> None:
         target = client.commands.get(command, False)
         if target:
             client.remove_event_handler(target.func)
-            client.disabled_commands.update({command: target})
+            client.disabled_commands.update(command=target)
             del client.commands[command]
             LOGGER.debug("Disabled command: %s", command)
 

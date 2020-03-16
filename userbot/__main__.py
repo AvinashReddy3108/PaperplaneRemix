@@ -17,6 +17,7 @@
 import logging
 import sys
 
+from telethon import functions
 from telethon.errors import AuthKeyError, InvalidBufferError
 
 import userbot
@@ -42,6 +43,19 @@ if __name__ == "__main__":
     client.pluginManager = pluginManager.PluginManager(client)
     client.pluginManager.import_all()
     client.pluginManager.add_handlers()
+    client.loop.run_until_complete(client.connect())
+    config = client.loop.run_until_complete(
+        client(functions.help.GetConfigRequest()))
+    for option in config.dc_options:
+        if option.ip_address == client.session.server_address:
+            if client.session.dc_id != option.id:
+                client.session.set_dc(option.id, option.ip_address,
+                                      option.port)
+                client.session.save()
+                LOGGER.warning(
+                    f"Fixed DC ID in session from {client.session.dc_id}"
+                    f" to {option.id}")
+                break
     try:
         client.start()
     except (AuthKeyError, InvalidBufferError):

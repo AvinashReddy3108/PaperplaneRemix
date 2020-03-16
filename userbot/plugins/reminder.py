@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
-import asyncio
 import datetime
 
 from userbot import client
@@ -61,8 +60,7 @@ async def remindme(event: NewMessage.Event) -> None:
         message = f"`Reminder will be sent in` {extra} `after {human_time}.`"
         await event.answer(
             message,
+            self_destruct=2,
             log=("remindme", f"Set a reminder in {extra}.\nETA: {human_time}"))
-        await asyncio.sleep(2)
-        await event.delete()
     else:
         await event.answer("`No kan do. ma'am. Minimum time should be 13s.`")

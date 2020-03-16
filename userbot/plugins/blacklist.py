@@ -27,7 +27,7 @@ from userbot.utils.sessions import RedisSession
 from userbot.plugins.plugins_data import Blacklist, GlobalBlacklist
 
 plugin_category = "blacklisting"
-if isinstance(type(client.session), type(RedisSession)):
+if isinstance(client.session, RedisSession):
     redis = client.session.redis_connection
 else:
     redis = None
@@ -293,6 +293,7 @@ async def whitelister(event: NewMessage.Event) -> None:
     value = event.matches[0].group('value')
     user = False
     chat = False
+    entity = await client.get_entity(value)
 
     if not value:
         if event.reply_to_msg_id:
@@ -305,7 +306,6 @@ async def whitelister(event: NewMessage.Event) -> None:
     else:
         value = int(value) if value.isdigit() else value
         try:
-            entity = await client.get_entity(value)
             if isinstance(entity, types.PeerUser):
                 user = True
             else:
@@ -650,9 +650,8 @@ async def is_admin(chat_id, sender_id) -> bool:
                 result.participant,
             (types.ChannelParticipantAdmin, types.ChannelParticipantCreator)):
             return True
-    except:
-        pass
-    return False
+    except Exception:
+        return False
 
 
 async def ban_user(event: NewMessage.Event, text: str) -> bool:
