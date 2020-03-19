@@ -8,6 +8,7 @@
 <p>&nbsp;</p>
 <h2 align="center">How to deploy and use</h2>
 <p align="center">The <a href="https://github.com/AvinashReddy3108/PaperplaneRemix/wiki">WIKI</a> [Work in progress] is the right place to go if you're stuck somewhere or need to find anything.</p>
+<p align="center">Until then, you can <a href="https://heroku.com/deploy?template=https://github.com/AvinashReddy3108/PaperplaneRemix">click here</a> to quickly deploy the userbot on Heroku.</p>
 <p style="text-align: center;">&nbsp;</p>
 <h2 align="center">Credits</h2>
 <p align="center"><a href="https://github.com/kandnub">Kan</a> - For the awesome <a href="https://github.com/kandnub/TG-UserBot">TG-Userbot</a> core, and helping me with many things.</p>
