@@ -131,11 +131,11 @@ async def out_listner(event: NewMessage.Event) -> None:
     status = await event.answer("`I am no longer AFK!`",
                                 reply_to=event.id,
                                 self_destruct=4)
-    toast = await event.answer(message=main_text or def_text,
-                               reply_to=status.id,
-                               self_destruct=4,
-                               log=("afk", '\n'.join([pr_log, gr_log]).strip()
-                                    or def_text))
+    await event.answer(message=main_text or def_text,
+                       reply_to=status.id,
+                       self_destruct=4,
+                       log=("afk", '\n'.join([pr_log, gr_log]).strip()
+                            or def_text))
 
     for chat, msg in AFK.sent.items():
         msgs = [m for m, _ in msg]
@@ -162,8 +162,8 @@ async def inc_listner(event: NewMessage.Event) -> None:
     reason = os.environ.get('userbot_afk_reason', False)
     elapsed = await _humanfriendly_seconds((now - since).total_seconds())
     if reason:
-        text = "**I am currently AFK.**\
-        \n__Last seen: {} ago.__\nReason: `{}`".format(elapsed, reason)
+        text = "`I am currently AFK{}.`\n`Last seen: {} ago.`".format(
+            ' because ' + reason if reason else '', elapsed)
     else:
         text = "**{}**\n__Last seen: {} ago.__".format(random.choice(AFKMEMEZ),
                                                        elapsed)
@@ -176,7 +176,7 @@ async def inc_listner(event: NewMessage.Event) -> None:
 
     if chat.id in AFK.sent:
         # Floodwait prevention, in case some retards spam tag/PM you.
-        timeout = random.randint(60, 180)
+        timeout = random.randint(15, 60)
         if round((now - AFK.sent[chat.id][-1][1]).total_seconds()) <= timeout:
             return
 

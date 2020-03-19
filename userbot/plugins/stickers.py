@@ -15,11 +15,11 @@
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
 import datetime
+import random
 import re
 import io
 import itertools
 import PIL
-import random
 from typing import BinaryIO, List, Sequence, Tuple, Union
 
 from telethon.tl import functions, types
@@ -284,8 +284,7 @@ async def kang(event: NewMessage.Event) -> None:
             pack = await _verify_cs_name(animated, packs)
             if not pack:
                 if "_kang_pack" in animated:
-                    await event.answer(
-                        "`Making a new animated kang pack, please wait!`")
+                    await event.answer("`Making a new animated kang pack!`")
                     user = await client.get_me()
                     tag = '@' + user.username if user.username else user.id
                     new_pack = True
@@ -301,8 +300,7 @@ async def kang(event: NewMessage.Event) -> None:
             pack = await _verify_cs_name(basic, packs)
             if not pack:
                 if "_kang_pack" in basic:
-                    await event.answer("`Making a new kang pack, please wait!`"
-                                       )
+                    await event.answer("`Making a new kang pack!`")
                     user = await client.get_me()
                     tag = '@' + user.username if user.username else user.id
                     new_pack = True
@@ -339,7 +337,7 @@ async def kang(event: NewMessage.Event) -> None:
             if "120 stickers" in r2.text:
                 if "_kang_pack" in pack:
                     await event.answer(
-                        "`Current kang pack is full, making a new one!`")
+                        "`Current userbot pack is full, making a new one!`")
                     await conv.send_message('/cancel')
                     r11 = await conv.get_response()
                     LOGGER.debug("Stickers:" + r11.text)

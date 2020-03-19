@@ -76,8 +76,10 @@ async def delme(event: NewMessage.Event) -> None:
         from_user="me")
 
     await client.delete_messages(entity, messages)
-    await event.answer(f"`Successfully deleted {len(messages)} message(s)!`",
-                       self_destruct=2)
+    await event.answer(
+        f"`Successfully deleted {len(messages)} message(s)!`",
+        self_destruct=2,
+    )
 
 
 @client.onMessage(command="del", outgoing=True, regex=r"del$")
