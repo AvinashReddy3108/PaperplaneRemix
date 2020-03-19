@@ -16,6 +16,7 @@
 
 import aiohttp
 import functools
+import git
 import io
 import PIL
 import re
@@ -26,7 +27,6 @@ from telethon.tl import functions, types
 
 from userbot import client, LOGGER
 from userbot.helper_funcs import misc
-from userbot.helper_funcs.ids import get_entity_from_msg
 from userbot.utils.helpers import get_chat_link, restart
 from userbot.utils.events import NewMessage
 
@@ -238,3 +238,21 @@ async def bot_mention(event: NewMessage.Event) -> None:
                 f'<a href="tg://resolve?domain={user}">{text}</a>', newstr)
     if newstr != event.text:
         await event.answer(newstr, parse_mode='html')
+
+
+@client.onMessage(command=("repo", plugin_category),
+                  outgoing=True,
+                  regex="repo$")
+async def git_repo(event: NewMessage.Event) -> None:
+    """Get the repo url."""
+    try:
+        repo = git.Repo('.')
+        remote_url = repo.remote().url.replace(".git", '/')
+        if remote_url[-1] != '/':
+            remote_url = remote_url + '/'
+        repo.__del__()
+    except Exception as e:
+        LOGGER.info("Couldnt fetch the repo link.")
+        LOGGER.debug(e)
+        remote_url = "https://github.com/AvinashReddy3108/PaperplaneRemix/"
+    await event.answer(f"[PaperplaneRemix]({remote_url})")

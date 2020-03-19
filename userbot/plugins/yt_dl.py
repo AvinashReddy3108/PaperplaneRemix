@@ -15,14 +15,17 @@
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
 import concurrent
+import copy
 import io
+import os
 
+from telethon.tl import types
 from telethon.utils import get_attributes
 
-from userbot import client, LOGGER
-from userbot.utils.helpers import is_ffmpeg_there
-from userbot.helper_funcs.yt_dl import (extract_info, hook, list_formats,
-                                        YTdlLogger)
+from userbot import client
+from userbot.utils.helpers import is_ffmpeg_there, ProgressCallback
+from userbot.helper_funcs.yt_dl import (extract_info, list_formats,
+                                        ProgressHook, YTdlLogger)
 
 audioFormats = ["aac", "flac", "mp3", "m4a", "opus", "vorbis", "wav"]
 
@@ -30,28 +33,23 @@ videoFormats = ["mp4", "flv", "ogg", "webm", "mkv", "avi"]
 
 ydl_opts = {
     'logger': YTdlLogger(),
-    'progress_hooks': [hook],
+    'progress_hooks': [],
     'postprocessors': [],
-    'restrictfilenames': True,
+    'restrictfilenames': False,
     'outtmpl': 'YT_DL/%(title)s_{time}.%(ext)s',
     'prefer_ffmpeg': True,
     'geo_bypass': True,
     'nocheckcertificate': True,
     'logtostderr': False,
-    'quiet': True
+    'quiet': True,
+    'embedthumbnail': True,
+    'addmetadata': True,
+    'writethumbnail': True
 }
 
 ffurl = ("https://tg-userbot.readthedocs.io/en/latest/"
          "faq.html#how-to-install-ffmpeg")
-
 success = "`Successfully downloaded` {}"
-
-
-async def progress(current, total):
-    """ Logs the upload progress """
-    LOGGER.info(
-        f"Uploaded {current} of {total}\nCompleted: {(current / total) * 100:.2f}%"
-    )
 
 
 @client.onMessage(command="ytdl",
@@ -66,7 +64,7 @@ async def yt_dl(event):
         return
 
     ffmpeg = await is_ffmpeg_there()
-    params = ydl_opts.copy()
+    params = copy.deepcopy(ydl_opts)
 
     if fmt:
         fmt = fmt.strip()
@@ -101,12 +99,15 @@ async def yt_dl(event):
                     params.update(writethumbnail=True)
                     params['postprocessors'].append({'key': 'EmbedThumbnail'})
 
+    progress = ProgressHook(event)
     await event.answer("`Processing...`")
-    output = await extract_info(client.loop,
-                                concurrent.futures.ThreadPoolExecutor(),
-                                params,
-                                url,
-                                download=True)
+    params['progress_hooks'].append(progress.hook)
+    output = await extract_info(
+        loop=client.loop,
+        executor=concurrent.futures.ThreadPoolExecutor(),
+        ydl_opts=params,
+        url=url,
+        download=True)
     warning = (
         f"`WARNING: FFMPEG is not installed!` [FFMPEG install guide]({ffurl})"
         " `If you requested multiple formats, they won't be merged.`\n\n")
@@ -114,20 +115,39 @@ async def yt_dl(event):
         result = warning + output if not ffmpeg else output
         await event.answer(result, link_preview=False)
     else:
-        title, link, path = output
-        huh = f"[{title}]({link})"
-        text = success.format(huh)
+        path, thumb, info = output
+        title = info.get('title', info.get('id', 'Unknown title'))
+        uploader = info.get('uploader', None)
+        duration = info.get('duration', 0)
+        width = info.get('width', None)
+        height = info.get('height', None)
+        url = info.get('webpage_url', None)
+        href = f"[{title}]({url})"
+        text = success.format(href)
         result = warning + text if not ffmpeg else text
-        await event.answer(f"`Uploading` {huh}`...`", link_preview=False)
+
+        progress_cb = ProgressCallback(event, filen=title)
         dl = io.open(path, 'rb')
-        uploaded = await client.fast_upload_file(dl, upload_progress)
+        uploaded = await client.fast_upload_file(dl, progress_cb.up_progress)
         dl.close()
-        attributes, _ = get_attributes(path)
+
+        attributes, mime_type = get_attributes(path)
+        if path.suffix[1:] in audioFormats:
+            attributes.append(
+                types.DocumentAttributeAudio(duration, None, title, uploader))
+        elif path.suffix[1:] in videoFormats:
+            attributes.append(
+                types.DocumentAttributeVideo(duration, width, height))
+        media = types.InputMediaUploadedDocument(
+            file=uploaded,
+            mime_type=mime_type,
+            attributes=attributes,
+            thumb=await client.upload_file(thumb) if thumb else None)
+
         await client.send_file(event.chat_id,
-                               uploaded,
-                               attributes=attributes,
-                               force_document=True,
-                               reply_to=event)
-        await event.answer(result,
-                           link_preview=False,
-                           log=("YTDL", f"Successfully uploaded {huh}!"))
+                               media,
+                               caption=href,
+                               force_document=True)
+        if thumb:
+            os.remove(thumb)
+        await event.delete()

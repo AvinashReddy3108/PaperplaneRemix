@@ -4,6 +4,7 @@
 > Copyright (C) 2019 Tulir Asokan - https://github.com/tulir/mautrix-telegram
 """
 import asyncio
+import math
 import hashlib
 import inspect
 import logging
@@ -12,7 +13,6 @@ from collections import defaultdict
 from typing import (Optional, List, AsyncGenerator, Union, Awaitable,
                     DefaultDict, Tuple, BinaryIO)
 
-import math
 from telethon import utils, helpers, TelegramClient
 from telethon.crypto import AuthKey
 from telethon.network import MTProtoSender
