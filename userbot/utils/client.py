@@ -116,8 +116,11 @@ class UserBotClient(TelegramClient):
     def _kill_running_processes(self) -> None:
         """Kill all the running asyncio subprocessess"""
         for _, process in self.running_processes.items():
-            process.kill()
-            LOGGER.debug("Killed %d which was still running.", process.pid)
+            try:
+                process.kill()
+                LOGGER.debug("Killed %d which was still running.", process.pid)
+            except Exception as e:
+                LOGGER.debug(e)
         self.running_processes.clear()
 
 

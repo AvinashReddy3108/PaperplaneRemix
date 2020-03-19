@@ -24,8 +24,8 @@ from userbot import client
 from userbot.utils.helpers import ProgressCallback
 from userbot.utils.events import NewMessage
 
-plugin_category = "downloads"
-downloads = pathlib.Path('./downloads/').resolve()
+plugin_category = "downlaods"
+downloads = pathlib.Path('./downloads/').absolute()
 NAME = 'untitled'
 
 
@@ -35,7 +35,7 @@ NAME = 'untitled'
 async def download(event: NewMessage.Event) -> None:
     """Download documents from Telegram."""
     name = NAME
-    path = downloads
+    path = None
     match = event.matches[0].group(3)
     if match:
         path = pathlib.Path(match.strip())
@@ -53,34 +53,40 @@ async def download(event: NewMessage.Event) -> None:
         if isinstance(attr, types.DocumentAttributeFilename):
             name = attr.file_name
     ext = get_extension(reply.document)
+    if path and not path.suffix and ext:
+        path = path.with_suffix(ext)
     if name == NAME:
         name += ('_' + str(getattr(reply.document, 'id', reply.id)) + ext)
 
-    if path.exists():
+    if path and path.exists():
         if path.is_file():
             newname = str(path.stem) + '_OLD'
             path.rename(path.with_name(newname).with_suffix(path.suffix))
             file_name = path
         else:
             file_name = path / name
-    elif not path.suffix and ext:
+    elif path and not path.suffix and ext:
         file_name = downloads / path.with_suffix(ext)
+    elif path:
+        file_name = path
     else:
-        downloads.mkdir(parents=True, exist_ok=True)
         file_name = downloads / name
+    file_name.parent.mkdir(parents=True, exist_ok=True)
 
-    prog = ProgressCallback(event, filen=file_name.stem)
+    prog = ProgressCallback(event,
+                            filen=await _get_file_name(file_name, False))
     if reply.document:
-        dl = io.FileIO(file_name.resolve(), 'a')
+        dl = io.FileIO(file_name.absolute(), 'a')
         await client.fast_download_file(location=reply.document,
                                         out=dl,
                                         progress_callback=prog.dl_progress)
         dl.close()
     else:
-        await reply.download_media(file=file_name.resolve(),
+        await reply.download_media(file=file_name.absolute(),
                                    progress_callback=prog.dl_progress)
 
-    await event.answer(f"__Successfully downloaded {file_name.stem}.__")
+    await event.answer(f"__Downloaded successfully!__\n"
+                       f"**Path:** `{await _get_file_name(file_name)}`")
 
 
 @client.onMessage(command=("upload", plugin_category),
@@ -96,30 +102,38 @@ async def upload(event: NewMessage.Event) -> None:
 
     match = match.strip().replace('\\', '/') if match else ''
     fmatch = pathlib.Path(match)
+    dmatch = pathlib.Path(downloads / match)
 
-    if '*' in match and '/' not in match:
-        for f in downloads.glob('*.*'):
-            if f.match(match):
-                target_files.append(f)
-    elif '*' not in match and '/' in match:
+    if '*' not in match:
         if fmatch.exists():
             target_files.append(fmatch)
-        elif (downloads / match).exists():
-            target_files.append(downloads / match)
-    for f in pathlib.Path('.').glob('**/*.*'):
+            pass
+        elif dmatch.exists():
+            target_files.append(dmatch)
+            pass
+    if not target_files:
+        for f in downloads.glob('*.*'):
+            if f.match(match) and f.is_file():
+                target_files.append(f)
+    # Un-comment this for recursive file fetching from the bot's root dir
+    """for f in pathlib.Path('.').glob('**/*.*'):
         if f in target_files:
             continue
-        if not f.match('*/__pycache__/*') and f.match(match):
-            target_files.append(f)
+        if not f.match('*/__pycache__/*') and f.match(match) and f.is_file():
+            target_files.append(f)"""
 
     if not target_files:
         await event.answer("__Couldn't find what you were looking for.__")
         return
 
-    files = ', '.join([f.stem for f in target_files])
+    files = '\n'.join([f'`{await _get_file_name(f)}`' for f in target_files])
+    if len(target_files) > 1:
+        await event.answer(f"**Found multiple files for {match}:**\n{files}")
+        return
+
     for f in target_files:
-        f = f.resolve()
-        prog = ProgressCallback(event, filen=f.stem)
+        f = f.absolute()
+        prog = ProgressCallback(event, filen=await _get_file_name(f, False))
         attributes, mime_type = get_attributes(str(f))
         ul = io.open(f, 'rb')
         uploaded = await client.fast_upload_file(
@@ -136,3 +150,11 @@ async def upload(event: NewMessage.Event) -> None:
                                reply_to=event)
 
     await event.answer(f"__Successfully uploaded {files}.__")
+
+
+async def _get_file_name(path: pathlib.Path, full: bool = True) -> str:
+    if full:
+        path = str(path.absolute())
+    else:
+        path = path.stem + path.suffix
+    return path

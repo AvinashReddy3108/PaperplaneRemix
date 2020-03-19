@@ -79,7 +79,7 @@ async def execute(event: NewMessage.Event) -> None:
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE)
 
-    client.running_processes.update(message=process)
+    client.running_processes.update({message: process})
     stdout, stderr = await process.communicate()
 
     not_killed = client.running_processes.get(message, False)
@@ -122,7 +122,7 @@ async def terminal(event: NewMessage.Event) -> None:
     process = await asyncio.create_subprocess_shell(
         cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
 
-    client.running_processes.update(message=process)
+    client.running_processes.update({message: process})
     stdout, stderr = await process.communicate()
 
     not_killed = client.running_processes.get(message, False)
