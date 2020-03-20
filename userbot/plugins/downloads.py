@@ -24,7 +24,7 @@ from userbot import client
 from userbot.utils.helpers import ProgressCallback
 from userbot.utils.events import NewMessage
 
-plugin_category = "downlaods"
+plugin_category = "downloads"
 downloads = pathlib.Path('./downloads/').absolute()
 NAME = 'untitled'
 
@@ -145,7 +145,6 @@ async def upload(event: NewMessage.Event) -> None:
                                                  thumb=None)
         await client.send_file(event.chat_id,
                                file=media,
-                               caption=str(f.parent / f.name),
                                force_document=True,
                                reply_to=event)
 

@@ -16,10 +16,11 @@
 
 import dill
 import re
-from typing import Dict, List
+from typing import Dict, List, Tuple, Union
 
 from telethon.events import ChatAction
 from telethon.tl import types, functions
+from telethon.utils import resolve_invite_link
 
 from userbot import client, LOGGER
 from userbot.utils.events import NewMessage
@@ -31,6 +32,13 @@ if isinstance(client.session, RedisSession):
     redis = client.session.redis_connection
 else:
     redis = None
+
+blacklisted_text = (
+    "**This user has already been blacklisted! Automatically banned.**")
+bio_text = "**Banned due to blacklisted bio match: {}**"
+str_text = "**Banned due to blacklisted string match: {}**"
+url_str = "**Banned due to blacklisted url match: {}**"
+id_str = "**Banned due to blacklisted id match: {}**"
 
 bl_pattern = (r"(?P<global>g(?:lobal)?)?"
               r"b(?:lack)?l(?:ist)?"
@@ -48,13 +56,20 @@ dwl_pattern = (r"r(?:e)?m(?:ove)?"
                r"w(?:hite)?l(?:ist)?"
                r"(?: |$)"
                r"(?P<value>@?\w{5,35}|-?\d{6,16})?")
+dbld_pattern = (r"(?:remove|un)"
+                r"b(?:lack)?l(?:ist)?"
+                r"(?: |$)"
+                r"(?P<value>@?\w{5,35}|-?\d{6,16})?")
 bls_pattern = (r"(?P<global>g(?:lobal)?)?"
                r"b(?:lack)?l(?:ist)?s"
                r"(?: |$)"
                r"(?:(?P<option>\w+))?")
 wls_pattern = (r"w(?:hite)?l(?:ist)?s" r"(?: |$)" r"(?:(?P<option>\w+))?")
+bld_pattern = (r"blacklisted" r"(?: |$)" r"(?:(?P<option>\w+))?")
 id_pattern = re.compile(
     r'(?:https?:\/\/)?(?:www\.)?(?:t\.me\/)?@?(?P<e>\w{5,35}|-?\d{6,16})\/?')
+invite_pattern = re.compile(
+    r'(?:https?:\/\/)?(?:www\.)?t\.me\/(?P<hash>\w{22})\/?')
 acceptable_options = {
     'id': 'tgid',
     'bio': 'bio',
@@ -63,7 +78,10 @@ acceptable_options = {
     'domian': 'url',
     'url': 'url'
 }
+
+temp_banlist: List[int] = []
 localBlacklists: Dict[int, Blacklist] = {}
+blacklistedUsers: Dict[int, Tuple[str, Union[str, int]]] = {}
 whitelistedUsers: List[int] = []
 whitelistedChats: List[int] = []
 
@@ -81,6 +99,8 @@ if redis:
                                                    txt=data.get('txt', None))
     for option, value in globalData.items():
         setattr(GlobalBlacklist, option, value)
+    if redis.exists('blacklist:users'):
+        blacklistedUsers = dill.loads(redis.get('blacklist:users'))
     if redis.exists('whitelist:users'):
         whitelistedUsers = dill.loads(redis.get('whitelist:users'))
     if redis.exists('whitelist:chats'):
@@ -318,6 +338,10 @@ async def whitelister(event: NewMessage.Event) -> None:
     if wl in whitelistedUsers or wl in whitelistedChats:
         await event.answer(f'__{wl} is already whitelisted.__')
         return
+    elif wl in blacklistedUsers:
+        await event.answer(
+            f"__{wl} is blacklisted, unblacklist them and try again.__")
+        return
 
     if user:
         whitelistedUsers.append(wl)
@@ -364,7 +388,7 @@ async def unwhitelister(event: NewMessage.Event) -> None:
         value = event.chat_id
 
     if not value:
-        await event.answer('__.rmwl (<value>)__')
+        await event.answer('__.rmwl <value>__')
         return
 
     if value in whitelistedUsers:
@@ -452,6 +476,50 @@ async def listbls(event: NewMessage.Event) -> None:
     await event.answer(text)
 
 
+@client.onMessage(command=("unblacklist", plugin_category),
+                  outgoing=True,
+                  regex=dbld_pattern)
+async def unblacklistuser(event: NewMessage.Event) -> None:
+    """Unblacklist a user."""
+    if not redis:
+        await event.answer(
+            "`You need to use a Redis session to use blacklists.`")
+        return
+
+    value = event.matches[0].group('value')
+    if event.matches[0].group('value'):
+        value = int(value) if value.isdigit() else value
+        try:
+            entity = await client.get_input_entity(value)
+            value = await client.get_peer_id(entity)
+        except Exception:
+            await event.answer(f"__Couldn't get the entity for {value}.__")
+            return
+
+    if event.reply_to_msg_id and not value:
+        value = (await event.get_reply_message()).from_id
+    if not value:
+        value = event.chat_id
+
+    if not value:
+        await event.answer('__.unbl <value>__')
+        return
+
+    if value in blacklistedUsers:
+        blacklistedUsers.pop(value, None)
+        if blacklistedUsers:
+            redis.set('blacklist:users', dill.dumps(blacklistedUsers))
+        else:
+            redis.delete('blacklist:users')
+        await event.answer(
+            f"__Removed {value} from blacklisted users.__",
+            log=('unblacklist',
+                 f'Unblacklisted user [{value}](tg://user?id={value}).'))
+    else:
+        await event.answer(f"__{value} hasn't been blacklisted.__")
+        return
+
+
 @client.onMessage(command=("whitelists", plugin_category),
                   outgoing=True,
                   regex=wls_pattern)
@@ -464,7 +532,7 @@ async def listwls(event: NewMessage.Event) -> None:
 
     option = event.matches[0].group('option') or None
 
-    if option and option not in ['users', 'chats', 'user', 'chat']:
+    if option and option.lower() not in ['users', 'chats', 'user', 'chat']:
         await event.answer("`Invalid argument. Available options:`\n"
                            "__user(s) or chat(s)__")
         return
@@ -498,53 +566,110 @@ async def listwls(event: NewMessage.Event) -> None:
     await event.answer(text)
 
 
+@client.onMessage(command=("blacklisted", plugin_category),
+                  outgoing=True,
+                  regex=bld_pattern)
+async def listbld(event: NewMessage.Event) -> None:
+    """Get a list of all the blacklisted users"""
+    if not redis:
+        await event.answer(
+            "`You need to use a Redis session to use blacklists.`")
+        return
+
+    option = event.matches[0].group('option') or None
+
+    if option and option.lower() not in ['txt', 'tgid', 'url']:
+        await event.answer("`Invalid argument. Available options:`\n"
+                           "__txt or tgid or url__")
+        return
+
+    if option and blacklistedUsers:
+        option = option.lower()
+        matches = {}
+        for user, ban in blacklistedUsers.items():
+            ban_type, match = ban
+            if ban_type == option:
+                matches.update({user: match})
+
+        if matches:
+            text = "**Blacklisted users:**\n"
+            text += ',\n'.join(
+                [f'`{x}: {y}' for x, y in blacklistedUsers.items()])
+        else:
+            text = f"__There are no {option} blacklisted users.__"
+    else:
+        if not blacklistedUsers:
+            text = "__There are no blacklisted users.__"
+        else:
+            text = ""
+
+        if blacklistedUsers:
+            text += "**Blacklisted users:**\n"
+            text += ', '.join([f'`{x}`' for x in blacklistedUsers])
+    await event.answer(text)
+
+
 @client.onMessage(incoming=True)
 async def inc_listener(event: NewMessage.Event) -> None:
     """Filter incoming messages for blacklisting."""
     broadcast = getattr(event.chat, 'broadcast', False)
     if not redis or event.is_private or broadcast:
         return
-    if event.chat_id in whitelistedChats or event.from_id in whitelistedUsers:
+    if (event.chat_id in whitelistedChats or event.from_id in whitelistedUsers
+            or await is_admin(event.chat_id, event.sender_id)):
         return
-    if await is_admin(event.chat_id, event.sender_id):
+    elif event.from_id in blacklistedUsers:
+        if event.from_id not in temp_banlist:
+            await ban_user(event, blacklisted_text)
         return
 
+    invite = False
+    invite_match = invite_pattern.search(event.text)
     text = False
-    flag = False
+    match = None
     tgid_check = False
     localbl = localBlacklists.get(event.chat_id, False)
+
+    if invite_match:
+        _, invite, _ = resolve_invite_link(invite_match.group('hash'))
+        try:
+            invite = await client.get_peer_id(invite, False)
+        except Exception as e:
+            LOGGER.debug(e)
 
     if GlobalBlacklist.txt:
         for value in GlobalBlacklist.txt:
             string = await escape_string(value)
             if re.search(string, event.text, flags=re.I):
-                text = ("**Banned due to globally blacklisted string match: "
-                        f"{value}**")
+                text = str_text.format(value)
+                match = value
+                break
     elif localbl and getattr(localbl, 'txt', False):
         for value in localBlacklists[event.chat_id].txt:
             string = await escape_string(value)
             if re.search(string, event.text, flags=re.I):
-                text = f"**Banned due to blacklisted string match: {value}**"
-    if text:
-        flag = await ban_user(event, text)
-        if flag:
-            return
+                text = str_text.format(value)
+                match = value
+                break
+    if text and await ban_user(event, text, 'txt', match):
+        return
 
     if GlobalBlacklist.url:
         for value in GlobalBlacklist.url:
             string = re.sub(r'(?<!\\)\*', r'\\w+', value, count=0)
             if re.search(string, event.text, flags=re.I):
-                text = ("**Banned due to globally blacklisted url match: "
-                        f"{value}**")
+                text = url_str.format(value)
+                match = value
+                break
     elif localbl and getattr(localbl, 'url', False):
         for value in localBlacklists[event.chat_id].url:
             string = re.sub(r'(?<!\\)\*', r'\\w+', value, count=0)
             if re.search(string, event.text, flags=re.I):
-                text = f"**Banned due to blacklisted url match: {value}**"
-    if text:
-        flag = await ban_user(event, text)
-        if flag:
-            return
+                text = url_str.format(value)
+                match = value
+                break
+    if text and await ban_user(event, text, 'url', match):
+        return
 
     if GlobalBlacklist.tgid or (localbl and getattr(localbl, 'tgid', False)):
         tgid_check = True
@@ -563,22 +688,30 @@ async def inc_listener(event: NewMessage.Event) -> None:
             else:
                 value = None
 
+            if value and invite:
+                temp = await client.get_peer_id(value, False)
+                if invite == temp:
+                    text = id_str.format(value)
+                    match = value
+                    break
+
             if GlobalBlacklist.tgid and value in GlobalBlacklist.tgid:
-                text = ("**Banned due to globally blacklisted url match: "
-                        f"{value}**")
+                text = id_str.format(value)
+                match = value
+                break
             elif localbl and getattr(localbl, 'tgid', False):
                 if value in localBlacklists[event.chat_id].tgid:
-                    text = f"**Banned due to blacklisted id match: {value}**"
+                    text = id_str.format(value)
+                    match = value
+                    break
     if text:
-        flag = await ban_user(event, text)
-        if flag:
-            return
+        await ban_user(event, text, 'tgid', match)
 
 
 @client.on(ChatAction)
 async def bio_filter(event: ChatAction.Event) -> None:
     """Filter incoming messages for blacklisting."""
-    text = None
+    match = False
     broadcast = getattr(event.chat, 'broadcast', False)
 
     if not redis or event.is_private or broadcast:
@@ -593,9 +726,12 @@ async def bio_filter(event: ChatAction.Event) -> None:
             localbl = localBlacklists.get(chat_id, False)
         except (ValueError, TypeError):
             return
-        if chat_id in whitelistedChats or sender_id in whitelistedUsers:
+        if (chat_id in whitelistedChats or sender_id in whitelistedUsers
+                or await is_admin(chat_id, sender_id)):
             return
-        if await is_admin(chat_id, sender_id):
+        elif sender_id in blacklistedUsers:
+            if sender_id not in temp_banlist:
+                await ban_user(event, blacklisted_text)
             return
 
         user = await client(functions.users.GetFullUserRequest(id=sender))
@@ -603,34 +739,17 @@ async def bio_filter(event: ChatAction.Event) -> None:
             for value in GlobalBlacklist.bio:
                 bio = await escape_string(value)
                 if re.search(bio, user.about, flags=re.I):
-                    text = ("**Banned due to globally blacklisted bio match: "
-                            f"{value}**")
+                    match = value
+                    break
         elif localbl and getattr(localbl, 'bio', False):
             for value in localBlacklists[chat_id].bio:
                 bio = await escape_string(value)
                 if re.search(bio, user.about, flags=re.I):
-                    text = f"**Banned due to blacklisted bio match: {value}**"
+                    match = value
+                    break
 
-        if text:
-            ban_right = getattr(chat.admin_rights, 'ban_users', False)
-            if ban_right or chat.creator:
-                pass
-            else:
-                return
-            try:
-                await client.edit_permissions(entity=chat,
-                                              user=sender_id,
-                                              view_messages=False)
-                await event.reply(text)
-                if client.logger:
-                    logger_group = client.config['userbot'].getint(
-                        'logger_group_id', 'me')
-                    log_text = ("**USERBOT LOG** #blacklist\n"
-                                f'Banned {sender_id} from {chat_id}.\n{text}.')
-                    await client.send_message(logger_group, log_text)
-            except Exception as e:
-                await event.reply(f"**Couldn't ban user due to {e}**")
-                LOGGER.exception(e)
+        if match:
+            await ban_user(event, bio_text.format(match), 'bio', match)
 
 
 async def escape_string(string: str) -> str:
@@ -654,26 +773,43 @@ async def is_admin(chat_id, sender_id) -> bool:
         return False
 
 
-async def ban_user(event: NewMessage.Event, text: str) -> bool:
+async def ban_user(event: NewMessage.Event or ChatAction.Event,
+                   text: str,
+                   bl_type: str = None,
+                   match: Union[str, int] = None) -> bool:
+    if isinstance(event, NewMessage.Event):
+        sender = await event.get_input_sender()
+    else:
+        sender = await event.get_input_user()
+    temp_banlist.append(sender)
     chat = await event.get_chat()
     ban_right = getattr(chat.admin_rights, 'ban_users', False)
-    if ban_right or chat.creator:
-        pass
-    else:
+    delete_messages = getattr(chat.admin_rights, 'delete_messages', False)
+    if not (ban_right or chat.creator):
         return False
     try:
-        await client.edit_permissions(entity=event.chat_id,
-                                      user=event.from_id,
+        await client.edit_permissions(entity=chat.id,
+                                      user=sender,
                                       view_messages=False)
-        await event.answer(
-            text,
-            log=('blacklist',
-                 f'Banned {event.from_id} from {event.chat_id}.\n{text}.'))
+        if delete_messages:
+            await event.delete()
+        await event.respond(text)
+        if client.logger:
+            logger_group = client.config['userbot'].getint(
+                'logger_group_id', 'me')
+            log_text = ("**USERBOT LOG** #blacklist\n"
+                        f"Banned {sender.user_id} from {chat.id}.\n{text}.")
+            await client.send_message(logger_group, log_text)
+        if bl_type and match:
+            blacklistedUsers.update({sender.user_id: (bl_type, match)})
+            redis.set('blacklist:users', dill.dumps(blacklistedUsers))
         return True
     except Exception as e:
-        await event.answer(f"**Couldn't ban user due to {e}**", reply=True)
+        await event.respond(f"**Couldn't ban user due to {e}**")
         LOGGER.exception(e)
         return False
+    finally:
+        temp_banlist.remove(sender)
 
 
 async def blattributes(blacklist) -> str:

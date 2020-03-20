@@ -44,7 +44,9 @@ ydl_opts = {
     'quiet': True,
     'embedthumbnail': True,
     'addmetadata': True,
-    'writethumbnail': True
+    'writethumbnail': True,
+    'ignoreerrors': True,
+    'noplaylist': True
 }
 
 ffurl = ("https://tg-userbot.readthedocs.io/en/latest/"
