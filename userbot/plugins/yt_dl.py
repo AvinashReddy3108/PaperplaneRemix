@@ -45,7 +45,7 @@ ydl_opts = {
     'embedthumbnail': True,
     'addmetadata': True,
     'writethumbnail': True,
-    'ignoreerrors': True,
+    'ignoreerrors': False,
     'noplaylist': True
 }
 
