@@ -162,8 +162,8 @@ async def inc_listner(event: NewMessage.Event) -> None:
     reason = os.environ.get('userbot_afk_reason', False)
     elapsed = await _humanfriendly_seconds((now - since).total_seconds())
     if reason:
-        text = "`I am currently AFK{}.`\n`Last seen: {} ago.`".format(
-            ' because ' + reason if reason else '', elapsed)
+        text = "**I am currently AFK.**\
+            \n__Last seen: {} ago.__\nReason: `{}`".format(elapsed, reason)
     else:
         text = "**{}**\n__Last seen: {} ago.__".format(random.choice(AFKMEMEZ),
                                                        elapsed)
