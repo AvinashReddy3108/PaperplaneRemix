@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import configparser
 import dataclasses
 import logging
@@ -26,7 +25,6 @@ from .FastTelethon import download_file, upload_file, TypeLocation
 from .parser import parse_arguments
 from .pluginManager import PluginManager
 from .events import MessageEdited, NewMessage
-
 
 LOGGER = logging.getLogger(__name__)
 no_info = "There is no help available for this command!"
@@ -56,14 +54,12 @@ class UserBotClient(TelegramClient):
     running_processes: dict = {}
     version: int = 0
 
-    def onMessage(
-        self: TelegramClient,
-        builtin: bool = False,
-        command: str or tuple = None,
-        edited: bool = True,
-        info: str = None,
-        **kwargs
-    ) -> callable:
+    def onMessage(self: TelegramClient,
+                  builtin: bool = False,
+                  command: str or tuple = None,
+                  edited: bool = True,
+                  info: str = None,
+                  **kwargs) -> callable:
         """Method to register a function without the client"""
 
         kwargs.setdefault('forwards', False)
@@ -85,12 +81,8 @@ class UserBotClient(TelegramClient):
                 else:
                     com = command
 
-                UBcommand = Command(
-                    func,
-                    handlers,
-                    info or func.__doc__ or no_info,
-                    builtin
-                )
+                UBcommand = Command(func, handlers, info or func.__doc__
+                                    or no_info, builtin)
                 category = category.lower()
                 self.commands.update({com: UBcommand})
                 update_dict(self.commandcategories, category, com)
@@ -101,16 +93,17 @@ class UserBotClient(TelegramClient):
         return wrapper
 
     async def fast_download_file(
-        self: TelegramClient, location: TypeLocation,
-        out: BinaryIO, progress_callback: callable = None
-    ) -> BinaryIO:
+            self: TelegramClient,
+            location: TypeLocation,
+            out: BinaryIO,
+            progress_callback: callable = None) -> BinaryIO:
         """Download files to Telethon with multiple connections."""
         return await download_file(self, location, out, progress_callback)
 
     async def fast_upload_file(
-        self: TelegramClient, file: BinaryIO,
-        progress_callback: callable = None
-    ) -> types.TypeInputFile:
+            self: TelegramClient,
+            file: BinaryIO,
+            progress_callback: callable = None) -> types.TypeInputFile:
         """Upload files to Telethon with multiple connections."""
         return await upload_file(self, file, progress_callback)
 
@@ -129,9 +122,7 @@ class UserBotClient(TelegramClient):
         for _, process in self.running_processes.items():
             try:
                 process.kill()
-                LOGGER.debug(
-                    "Killed %d which was still running.", process.pid
-                )
+                LOGGER.debug("Killed %d which was still running.", process.pid)
             except Exception as e:
                 LOGGER.debug(e)
         self.running_processes.clear()

@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import concurrent
 import copy
 import io
@@ -25,29 +24,12 @@ from telethon.utils import get_attributes
 
 from userbot import client
 from userbot.utils.helpers import is_ffmpeg_there, ProgressCallback
-from userbot.helper_funcs.yt_dl import (
-    extract_info, list_formats, ProgressHook, YTdlLogger
-)
+from userbot.helper_funcs.yt_dl import (extract_info, list_formats,
+                                        ProgressHook, YTdlLogger)
 
+audioFormats = ["aac", "flac", "mp3", "m4a", "opus", "vorbis", "wav"]
 
-audioFormats = [
-    "aac",
-    "flac",
-    "mp3",
-    "m4a",
-    "opus",
-    "vorbis",
-    "wav"
-]
-
-videoFormats = [
-    "mp4",
-    "flv",
-    "ogg",
-    "webm",
-    "mkv",
-    "avi"
-]
+videoFormats = ["mp4", "flv", "ogg", "webm", "mkv", "avi"]
 
 ydl_opts = {
     'logger': YTdlLogger(),
@@ -67,36 +49,28 @@ ydl_opts = {
     'noplaylist': True
 }
 
-ffurl = (
-    "https://tg-userbot.readthedocs.io/en/latest/"
-    "faq.html#how-to-install-ffmpeg"
-)
+ffurl = ("https://tg-userbot.readthedocs.io/en/latest/"
+         "faq.html#how-to-install-ffmpeg")
 warning = (
     f"`WARNING: FFMPEG is not installed!` [FFMPEG install guide]({ffurl})"
-    " `If you requested multiple formats, they won't be merged.`\n\n"
-)
+    " `If you requested multiple formats, they won't be merged.`\n\n")
 success = "`Successfully downloaded` {}"
 
 
-@client.onMessage(
-    command="ytdl",
-    outgoing=True, regex=r"ytdl(?: |$)([\s\S]*)"
-)
+@client.onMessage(command="ytdl", outgoing=True, regex=r"ytdl(?: |$)([\s\S]*)")
 async def yt_dl(event):
     """Download videos from YouTube with their url in multiple formats."""
     match = event.matches[0].group(1)
     if not match:
         await event.answer(
-            "`.ytdl <url>` or `.ytdl <url1> .. <urln> format=<fmt>`"
-        )
+            "`.ytdl <url>` or `.ytdl <url1> .. <urln> format=<fmt>`")
         return
 
     args, kwargs = await client.parse_arguments(match)
     fmt = kwargs.get('format', kwargs.get('fmt', False))
     round_message = kwargs.get('round_message', kwargs.get('round', False))
-    supports_streaming = kwargs.get(
-        'supports_streaming', kwargs.get('stream', False)
-    )
+    supports_streaming = kwargs.get('supports_streaming',
+                                    kwargs.get('stream', False))
     ffmpeg = await is_ffmpeg_there()
     params = copy.deepcopy(ydl_opts)
     warnings = []
@@ -108,8 +82,7 @@ async def yt_dl(event):
             for url in args:
                 info = await extract_info(
                     client.loop, concurrent.futures.ThreadPoolExecutor(),
-                    params, url
-                )
+                    params, url)
                 if isinstance(info, dict):
                     fmts.append(await list_formats(info))
                 else:
@@ -126,21 +99,17 @@ async def yt_dl(event):
             return
         elif fmt in audioFormats and ffmpeg:
             params.update(format='bestaudio')
-            params['postprocessors'].append(
-                {
-                    'key': 'FFmpegExtractAudio',
-                    'preferredcodec': fmt,
-                    'preferredquality': '320',
-                }
-            )
+            params['postprocessors'].append({
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': fmt,
+                'preferredquality': '320',
+            })
         elif fmt in videoFormats and ffmpeg:
             params.update(format='bestvideo')
-            params['postprocessors'].append(
-                {
-                    'key': 'FFmpegVideoConvertor',
-                    'preferedformat': fmt
-                }
-            )
+            params['postprocessors'].append({
+                'key': 'FFmpegVideoConvertor',
+                'preferedformat': fmt
+            })
         else:
             params.update(format=fmt)
             if ffmpeg:
@@ -156,9 +125,11 @@ async def yt_dl(event):
     for url in args:
         await event.answer(f"`Processing {url}...`")
         output = await extract_info(
-            loop=client.loop, ydl_opts=params, url=url, download=True,
-            executor=concurrent.futures.ThreadPoolExecutor()
-        )
+            loop=client.loop,
+            ydl_opts=params,
+            url=url,
+            download=True,
+            executor=concurrent.futures.ThreadPoolExecutor())
         if isinstance(output, str):
             result = warning + output if not ffmpeg else output
             warnings.append(result)
@@ -172,24 +143,22 @@ async def yt_dl(event):
 
             dl = io.open(path, 'rb')
             progress_cb.filen = title
-            uploaded = await client.fast_upload_file(
-                dl, progress_cb.up_progress
-            )
+            uploaded = await client.fast_upload_file(dl,
+                                                     progress_cb.up_progress)
             dl.close()
 
             attributes, mime_type = await fix_attributes(
-                path, info, round_message, supports_streaming
-            )
+                path, info, round_message, supports_streaming)
             media = types.InputMediaUploadedDocument(
                 file=uploaded,
                 mime_type=mime_type,
                 attributes=attributes,
-                thumb=await client.upload_file(thumb) if thumb else None
-            )
+                thumb=await client.upload_file(thumb) if thumb else None)
 
-            await client.send_file(
-                event.chat_id, media, caption=href, force_document=True
-            )
+            await client.send_file(event.chat_id,
+                                   media,
+                                   caption=href,
+                                   force_document=True)
             if thumb:
                 os.remove(thumb)
     if warnings:
@@ -200,10 +169,10 @@ async def yt_dl(event):
         await event.delete()
 
 
-async def fix_attributes(
-    path, info_dict: dict,
-    round_message: bool = False, supports_streaming: bool = False
-) -> list:
+async def fix_attributes(path,
+                         info_dict: dict,
+                         round_message: bool = False,
+                         supports_streaming: bool = False) -> list:
     """Avoid multiple instances of an attribute."""
     new_attributes = []
     video = False
@@ -228,9 +197,8 @@ async def fix_attributes(
                 width = width or attr.w
                 height = height or attr.h
                 break
-        video = types.DocumentAttributeVideo(
-            duration, width, height, round_message, supports_streaming
-        )
+        video = types.DocumentAttributeVideo(duration, width, height,
+                                             round_message, supports_streaming)
 
     for attr in attributes:
         if audio and isinstance(attr, types.DocumentAttributeAudio):

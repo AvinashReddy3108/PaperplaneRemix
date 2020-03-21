@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
-
 from typing import Union
 
 from telethon.tl import types
@@ -25,12 +24,9 @@ from ..utils.events import NewMessage
 
 class Parser:
     """Parse UserFull, ChannelFull and ChatFull objects."""
-
     @staticmethod
-    async def parse_full_user(
-        usr_obj: types.UserFull,
-        event: NewMessage.Event
-    ) -> str:
+    async def parse_full_user(usr_obj: types.UserFull,
+                              event: NewMessage.Event) -> str:
         """Human-friendly string of an User obj's attributes"""
         user = usr_obj.user
 
@@ -92,10 +88,9 @@ class Parser:
         return text
 
     @staticmethod
-    async def parse_full_chat(
-        chat_obj: Union[types.ChatFull, types.ChannelFull],
-        event: NewMessage.Event
-    ) -> str:
+    async def parse_full_chat(chat_obj: Union[types.ChatFull,
+                                              types.ChannelFull],
+                              event: NewMessage.Event) -> str:
         """Human-friendly string of a Chat/Channel obj's attributes"""
         full_chat = chat_obj.full_chat
         chats = chat_obj.chats[0]

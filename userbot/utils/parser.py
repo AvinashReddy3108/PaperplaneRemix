@@ -14,20 +14,16 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
-
 # This is based on the parser of https://github.com/mojurasu/kantek/
-
 
 import re
 from typing import Dict, List, Tuple, Union
-
 
 KWARGS = re.compile(
     r'(?<!\S)'  # Make sure the key starts after a whitespace
     r'(?:(?P<q>\'|\")?)(?P<key>(?(q).+?|(?!\d)\w+?))(?(q)(?P=q))'
     r'(?::(?!//)|=)\s?'
-    r'(?P<val>\[.+?\]|(?P<q1>\'|\").+?(?P=q1)|\S+)'
-)
+    r'(?P<val>\[.+?\]|(?P<q1>\'|\").+?(?P=q1)|\S+)')
 ARGS = re.compile(r'(?:(?P<q>\'|\"))(.+?)(?:(?P=q))')
 BOOL_MAP = {
     'false': False,
@@ -59,8 +55,7 @@ async def _parse_arg(val: str) -> Union[int, str, float]:
 
 
 async def parse_arguments(
-    arguments: str
-) -> Tuple[List[Value], Dict[str, KeywordArgument]]:
+        arguments: str) -> Tuple[List[Value], Dict[str, KeywordArgument]]:
     keyword_args = {}
     args = []
 

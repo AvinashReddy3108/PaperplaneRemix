@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import concurrent
 import datetime
 import functools
@@ -26,12 +25,10 @@ import youtube_dl
 
 from .. import LOGGER
 
-
 downloads = {}
 audio = re.compile(r'\[ffmpeg\] Destination\: (.+)')
 video = re.compile(
-    r'\[ffmpeg\] Converting video from \w+ to \w+, Destination: (.+)'
-)
+    r'\[ffmpeg\] Converting video from \w+ to \w+, Destination: (.+)')
 merger = re.compile(r'\[ffmpeg\] Merging formats into "(.+)"')
 
 
@@ -83,8 +80,7 @@ class ProgressHook():
     def edit(self, *args, **kwargs):
         """Create a Task of the progress edit."""
         task = self.event.client.loop.create_task(
-            self.event.answer(*args, **kwargs)
-        )
+            self.event.answer(*args, **kwargs))
         task.add_done_callback(self.callback)
         self.tasks.append(task)
         return task
@@ -104,22 +100,15 @@ class ProgressHook():
             if not prcnt or not ttlbyt or not spdstr or not etastr:
                 return
 
-            finalStr = (
-                "Downloading {}: {} of {} at {} ETA: {}".format(
-                    filen, prcnt, ttlbyt, spdstr, etastr
-                )
-            )
+            finalStr = ("Downloading {}: {} of {} at {} ETA: {}".format(
+                filen, prcnt, ttlbyt, spdstr, etastr))
             LOGGER.debug(finalStr)
-            if (
-                not self.last_edit or
-                (now - self.last_edit).total_seconds() > 5
-            ):
+            if (not self.last_edit
+                    or (now - self.last_edit).total_seconds() > 5):
                 filen = re.sub(r'YT_DL\\(.+)_\d+\.', r'\1.', filen)
-                self.edit(
-                    f"`Downloading {filen} at {spdstr}.`\n"
-                    f"__Progress: {prcnt} of {ttlbyt}__\n"
-                    f"__ETA: {etastr}__"
-                )
+                self.edit(f"`Downloading {filen} at {spdstr}.`\n"
+                          f"__Progress: {prcnt} of {ttlbyt}__\n"
+                          f"__ETA: {etastr}__")
 
         elif d['status'] == 'finished':
             filen = d.get('filename', 'Unknown filename')
@@ -134,9 +123,7 @@ class ProgressHook():
             LOGGER.warning(finalStr)
             self.event.client.loop.create_task(
                 self.event.answer(
-                    f"`Successfully downloaded {filen1} in {elpstr}!`"
-                )
-            )
+                    f"`Successfully downloaded {filen1} in {elpstr}!`"))
             for task in self.tasks:
                 if not task.done():
                     task.cancel()
@@ -159,28 +146,26 @@ async def list_formats(info_dict: dict) -> str:
             All available formats in order as a string instead of stdout.
     """
     formats = info_dict.get('formats', [info_dict])
-    table = [
-        [f['format_id'], f['ext'], youtube_dl.YoutubeDL.format_resolution(f)]
-        for f in formats
-        if f.get('preference') is None or f['preference'] >= -1000]
+    table = [[
+        f['format_id'], f['ext'],
+        youtube_dl.YoutubeDL.format_resolution(f)
+    ] for f in formats
+             if f.get('preference') is None or f['preference'] >= -1000]
     if len(formats) > 1:
         table[-1][-1] += (' ' if table[-1][-1] else '') + '(best)'
 
     header_line = ['format code', 'extension', 'resolution']
     fmtStr = (
         '`Available formats for %s:`\n`%s`' %
-        (info_dict['title'], youtube_dl.render_table(header_line, table))
-    )
+        (info_dict['title'], youtube_dl.render_table(header_line, table)))
     return fmtStr
 
 
-async def extract_info(
-    loop,
-    executor: concurrent.futures.Executor,
-    ydl_opts: dict,
-    url: str,
-    download: bool = False
-) -> str:
+async def extract_info(loop,
+                       executor: concurrent.futures.Executor,
+                       ydl_opts: dict,
+                       url: str,
+                       download: bool = False) -> str:
     """Runs YoutubeDL's extract_info method without blocking the event loop.
 
     Args:
@@ -212,8 +197,7 @@ async def extract_info(
         except youtube_dl.utils.GeoRestrictedError:
             eStr = (
                 "`Video is not available from your geographic location due "
-                "to geographic restrictions imposed by a website.`"
-            )
+                "to geographic restrictions imposed by a website.`")
         except youtube_dl.utils.MaxDownloadsReached:
             eStr = "`Max-downloads limit has been reached.`"
         except youtube_dl.utils.PostProcessingError:
@@ -244,8 +228,7 @@ async def extract_info(
                 else:
                     newname = str(old_f.stem) + '_OLD'
                     old_f.replace(
-                        old_f.with_name(newname).with_suffix(old_f.suffix)
-                    )
+                        old_f.with_name(newname).with_suffix(old_f.suffix))
             path = new_f.parent.parent / npath
             new_f.rename(new_f.parent.parent / npath)
             thumb = str(thumb.absolute()) if thumb.exists() else None
@@ -258,5 +241,4 @@ async def extract_info(
     # result = fut.result()
     return await loop.run_in_executor(
         concurrent.futures.ThreadPoolExecutor(),
-        functools.partial(downloader, url, download)
-    )
+        functools.partial(downloader, url, download))
