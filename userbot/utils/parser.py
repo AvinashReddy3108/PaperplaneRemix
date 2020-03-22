@@ -35,7 +35,9 @@ KeywordArgument = Union[Value, range, List[Value]]
 
 
 async def _parse_arg(val: str) -> Union[int, str, float]:
-    if val.isdecimal():
+    val = val.strip()
+
+    if re.match(r'-?\d+', val):
         return int(val)
 
     try:
@@ -55,6 +57,7 @@ async def _parse_arg(val: str) -> Union[int, str, float]:
 
 
 async def parse_arguments(
+        self,
         arguments: str) -> Tuple[List[Value], Dict[str, KeywordArgument]]:
     keyword_args = {}
     args = []
@@ -66,11 +69,11 @@ async def parse_arguments(
     arguments = KWARGS.sub('', arguments)
 
     for val in ARGS.finditer(arguments):
-        args.append(val.group(2).strip())
+        args.append(await _parse_arg(val.group(2)))
     arguments = ARGS.sub('', arguments)
 
     for val in re.findall(r'([^\r\n\t\f\v ,]+|\[.*\])', arguments):
         parsed = await _parse_arg(val)
         if parsed:
-            args.append(val)
+            args.append(parsed)
     return args, keyword_args

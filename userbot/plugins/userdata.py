@@ -41,16 +41,16 @@ async def whois(event: NewMessage.Event) -> None:
         if "this" in entities:
             entities.remove("this")
             entities.append(event.chat_id)
-    else:
-        entities.append("self")
-
-    if event.reply_to_msg_id:
+    elif event.reply_to_msg_id:
         if not entities:
             reply = await event.get_reply_message()
             user = reply.sender_id
             if reply.fwd_from:
                 if reply.fwd_from.from_id:
                     user = reply.fwd_from.from_id
+            entities.append(user)
+    else:
+        entities.append("self")
 
     users = ""
     chats = ""
@@ -282,7 +282,8 @@ async def whichid(event: NewMessage.Event) -> None:
         if reply.fwd_from:
             if reply.fwd_from.from_id:
                 user = reply.fwd_from.from_id
-        text = f"`{get_peer_id(user)}`"
+        peer = get_peer_id(user)
+        text = f"[{peer}](tg://user?id={peer})"
     else:
         failed = []
         strings = []
@@ -290,7 +291,7 @@ async def whichid(event: NewMessage.Event) -> None:
         for user in users:
             try:
                 entity = await client.get_input_entity(user)
-                strings.append(f"{user}: `{get_peer_id(entity)}`")
+                strings.append(f"[{user}](tg://user?id={get_peer_id(entity)})")
             except Exception as e:
                 failed.append(user)
                 LOGGER.debug(e)

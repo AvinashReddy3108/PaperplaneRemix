@@ -46,7 +46,7 @@ class YTdlLogger(object):
             if merger.search(msg):
                 f = merger.match(msg).group(1)
             if f:
-                downloads.update(**{f.split('.')[0]: f})
+                downloads.update({f.split('.')[0]: f})
 
     def warning(self, msg: str) -> None:
         """Logs warning messages with youtube-dl tag to UserBot logger."""
@@ -86,7 +86,9 @@ class ProgressHook():
         return task
 
     def hook(self, d: dict) -> None:
-        """YoutubeDL's hook which logs progress and errors to UserBot logger."""
+        """
+            YoutubeDL's hook which logs progress and errors to UserBot logger.
+        """
         if not self.last_edit:
             self.last_edit = datetime.datetime.now(datetime.timezone.utc)
         now = datetime.datetime.now(datetime.timezone.utc)
@@ -115,6 +117,7 @@ class ProgressHook():
             filen1 = re.sub(r'YT_DL\\(.+)_\d+\.', r'\1.', filen)
             ttlbyt = d.get('_total_bytes_str', None)
             elpstr = d.get('_elapsed_str', None)
+            downloads.update({filen.split('.')[0]: filen})
 
             if not ttlbyt or not elpstr:
                 return
@@ -239,6 +242,11 @@ async def extract_info(loop,
     # Future blocks the running event loop
     # fut = executor.submit(downloader, url, download)
     # result = fut.result()
-    return await loop.run_in_executor(
-        concurrent.futures.ThreadPoolExecutor(),
-        functools.partial(downloader, url, download))
+    try:
+        result = await loop.run_in_executor(
+            concurrent.futures.ThreadPoolExecutor(),
+            functools.partial(downloader, url, download))
+    except Exception as e:
+        result = f"```{type(e)}: {e}```"
+    finally:
+        return result
