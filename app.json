@@ -2,7 +2,7 @@
     "name": "PaperplaneRemix",
     "description": "A modular Telegram userbot.",
     "repository": "https://github.com/AvinashReddy3108/PaperplaneRemix",
-    "logo": "https://i.imgur.com/KmAZsPV.png",
+    "logo": "https://i.imgur.com/pW4vFsd.png",
     "keywords": ["paperplaneremix", "telegram-userbot", "userbot", "python"],
     "success_url": "https://t.me/MemezByAvinashReddy",
     "stack": "container",
@@ -32,6 +32,10 @@
             "description": "The ID of a group if you want the userbot to log everything.",
             "required": false
         },
+        "pm_permit": {
+            "description": "Set this to 'True' to enable PMPermit feature.",
+            "value": "False"
+        },
         "userbot_prefix": {
             "description": "If you want to use one specific prefix. Set one.",
             "required": false
@@ -45,6 +49,10 @@
             "description": "Default animated sticker pack to add the new stickers in.",
             "value": "auto",
             "required": false
+        },
+        "self_destruct_msg": {
+            "description": "Set this to 'False' to disable auto-deletion of userbot's toast messages.",
+            "value": "True"
         },
         "api_key_removebg": {
             "description": "Get your API key from https://remove.bg/",
