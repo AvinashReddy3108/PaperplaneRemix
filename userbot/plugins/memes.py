@@ -199,7 +199,7 @@ async def decide(event: NewMessage.Event) -> None:
 
 @client.onMessage(command=("lmgtfy", plugin_category),
                   outgoing=True,
-                  regex="lmgtfy(?: |$)(.*)")
+                  regex="lmg(?: |$)(.*)")
 async def lmgtfy(event: NewMessage.Event) -> None:
     """Let me Google that for you real quick."""
     query = event.matches[0].group(1)
@@ -227,7 +227,7 @@ async def react(event: NewMessage.Event) -> None:
 
 @client.onMessage(command=("vapor", plugin_category),
                   outgoing=True,
-                  regex="vapor(?: |$)(.*)")
+                  regex="vpr(?: |$)(.*)")
 async def vapor(event: NewMessage.Event) -> None:
     """Vaporize everything!"""
     reply_text = list()
@@ -309,7 +309,7 @@ async def spongemock(event: NewMessage.Event) -> None:
     elif textx:
         message = textx.text
     else:
-        await event.answer("`UwU no text given!`")
+        await event.answer("`I cAnT MoCk tHe vOId!`")
         return
 
     for charac in message:
@@ -318,15 +318,23 @@ async def spongemock(event: NewMessage.Event) -> None:
             reply_text.append(to_app)
         else:
             reply_text.append(charac)
+    mocked_text = "".join(reply_text)
+    await event.answer(f"__{mocked_text}__")
 
-    await event.answer("".join(reply_text))
+
+@client.onMessage(command=("insult", plugin_category),
+                  outgoing=True,
+                  regex="insult$")
+async def memereview(event: NewMessage.Event) -> None:
+    """Insult people."""
+    await event.answer(f"__{random.choice(INSULTS)}__")
 
 
 @client.onMessage(command=("clap", plugin_category),
                   outgoing=True,
                   regex="clap(?: |$)(.*)")
-async def memereview(event: NewMessage.Event) -> None:
-    """Praise people!"""
+async def clapz(event: NewMessage.Event) -> None:
+    """Praise people."""
     textx = await event.get_reply_message()
     message = event.matches[0].group(1)
     if message:
@@ -337,18 +345,9 @@ async def memereview(event: NewMessage.Event) -> None:
         await event.answer("`Hah, I don't clap for the void!`")
         return
 
-    reply_text = "👏 "
-    reply_text += message.replace(" ", " 👏 ")
-    reply_text += " 👏"
-    await event.answer(reply_text)
-
-
-@client.onMessage(command=("insult", plugin_category),
-                  outgoing=True,
-                  regex="insult$")
-async def memereview(event: NewMessage.Event) -> None:
-    """Insult people."""
-    await event.answer(f"__{random.choice(INSULTS)}__")
+    clapped_text = re.sub(" ", " 👏 ", message)
+    reply_text = f"👏 {clapped_text} 👏"
+    await event.answer(f"__{reply_text}__")
 
 
 @client.onMessage(outgoing=True, regex="^Oof$", disable_prefix=True)
