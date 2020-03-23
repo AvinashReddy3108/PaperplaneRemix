@@ -101,7 +101,8 @@ async def rmbg(event: NewMessage.Event) -> None:
                 await event.answer("`Invalid URL provided!`")
                 return
             except Exception as e:
-                await event.answer(f"`Unknown exception: {e}`")
+                exc = await client.get_traceback(e)
+                await event.answer(f"**Unknown exception:**\n```{exc}```")
                 return
         media = match
     elif reply and reply.media:
@@ -180,7 +181,7 @@ async def resolver(event: NewMessage.Event) -> None:
                 except (TypeError, ValueError):
                     break
                 except Exception as e:
-                    text += f"\n```{e}```"
+                    text += f"\n```{await client.get_traceback(e)}```"
                     break
 
                 if isinstance(chat, types.Channel):
@@ -254,5 +255,5 @@ async def git_repo(event: NewMessage.Event) -> None:
     except Exception as e:
         LOGGER.info("Couldnt fetch the repo link.")
         LOGGER.debug(e)
-        remote_url = "https://github.com/AvinashReddy3108/PaperplaneRemix/"
+        remote_url = "https://github.com/AvinashReddy3108/PaperplaneRemix"
     await event.answer(f"[PaperplaneRemix]({remote_url})")

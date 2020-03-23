@@ -64,7 +64,7 @@ async def promote(event: NewMessage.Event) -> None:
 
         await event.answer(text.format(e1, user.id), log=("promote", log_msg))
     except Exception as e:
-        await event.answer(f"`{e}`")
+        await event.answer(f"```{await client.get_traceback(e)}```")
         LOGGER.exception(e)
 
 
@@ -105,7 +105,7 @@ async def demote(event: NewMessage.Event) -> None:
 
         await event.answer(text.format(e1, user.id), log=("demote", log_msg))
     except Exception as e:
-        await event.answer(f"`{e}`")
+        await event.answer(f"```{await client.get_traceback(e)}```")
         LOGGER.exception(e)
 
 
@@ -147,7 +147,7 @@ async def ban(event: NewMessage.Event) -> None:
 
         await event.answer(text.format(e1, user.id), log=("ban", log_msg))
     except Exception as e:
-        await event.answer(f"`{e}`")
+        await event.answer(f"```{await client.get_traceback(e)}```")
         LOGGER.exception(e)
 
 
@@ -196,7 +196,7 @@ async def unban(event: NewMessage.Event) -> None:
 
         await event.answer(text.format(e1, user.id), log=("unban", log_msg))
     except Exception as e:
-        await event.answer(f"`{e}`")
+        await event.answer(f"```{await client.get_traceback(e)}```")
         LOGGER.exception(e)
 
 
@@ -236,7 +236,7 @@ async def kick(event: NewMessage.Event) -> None:
 
         await event.answer(text.format(e1, user.id), log=("kick", log_msg))
     except Exception as e:
-        await event.answer(f"`{e}`")
+        await event.answer(f"```{await client.get_traceback(e)}```")
         LOGGER.exception(e)
 
 
@@ -278,7 +278,7 @@ async def mute(event: NewMessage.Event) -> None:
 
         await event.answer(text.format(e1, user.id), log=("mute", log_msg))
     except Exception as e:
-        await event.answer(f"`{e}`")
+        await event.answer(f"```{await client.get_traceback(e)}```")
         LOGGER.exception(e)
 
 
@@ -321,7 +321,7 @@ async def unmute(event: NewMessage.Event) -> None:
 
         await event.answer(text.format(e1, user.id), log=("unmute", log_msg))
     except Exception as e:
-        await event.answer(f"`{e}`")
+        await event.answer(f"```{await client.get_traceback(e)}```")
         LOGGER.exception(e)
 
 
@@ -377,7 +377,7 @@ async def tmute(event: NewMessage.Event) -> None:
 
         await event.answer(text.format(e1, user.id), log=("tmute", log_msg))
     except Exception as e:
-        await event.answer(f"`{e}`")
+        await event.answer(f"```{await client.get_traceback(e)}```")
         LOGGER.exception(e)
 
 
@@ -433,7 +433,7 @@ async def tban(event: NewMessage.Event) -> None:
 
         await event.answer(text.format(e1, user.id), log=("tban", log_msg))
     except Exception as e:
-        await event.answer(f"`{e}`")
+        await event.answer(f"```{await client.get_traceback(e)}```")
         LOGGER.exception(e)
 
 

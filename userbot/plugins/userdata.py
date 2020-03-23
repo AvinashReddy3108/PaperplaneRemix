@@ -30,7 +30,7 @@ plugin_category = "user"
 
 @client.onMessage(command=("whois", plugin_category),
                   outgoing=True,
-                  regex=r"(?:who|what)is(?: |$)([\s\S]*)")
+                  regex=r"(?:who|what)is(?: |$|\n)([\s\S]*)")
 async def whois(event: NewMessage.Event) -> None:
     """Get your or a user's/chat's information."""
     match = event.matches[0].group(1)
@@ -122,7 +122,7 @@ async def name(event: NewMessage.Event) -> None:
     except errors.FirstNameInvalidError:
         await event.answer("`The first name is invalid.`")
     except Exception as e:
-        await event.answer('`' + type(e).__name__ + ': ' + str(e) + '`')
+        await event.answer(f'```{await client.get_traceback(e)}```')
 
 
 @client.onMessage(command=("bio", plugin_category),
@@ -204,7 +204,7 @@ async def pfp(event: NewMessage.Event) -> None:
             temp_file = io.BytesIO()
             await client.download_media(reply, temp_file)
         except Exception as e:
-            await event.answer('`' + type(e).__name__ + ': ' + str(e) + '`',
+            await event.answer(f'```{await client.get_traceback(e)}```',
                                reply=True)
             temp_file.close()
             return
@@ -267,7 +267,7 @@ async def delpfp(event: NewMessage.Event) -> None:
 
 @client.onMessage(command=("id", plugin_category),
                   outgoing=True,
-                  regex=r"id(?: |$)([\s\S]*)")
+                  regex=r"id(?: |$|\n)([\s\S]*)")
 async def whichid(event: NewMessage.Event) -> None:
     """Get the ID of a chat/channel or user."""
     match = event.matches[0].group(1)

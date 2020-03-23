@@ -26,7 +26,7 @@ plugin_category = "user"
 
 @client.onMessage(command=("remindme/remindhere", plugin_category),
                   outgoing=True,
-                  regex=r"remind(me|here)(?: |$)(\w+)?(?: |$)([\s\S]*)")
+                  regex=r"remind(me|here)(?: |$|\n)(\w+)?(?: |$)([\s\S]*)")
 async def remindme(event: NewMessage.Event) -> None:
     """Set a reminder (scheduled message) to be sent in n amount of time."""
     arg = event.matches[0].group(1)
