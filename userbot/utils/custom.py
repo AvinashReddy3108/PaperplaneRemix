@@ -26,6 +26,10 @@ from telethon.tl import custom, functions, types
 
 LOGGER = logging.getLogger(__name__)
 MAXLIM: int = 4096
+file_kwargs: Tuple = ('file', 'caption', 'force_document', 'clear_draft',
+                      'progress_callback', 'reply_to', 'attributes', 'thumb',
+                      'allow_cache', 'voice_note', 'video_note', 'buttons',
+                      'supports_streaming')
 
 
 async def answer(self,
@@ -45,7 +49,7 @@ async def answer(self,
     else:
         parser = markdown
 
-    if len(args) == 1 and isinstance(args[0], str):
+    if not any([k for k in file_kwargs if kwargs.get(k, False)]):
         is_reply = reply or kwargs.get('reply_to', False)
         text = args[0]
         msg, msg_entities = parser.parse(text)
@@ -100,7 +104,8 @@ async def answer(self,
             output.name = "output.txt"
             try:
                 kwargs.setdefault('silent', True)
-                message_out = await self.respond(file=output, **kwargs)
+                message_out = await self.client.send_file(
+                    self.chat_id, *args, **kwargs)
                 output.close()
             except Exception as e:
                 output.close()

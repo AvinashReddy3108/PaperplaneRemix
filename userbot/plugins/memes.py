@@ -141,18 +141,17 @@ async def lmgtfy(event: NewMessage.Event) -> None:
                       \n[{query}]({clickbait})")
 
 
-@client.onMessage(command=("react", plugin_category),
+@client.onMessage(command=("asciimoji", plugin_category),
                   outgoing=True,
-                  regex="react(?: |$)(.*)$")
+                  regex="(\w+)$")
 async def react(event: NewMessage.Event) -> None:
     """Helps you react to things using ASCII emojis."""
     reaction = event.matches[0].group(1).lower()
-    if reaction in ASCIIMOJI_DICT.keys():
-        emoticon = random.choice(ASCIIMOJI_DICT[reaction])
-    elif not reaction:
-        random_emotion = random.choice(list(ASCIIMOJI_DICT.keys()))
-        emoticon = random.choice(ASCIIMOJI_DICT[random_emotion])
-    await event.answer(f"`{emoticon}`")
+    for key in ASCIIMOJI_DICT:
+        if reaction in key:
+            emoticon = random.choice(ASCIIMOJI_DICT[key])
+            await event.answer(f"`{emoticon}`")
+            break
 
 
 @client.onMessage(command=("vapor", plugin_category),
@@ -386,8 +385,7 @@ async def keks(event: NewMessage.Event) -> None:
         await event.answer(":" + uio[i % 2])
 
 
-async def _request_json(url: str,
-                        params: dict = None) -> Union[Tuple[str, dict], None]:
+async def _request_json(url: str, params: dict = None) -> Union[dict, None]:
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             if response.status == 200:
@@ -395,8 +393,7 @@ async def _request_json(url: str,
             return None
 
 
-async def _request_text(url: str,
-                        params: dict = None) -> Union[Tuple[str, dict], None]:
+async def _request_text(url: str, params: dict = None) -> Union[str, None]:
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             if response.status == 200:

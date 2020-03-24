@@ -67,7 +67,8 @@ AFKMEMEZ = [
 async def awayfromkeyboard(event: NewMessage.Event) -> None:
     """Set your status as AFK until you send a message again."""
     arg = event.matches[0].group(1)
-    os.environ['userbot_afk'] = time.time().__str__()
+    curtime = time.time().__str__()
+    os.environ['userbot_afk'] = f"{curtime}/{event.chat_id}/{event.id}"
     text = "**AFK AF!**"
     if arg:
         os.environ['userbot_afk_reason'] = arg.strip()
@@ -80,9 +81,12 @@ async def awayfromkeyboard(event: NewMessage.Event) -> None:
 @client.onMessage(outgoing=True, forwards=None)
 async def out_listner(event: NewMessage.Event) -> None:
     """Handle your AFK status by listening to new outgoing messages."""
-    if event.from_scheduled or not os.environ.pop('userbot_afk', False):
+    userbot_afk = os.environ.pop('userbot_afk', False)
+    if event.from_scheduled or not userbot_afk:
         return
     os.environ.pop('userbot_afk_reason', None)
+    _, chat, msg = userbot_afk.split('/')
+    await client.delete_messages(chat, msg)
 
     def_text = "`You received no messages nor were tagged at any time.`"
     pr_text = ''
@@ -156,7 +160,7 @@ async def inc_listner(event: NewMessage.Event) -> None:
     if not (afk and (event.is_private or event.mentioned)):
         return
 
-    since = datetime.datetime.fromtimestamp(float(afk),
+    since = datetime.datetime.fromtimestamp(float(afk.split('/')[0]),
                                             tz=datetime.timezone.utc)
     now = datetime.datetime.now(datetime.timezone.utc)
     reason = os.environ.get('userbot_afk_reason', False)
