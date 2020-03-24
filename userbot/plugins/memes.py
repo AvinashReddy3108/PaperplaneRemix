@@ -141,14 +141,18 @@ async def lmgtfy(event: NewMessage.Event) -> None:
                       \n[{query}]({clickbait})")
 
 
-@client.onMessage(command=("asciimoji", plugin_category),
+@client.onMessage(command=("react", plugin_category),
                   outgoing=True,
-                  regex="(\w+)moji$")
+                  regex="react(?: |$)(.*)$")
 async def react(event: NewMessage.Event) -> None:
     """Helps you react to things using ASCII emojis."""
-    reaction = event.matches[0].group(1)
+    reaction = event.matches[0].group(1).lower()
     if reaction in ASCIIMOJI_DICT.keys():
-        await event.answer("`" + random.choice(ASCIIMOJI_DICT[reaction]) + "`")
+        emoticon = random.choice(ASCIIMOJI_DICT[reaction])
+    elif not reaction:
+        random_emotion = random.choice(list(ASCIIMOJI_DICT.keys()))
+        emoticon = random.choice(ASCIIMOJI_DICT[random_emotion])
+    await event.answer(f"`{emoticon}`")
 
 
 @client.onMessage(command=("vapor", plugin_category),

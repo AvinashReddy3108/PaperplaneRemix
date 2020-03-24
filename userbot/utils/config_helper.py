@@ -38,7 +38,7 @@ def resolve_env(config: configparser.ConfigParser):
         'userbot_regexninja':
         strtobool(os.getenv('userbot_regexninja', 'False')),
         'self_destruct_msg':
-        strtobool(os.getenv('self_destruct_msg', 'False')),
+        strtobool(os.getenv('self_destruct_msg', 'True')),
         'pm_permit':
         strtobool(os.getenv('pm_permit', 'False')),
         'console_logger_level':
@@ -58,8 +58,15 @@ def resolve_env(config: configparser.ConfigParser):
         'api_key_removebg': os.getenv('api_key_removebg', None)
     }
 
+    plugins = {
+        'repos': os.getenv('repos', None),
+        'user': os.getenv('user', None),
+        'token': os.getenv('token', None)
+    }
+
     make_config(config, 'userbot', userbot)
     make_config(config, 'api_keys', api_keys)
+    make_config(config, 'plugins', plugins)
 
 
 def make_config(config: configparser.ConfigParser, section: str,

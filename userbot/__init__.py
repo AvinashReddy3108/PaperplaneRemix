@@ -16,7 +16,7 @@
 
 import configparser
 import logging
-import os.path
+import pathlib
 import platform
 import sys
 
@@ -38,19 +38,18 @@ LEVELS = {
     'ERROR': logging.ERROR,
     'CRITICAL': logging.CRITICAL
 }
-config = configparser.ConfigParser()
 
-config_file = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                           'config.ini')
-sql_session = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                           'userbot.session')
+redis_db = False
+config = configparser.ConfigParser()
+config_file = pathlib.Path('./config.ini')
+sql_session = pathlib.Path('./userbot.session')
 
 if platform.python_version_tuple() < ('3', '7', '3'):
     print("Please run this script with Python 3.7.3 or above."
           "\nExiting the script.")
     sys.exit(1)
 
-if os.path.isfile(config_file):
+if config_file.exists():
     config.read(config_file)
     resolve_env(config)
 
@@ -93,11 +92,12 @@ if sys.platform.startswith('win'):
 else:
     loop = None
 
-if not API_ID and not API_HASH:
+if not (API_ID and API_HASH):
     print("You need to set your API keys in your config or environment!")
     LOGGER.debug("No API keys!")
     sys.exit(1)
-elif REDIS_ENDPOINT and REDIS_PASSWORD:
+
+if REDIS_ENDPOINT and REDIS_PASSWORD:
     REDIS_HOST = REDIS_ENDPOINT.split(':')[0]
     REDIS_PORT = REDIS_ENDPOINT.split(':')[1]
     redis_connection = redis.Redis(host=REDIS_HOST,
@@ -112,19 +112,13 @@ elif REDIS_ENDPOINT and REDIS_PASSWORD:
             "Make sure you have the correct Redis endpoint and password "
             "and your machine can make connections.")
         sys.exit(1)
-    redis_session = True
-    LOGGER.debug("Redis connection and Redis session")
-    session = RedisSession("userbot", redis_connection)
-elif os.path.isfile(sql_session) or (API_ID and API_HASH):
-    redis_session = False
-    session = "userbot"
-    LOGGER.debug("SQL session")
-else:
-    LOGGER.error(
-        "Make a proper config with your API keys to at least run the scrip or "
-        "make an account on redislabs.com and update your config with the "
-        "redis endpoint and password, if you want to use a Redis session!")
-    sys.exit(1)
+    LOGGER.debug("Connected to Redis successfully!")
+    redis_db = redis_connection
+    if sql_session.exists():
+        session = "userbot"
+    else:
+        LOGGER.debug("Using Redis session!")
+        session = RedisSession("userbot", redis_connection)
 
 client = UserBotClient(session=session,
                        api_id=API_ID,
@@ -136,6 +130,7 @@ client = UserBotClient(session=session,
 client.version = __version__
 client.config = config
 client.prefix = userbot.get('userbot_prefix', None)
+client.database = redis_db
 
 
 def verifyLoggerGroup(client: UserBotClient) -> None:

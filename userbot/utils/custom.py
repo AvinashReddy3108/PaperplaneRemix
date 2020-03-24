@@ -120,7 +120,7 @@ async def answer(self,
         else:
             message_out.date = start_date
     if (self_destruct and self.client.config['userbot'].getboolean(
-            'self_destruct_msg', False)):
+            'self_destruct_msg', True)):
         asyncio.create_task(_self_destructor(message_out, self_destruct))
 
     if log:
