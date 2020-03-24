@@ -31,13 +31,13 @@ plugin_category = "memes"
 
 ASCIIMOJI_DICT = {
     "sad": ["(╥_╥)", "(T⌓T)", "(⋟﹏⋞)"],
-    "ded": ["(×_×)", "(×﹏×)", "(＋_＋)"],
+    "dead": ["(×_×)", "(×﹏×)", "(＋_＋)"],
     "shg": ["┐(´～｀)┌", "┐(￣ヘ￣)┌", "¯\_(ツ)_/¯", "┐('д')┌", "┐(￣ヮ￣)┌"],
     "dance": ["└|∵┌|", "|┐∵|┘", "└|ﾟεﾟ|┐", "┌|ﾟзﾟ|┘"],
     "smug": ["(¬‿¬)", "(¬_¬ )"],
-    "sleep": ["(－ω－) zzZ", "[(－－)]..zzZ", "(－.－)...zzz", "(￣o￣) zzZZzzZZ"],
-    "mvp": ["(⌐▨_▨)", "(⌐■_■)"],
-    "salute": ["(￣^￣)ゞ"],
+    "slp": ["(－ω－) zzZ", "[(－－)]..zzZ", "(－.－)...zzz", "(￣o￣) zzZZzzZZ"],
+    "cool": ["(⌐▨_▨)", "(⌐■_■)"],
+    "slt": ["(￣^￣)ゞ"],
     "gun": ["╾━╤デ╦︻(▀̿Ĺ̯▀̿ ̿)"]
 }
 
@@ -182,7 +182,7 @@ async def cowsay(event: NewMessage.Event) -> None:
                   regex="(yes|no|maybe|decide)$")
 async def decide(event: NewMessage.Event) -> None:
     """Helps to make a quick decision."""
-    decision = event.matches[0].group(1).lower()
+    decision = event.matches[0].group(1)
     if decision != "decide":
         decide_data = await _request_json("https://yesno.wtf/api",
                                           {'force': decision})
@@ -220,7 +220,7 @@ async def lmgtfy(event: NewMessage.Event) -> None:
                   regex="(\w+)moji$")
 async def react(event: NewMessage.Event) -> None:
     """Helps you react to things using ASCII emojis."""
-    reaction = event.matches[0].group(1).lower()
+    reaction = event.matches[0].group(1)
     if reaction in ASCIIMOJI_DICT.keys():
         await event.answer("`" + random.choice(ASCIIMOJI_DICT[reaction]) + "`")
 
