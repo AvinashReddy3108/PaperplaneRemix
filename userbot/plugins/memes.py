@@ -21,6 +21,7 @@ from typing import Tuple, Union
 from cowpy import cow
 import random
 import re
+from userbot.utils.memes_resources import *
 
 from telethon.errors import rpcerrorlist
 
@@ -28,81 +29,6 @@ from userbot import client
 from userbot.utils.events import NewMessage
 
 plugin_category = "memes"
-
-ASCIIMOJI_DICT = {
-    "sad": ["(╥_╥)", "(T⌓T)", "(⋟﹏⋞)"],
-    "dead": ["(×_×)", "(×﹏×)", "(＋_＋)"],
-    "shg": ["┐(´～｀)┌", "┐(￣ヘ￣)┌", "¯\_(ツ)_/¯", "┐('д')┌", "┐(￣ヮ￣)┌"],
-    "dance": ["└|∵┌|", "|┐∵|┘", "└|ﾟεﾟ|┐", "┌|ﾟзﾟ|┘"],
-    "smug": ["(¬‿¬)", "(¬_¬ )"],
-    "slp": ["(－ω－) zzZ", "[(－－)]..zzZ", "(－.－)...zzz", "(￣o￣) zzZZzzZZ"],
-    "cool": ["(⌐▨_▨)", "(⌐■_■)"],
-    "slt": ["(￣^￣)ゞ"],
-    "gun": ["╾━╤デ╦︻(▀̿Ĺ̯▀̿ ̿)"]
-}
-
-INSULTS = [
-    "Owww ... Such a stupid idiot.",
-    "Don't drink and type.",
-    "I think you should go home or better a mental asylum.",
-    "Command not found. Just like your brain.",
-    "Do you realize you are making a fool of yourself? Apparently not.",
-    "You can type better than that.",
-    "Sorry, we do not sell brains.",
-    "Believe me you are not normal.",
-    "I bet your brain feels as good as new, seeing that you never use it.",
-    "If I wanted to kill myself I'd climb your ego and jump to your IQ.",
-    "Zombies eat brains...\nyou're safe.",
-    "You didn't evolve from apes,\n...they evolved from you.",
-    "Come back and talk to me when your I.Q. exceeds your age.",
-    "I'm not saying you're stupid, I'm just saying you've got bad luck when it comes to thinking.",
-    "What language are you speaking? Cause it sounds like bullshit.",
-    "Stupidity is not a crime so you are free to go.",
-    "You are proof that evolution CAN go in reverse.",
-    "I would ask you how old you are but I know you can't count that high.",
-    "As an outsider, what do you think of the human race?",
-    "Brains aren't everything. In your case they're nothing.",
-    "Ordinarily people live and learn. You just live.",
-    "I don't know what makes you so stupid, but it really works.",
-    "Keep talking, someday you'll say something intelligent!\n(I doubt it though)",
-    "Shock me, say something intelligent.",
-    "Your IQ's lower than your shoe size.",
-    "Alas! Your neurotransmitters are no more working.",
-    "Are you crazy you fool.",
-    "Everyone has the right to be stupid but you are abusing the privilege.",
-    "I'm sorry I hurt your feelings when I called you stupid.\nI thought you already knew that.",
-    "You should try tasting cyanide.",
-    "Your enzymes are meant to digest rat poison.",
-    "You should try sleeping forever.",
-    "You could make a world record by jumping from a plane without parachute.",
-    "Stop talking BS and jump in front of a running bullet train.",
-    "Try bathing with Hydrochloric Acid instead of water.",
-    "You should definitely try this:\nif you hold your breath underwater for an hour, you can then hold it forever.",
-    "Go Green!\nStop inhaling Oxygen.",
-    "God was searching for you.\nYou should leave to meet him.",
-    "give your 100%.\nNow, go donate blood.",
-    "Try jumping from a hundred story building but you can do it only once.",
-    "You should donate your brain seeing that you never used it.",
-    "Volunteer for target in an firing range.",
-    "Head shots are fun.\nGet yourself one.",
-    "You should try swimming with great white sharks.",
-    "You should paint yourself red and run in a bull marathon.",
-    "You can stay underwater for the rest of your life without coming back up.",
-    "How about you stop breathing for like 1 day?\nThat'll be great.",
-    "Try provoking a tiger while you both are in a cage.",
-    "Have you tried shooting yourself as high as 100m using a canon.",
-    "You should try holding TNT in your mouth and igniting it.",
-    "Try playing catch and throw with RDX its fun.",
-    "I heard phogine is poisonous but i guess you wont mind inhaling it for fun.",
-    "Launch yourself into outer space while forgetting oxygen on Earth.",
-    "You should try playing snake and ladders, with real snakes and no ladders.",
-    "Dance naked on a couple of HT wires.",
-    "Active Volcano is the best swimming pool for you.",
-    "You should try hot bath in a volcano.",
-    "Try to spend one day in a coffin and it will be yours forever.",
-    "Hit Uranium with a slow moving neutron in your presence. It will be a worthwhile experience.",
-    "You can be the first person to step on sun. Have a try.",
-]
 
 
 @client.onMessage(command=("shibe", plugin_category),
@@ -252,6 +178,47 @@ async def vapor(event: NewMessage.Event) -> None:
     await event.answer("".join(reply_text))
 
 
+@client.onMessage(command=("zalgo", plugin_category),
+                  outgoing=True,
+                  regex="zlg(?: |$)(.*)")
+async def zalgofy(event: NewMessage.Event) -> None:
+    """Invoke the feeling of chaos!"""
+    reply_text = list()
+    textx = await event.get_reply_message()
+    message = event.matches[0].group(1)
+    if message:
+        pass
+    elif textx:
+        message = textx.text
+    else:
+        await event.answer(
+            "__I̺͑ c̴̎a̩͘n͉͐'tͪͬ i̡͙n̺ͦṽ̘o̎͘k͇̃e̮͊ c̜̾h̩͋ä͒o̺͝s̗͟ į̶n̵ͭ t̵̙h̛ ̝e͊̀ v̗͛o̯͡i̋ͦd̙ͤ.__"
+        )
+        return
+
+    for charac in message:
+        if not charac.isalpha():
+            reply_text.append(charac)
+            continue
+
+        for _ in range(0, 3):
+            zalgint = random.randint(0, 2)
+
+            if zalgint == 0:
+                charac = charac.strip() + \
+                    random.choice(ZALG_LIST[0]).strip()
+            elif zalgint == 1:
+                charac = charac.strip() + \
+                    random.choice(ZALG_LIST[1]).strip()
+            else:
+                charac = charac.strip() + \
+                    random.choice(ZALG_LIST[2]).strip()
+
+        reply_text.append(charac)
+
+    await event.answer(f"__{''.join(reply_text)}__")
+
+
 @client.onMessage(command=("stretch", plugin_category),
                   outgoing=True,
                   regex="str(?: |$)(.*)")
@@ -264,13 +231,13 @@ async def slinky(event: NewMessage.Event) -> None:
     elif textx:
         message = textx.text
     else:
-        await event.answer("`GiiiiiiiB sooooooomeeeeeee teeeeeeext!`")
+        await event.answer("__GiiiiiiiB sooooooomeeeeeee teeeeeeext!__")
         return
 
     count = random.randint(3, 10)
     reply_text = re.sub(r"([aeiouAEIOUａｅｉｏｕＡＥＩＯＵаеиоуюяыэё])", (r"\1" * count),
                         message)
-    await event.answer(reply_text)
+    await event.answer(f"__{reply_text}__")
 
 
 @client.onMessage(command=("uwu", plugin_category),
@@ -285,7 +252,7 @@ async def nekofy(event: NewMessage.Event) -> None:
     elif textx:
         message = textx.text
     else:
-        await event.answer("`UwU no text given!`")
+        await event.answer("__I can't nyekofy the void.__")
         return
 
     reply_text = re.sub(r"(r|l)", "w", message)
@@ -293,7 +260,42 @@ async def nekofy(event: NewMessage.Event) -> None:
     reply_text = re.sub(r"n([aeiou])", r"ny\1", reply_text)
     reply_text = re.sub(r"N([aeiouAEIOU])", r"Ny\1", reply_text)
     reply_text = reply_text.replace("ove", "uv")
-    await event.answer(reply_text)
+    await event.answer(f"__{reply_text}__")
+
+
+@client.onMessage(command=("copypasta", plugin_category),
+                  outgoing=True,
+                  regex="pasta(?: |$)(.*)")
+async def copypasta(event: NewMessage.Event) -> None:
+    """Copypasta the famous meme."""
+    textx = await event.get_reply_message()
+    message = event.matches[0].group(1)
+    if message:
+        pass
+    elif textx:
+        message = textx.text
+    else:
+        await event.answer("__😂🅱️IvE👐sOME👅text👅for✌️Me👌tO👐MAkE👀iT💞funNy!💦__")
+        return
+
+    reply_text = random.choice(PASTAMOJIS)
+    # choose a random character in the message to be substituted with 🅱️
+    b_char = random.choice(message).lower()
+    for owo in message:
+        if owo == " ":
+            reply_text += random.choice(PASTAMOJIS)
+        elif owo in PASTAMOJIS:
+            reply_text += owo
+            reply_text += random.choice(PASTAMOJIS)
+        elif owo.lower() == b_char:
+            reply_text += "🅱️"
+        else:
+            if bool(random.getrandbits(1)):
+                reply_text += owo.upper()
+            else:
+                reply_text += owo.lower()
+    reply_text += random.choice(PASTAMOJIS)
+    await event.answer(f"__{reply_text}__")
 
 
 @client.onMessage(command=("mock", plugin_category),
