@@ -20,15 +20,17 @@ from userbot import client
 from userbot.utils.events import NewMessage
 
 plugin_category = "pandemic"
-covid_str = ("**{country}:**  🦠 **{active}**  💀 **{deaths}**  💚 "
-             "**{recovered}**  ✅ **{confirmed}**")
-covid_countries = "{name}: {id}"
+covid_str = (
+    "**{country}:** ✅: `{confirmed}` 🦠: `{active}` 💚: `{recovered}` 💀: `{deaths}`"
+)
+covid_countries = "**{name}**: [ID: `{id}`]"
 
 
 @client.onMessage(command="covid", outgoing=True, regex="covid(?: |$)(.*)")
 async def covid19(event: NewMessage.Event) -> None:
-    """Get the current covid stats for a specific country or overall."""
-    covid = Covid()
+    """Get the current COVID-19 stats for a specific country or worldwide.
+[✅: Confirmed, 🦠: Active, 💚: Recovered, 💀: Deaths]"""
+    covid = Covid(source="worldometers")
     match = event.matches[0].group(1)
     if match:
         strings = []
