@@ -14,27 +14,20 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
-
 from covid import Covid
 
 from userbot import client
 from userbot.utils.events import NewMessage
 
-
 plugin_category = "pandemic"
-covid_str = (
-    "**{country}:**  🦠 **{active}**  💀 **{deaths}**  💚 "
-    "**{recovered}**  ✅ **{confirmed}**"
-)
+covid_str = ("**{country}:**  🦠 **{active}**  💀 **{deaths}**  💚 "
+             "**{recovered}**  ✅ **{confirmed}**")
 covid_countries = "{name}: {id}"
 
 
-@client.onMessage(
-    command="covid",
-    outgoing=True, regex="covid(?: |$)(.*)"
-)
+@client.onMessage(command="covid", outgoing=True, regex="covid(?: |$)(.*)")
 async def covid19(event: NewMessage.Event) -> None:
-        """Get the current COVID-19 stats for a specific country or worldwide.
+    """Get the current COVID-19 stats for a specific country or worldwide.
 
 The stats are emoji coded as given below.
 ✅: Confirmed, 🦠: Active, 💚: Recovered, 💀: Deaths"""
@@ -67,8 +60,9 @@ The stats are emoji coded as given below.
         confirmed = covid.get_total_confirmed_cases()
         recovered = covid.get_total_recovered()
         deaths = covid.get_total_deaths()
-        string = covid_str.format(
-            country=country, active=active, confirmed=confirmed,
-            recovered=recovered, deaths=deaths
-        )
+        string = covid_str.format(country=country,
+                                  active=active,
+                                  confirmed=confirmed,
+                                  recovered=recovered,
+                                  deaths=deaths)
         await event.answer(string)
