@@ -1,4 +1,4 @@
-# PaperplaneRemix's files and folders
+# PaperplaneRemix's stuff.
 config.ini
 userbot.session
 userbot.session-journal
@@ -12,6 +12,7 @@ userbot/__pycache__/*
 userbot/plugins/__pycache__/*
 userbot/helper_funcs/__pycache__/*
 userbot/utils/__pycache__/*
+sessions/__pycache__/*
 
 # Visual Studio Code folder for settings, etc
 .vscode/

@@ -23,7 +23,7 @@ import sys
 import redis
 from telethon.tl import types
 
-from .utils.sessions import RedisSession
+from sessions.redis import RedisSession
 from .utils.config_helper import resolve_env
 from .utils.client import UserBotClient
 
@@ -41,9 +41,20 @@ LEVELS = {
 
 session = "userbot"
 redis_db = False
+loop = None
 config = configparser.ConfigParser()
 config_file = pathlib.Path('./config.ini')
 sql_session = pathlib.Path('./userbot.session')
+
+ROOT_LOGGER = logging.getLogger()
+LOGGER = logging.getLogger(__name__)
+
+if sys.platform.startswith('win'):
+    from asyncio import ProactorEventLoop
+    from os import system
+
+    loop = ProactorEventLoop()
+    system('color')
 
 if platform.python_version_tuple() < ('3', '7', '3'):
     print("Please run this script with Python 3.7.3 or above."
@@ -61,9 +72,6 @@ except ValueError:
           "or the required environment variables set."
           "\nExiting the script.")
     sys.exit(1)
-
-ROOT_LOGGER = logging.getLogger()
-LOGGER = logging.getLogger(__name__)
 
 if "telethon" not in config:
     print("You're not using a valid config, refer to the sample_config.ini")
@@ -83,15 +91,6 @@ if CONSOLE_LOGGER.upper() in LEVELS:
     level = LEVELS[CONSOLE_LOGGER.upper()]
     ROOT_LOGGER.setLevel(level)
     LOGGER.setLevel(level)
-
-if sys.platform.startswith('win'):
-    from asyncio import ProactorEventLoop
-    from os import system
-
-    loop = ProactorEventLoop()
-    system('color')
-else:
-    loop = None
 
 if not (API_ID and API_HASH):
     print("You need to set your API keys in your config or environment!")
