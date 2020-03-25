@@ -23,7 +23,7 @@ plugin_category = "pandemic"
 covid_str = (
     "**{country}:** ✅: `{confirmed}` 🦠: `{active}` 💚: `{recovered}` 💀: `{deaths}`"
 )
-covid_countries = "**{name}**: [ID: `{id}`]"
+covid_countries = "{name}: {id}"
 
 
 @client.onMessage(command="covid", outgoing=True, regex="covid(?: |$)(.*)")
