@@ -105,7 +105,7 @@ async def answer(self,
             output.name = "output.txt"
             try:
                 kwargs.setdefault('silent', True)
-                message_out = await self.client.respond(*args, **kwargs)
+                message_out = await self.respond(file=output, **kwargs)
                 output.close()
             except Exception as e:
                 output.close()
