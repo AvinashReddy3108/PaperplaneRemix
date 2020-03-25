@@ -22,7 +22,7 @@ from userbot.utils.events import NewMessage
 plugin_category = "pandemic"
 covid_str = ("**{country}:**  🦠 **{active}**  💀 **{deaths}**  💚 "
              "**{recovered}**  ✅ **{confirmed}**")
-covid_countries = "`{name}`: `{id}`"
+covid_countries = "{name}: {id}"
 
 
 @client.onMessage(command="covid", outgoing=True, regex="covid(?: |$)(.*)")
@@ -42,7 +42,10 @@ async def covid19(event: NewMessage.Event) -> None:
         else:
             for c in args:
                 try:
-                    country = covid.get_status_by_country_name(c)
+                    if c.isnumeric():
+                        country = covid.get_status_by_country_id(c)
+                    else:
+                        country = covid.get_status_by_country_name(c)
                     strings.append(covid_str.format(**country))
                 except ValueError:
                     continue
