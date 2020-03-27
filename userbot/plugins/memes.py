@@ -18,6 +18,7 @@ import aiohttp
 import asyncio
 from typing import Tuple, Union
 
+import asyncurban
 from cowpy import cow
 import random
 import re
@@ -29,32 +30,10 @@ from userbot.utils.events import NewMessage
 
 plugin_category = "memes"
 
-ASCIIMOJI_DICT = {
-    ("sad", "cry"): ["(╥_╥)", "(T⌓T)", "(⋟﹏⋞)"],
-    ("ded", "dead"): ["(×_×)", "(×﹏×)", "(＋_＋)"],
-    ("shg", "shrug"):
-    ["┐(´～｀)┌", "┐(￣ヘ￣)┌", "¯\_(ツ)_/¯", "┐('д')┌", "┐(￣ヮ￣)┌"],
-    ("dance"): ["└|∵┌|", "|┐∵|┘", "└|ﾟεﾟ|┐", "┌|ﾟзﾟ|┘"],
-    ("rage", "angry"): ["(⋋▂⋌)", "(◣_◢)", "〴⋋_⋌〵", "(｀ε´)", "（♯▼皿▼）"],
-    ("smug", "smirk"): ["(¬‿¬)", "(¬_¬ )"],
-    ("middlefinger", "midfinger"):
-    ["凸(｀0´)凸", "凸(¬‿¬)", "t(- n -)t", "┌П┐(►˛◄’!)"],
-    ("magic"): ["(ﾉ≧∀≦)ﾉ・‥…━━━★"],
-    ("bear"): ["ᵔᴥᵔ", "ʕ·ᴥ·ʔ", "ʕ≧ᴥ≦ʔ", "ʕ•̠͡•ʔ", "ʕ∙ჲ∙ʔ", "ʕ◉ᴥ◉ʔ", "ʕ￫ᴥ￩ʔ"],
-    ("hi", "hello"): ["＼(￣O￣)", "(≧∇≦)/", "ヾ(＾-＾)ノ"],
-    ("sleep"): ["(－ω－) zzZ", "[(－－)]..zzZ", "(－.－)...zzz", "(￣o￣) zzZZzzZZ"],
-    ("cool", "glasses"): ["(⌐▨_▨)", "(⌐■_■)"],
-    ("point"): ["(╭☞• ⍛• )╭☞", "☜╮(´ิ∀´ิ☜╮)", "(╭☞•́•̀)╭☞", "(☞ ͡° ͜ʖ ͡°)☞"],
-    ("salute"): ["(￣^￣)ゞ", "(＞ロ＜)ゝ", "（・д・ゝ）", "('-'*ゞ"],
-    ("run"): ["┗(^o^　)┓三", "┌（・Σ・）┘≡З", "｢(◔ω◔「)三", "┏( ゜)ਊ゜)┛"],
-    ("gun", "shoot"): ["╾━╤デ╦︻(▀̿Ĺ̯▀̿ ̿)"]
-}
-
 INSULTS = [
     "Owww ... Such a stupid idiot.",
     "Don't drink and type.",
     "I think you should go home or better a mental asylum.",
-    "Command not found. Just like your brain.",
     "Do you realize you are making a fool of yourself? Apparently not.",
     "You can type better than that.",
     "Sorry, we do not sell brains.",
@@ -71,13 +50,12 @@ INSULTS = [
     "I would ask you how old you are but I know you can't count that high.",
     "As an outsider, what do you think of the human race?",
     "Brains aren't everything. In your case they're nothing.",
-    "Ordinarily people live and learn. You just live.",
+    "Usually people live and learn. You just live.",
     "I don't know what makes you so stupid, but it really works.",
-    "Keep talking, someday you'll say something intelligent!\n(I doubt it though)",
+    "Keep talking, someday you'll say something intelligent!\n__(I doubt it though)__",
     "Shock me, say something intelligent.",
     "Your IQ's lower than your shoe size.",
     "Alas! Your neurotransmitters are no more working.",
-    "Are you crazy you fool.",
     "Everyone has the right to be stupid but you are abusing the privilege.",
     "I'm sorry I hurt your feelings when I called you stupid.\nI thought you already knew that.",
     "You should try tasting cyanide.",
@@ -369,19 +347,6 @@ async def lmgtfy(event: NewMessage.Event) -> None:
                       \n[{query}]({clickbait})")
 
 
-@client.onMessage(command=("asciimoji", plugin_category),
-                  outgoing=True,
-                  regex="(\w+)$")
-async def react(event: NewMessage.Event) -> None:
-    """Helps you react to things using ASCII emojis."""
-    reaction = event.matches[0].group(1).lower()
-    for key in ASCIIMOJI_DICT:
-        if reaction in key:
-            emoticon = random.choice(ASCIIMOJI_DICT[key])
-            await event.answer(f"`{emoticon}`")
-            break
-
-
 @client.onMessage(command=("vapor", plugin_category),
                   outgoing=True,
                   regex="vpr(?: |$)(.*)")
@@ -423,7 +388,7 @@ async def zalgofy(event: NewMessage.Event) -> None:
         message = textx.text
     else:
         await event.answer(
-            "__I̺͑ c̴̎a̩͘n͉͐'tͪͬ i̡͙n̺ͦṽ̘o̎͘k͇̃e̮͊ c̜̾h̩͋ä͒o̺͝s̗͟ į̶n̵ͭ t̵̙h̛ ̝e͊̀ v̗͛o̯͡i̋ͦd̙ͤ.__"
+            "I̺͑ c̴̎a̩͘n͉͐'tͪͬ i̡͙n̺ͦṽ̘o̎͘k͇̃e̮͊ c̜̾h̩͋ä͒o̺͝s̗͟ į̶n̵ͭ t̵̙h̛ ̝e͊̀ v̗͛o̯͡i̋ͦd̙ͤ."
         )
         return
 
@@ -447,7 +412,7 @@ async def zalgofy(event: NewMessage.Event) -> None:
 
         reply_text.append(charac)
 
-    await event.answer(f"__{''.join(reply_text)}__")
+    await event.answer(''.join(reply_text))
 
 
 @client.onMessage(command=("stretch", plugin_category),
@@ -462,13 +427,13 @@ async def slinky(event: NewMessage.Event) -> None:
     elif textx:
         message = textx.text
     else:
-        await event.answer("__GiiiiiiiB sooooooomeeeeeee teeeeeeext!__")
+        await event.answer("GiiiiiiiB sooooooomeeeeeee teeeeeeext!")
         return
 
     count = random.randint(3, 10)
     reply_text = re.sub(r"([aeiouAEIOUａｅｉｏｕＡＥＩＯＵаеиоуюяыэё])", (r"\1" * count),
                         message)
-    await event.answer(f"__{reply_text}__")
+    await event.answer(reply_text)
 
 
 @client.onMessage(command=("uwu", plugin_category),
@@ -483,7 +448,7 @@ async def nekofy(event: NewMessage.Event) -> None:
     elif textx:
         message = textx.text
     else:
-        await event.answer("__I can't nyekofy the void.__")
+        await event.answer("I can't nyekofy the void.")
         return
 
     reply_text = re.sub(r"(r|l)", "w", message)
@@ -491,7 +456,7 @@ async def nekofy(event: NewMessage.Event) -> None:
     reply_text = re.sub(r"n([aeiou])", r"ny\1", reply_text)
     reply_text = re.sub(r"N([aeiouAEIOU])", r"Ny\1", reply_text)
     reply_text = reply_text.replace("ove", "uv")
-    await event.answer(f"__{reply_text}__")
+    await event.answer(reply_text)
 
 
 @client.onMessage(command=("copypasta", plugin_category),
@@ -506,7 +471,7 @@ async def copypasta(event: NewMessage.Event) -> None:
     elif textx:
         message = textx.text
     else:
-        await event.answer("__😂🅱️IvE👐sOME👅text👅for✌️Me👌tO👐MAkE👀iT💞funNy!💦__")
+        await event.answer("😂🅱️IvE👐sOME👅text👅for✌️Me👌tO👐MAkE👀iT💞funNy!💦")
         return
 
     reply_text = random.choice(PASTAMOJIS)
@@ -526,7 +491,7 @@ async def copypasta(event: NewMessage.Event) -> None:
             else:
                 reply_text += owo.lower()
     reply_text += random.choice(PASTAMOJIS)
-    await event.answer(f"__{reply_text}__")
+    await event.answer(reply_text)
 
 
 @client.onMessage(command=("mock", plugin_category),
@@ -552,7 +517,7 @@ async def spongemock(event: NewMessage.Event) -> None:
         else:
             reply_text.append(charac)
     mocked_text = "".join(reply_text)
-    await event.answer(f"__{mocked_text}__")
+    await event.answer(mocked_text)
 
 
 @client.onMessage(command=("insult", plugin_category),
@@ -560,7 +525,7 @@ async def spongemock(event: NewMessage.Event) -> None:
                   regex="insult$")
 async def memereview(event: NewMessage.Event) -> None:
     """Insult people."""
-    await event.answer(f"__{random.choice(INSULTS)}__")
+    await event.answer(random.choice(INSULTS))
 
 
 @client.onMessage(command=("clap", plugin_category),
@@ -580,7 +545,26 @@ async def clapz(event: NewMessage.Event) -> None:
 
     clapped_text = re.sub(" ", " 👏 ", message)
     reply_text = f"👏 {clapped_text} 👏"
-    await event.answer(f"__{reply_text}__")
+    await event.answer(reply_text)
+
+
+@client.onMessage(command=("urbandictionary", plugin_category),
+                  outgoing=True,
+                  regex="ud(?: |$)(.*)")
+async def urban_dict(event: NewMessage.Event) -> None:
+    """ Looks up words in the Urban Dictionary. """
+    await event.answer("Processing...")
+    query = event.matches[0].group(1)
+    urban_dict_helper = asyncurban.UrbanDictionary()
+    try:
+        urban_def = await urban_dict_helper.get_word(query)
+    except asyncurban.WordNotFoundError:
+        await event.answer(
+            f"`Sorry, couldn't find any results for:` **{query}**")
+        return
+    await event.answer("**Text**: " + query + "\n**Meaning**: `" +
+                       urban_def.definition + "`\n" + "**Example**: __" +
+                       urban_def.example + "__")
 
 
 @client.onMessage(outgoing=True, regex="^Oof$", disable_prefix=True)
