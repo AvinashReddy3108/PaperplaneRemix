@@ -15,11 +15,11 @@
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
 import datetime
+import random
 import re
 import io
 import itertools
 import PIL
-import random
 from typing import BinaryIO, List, Sequence, Tuple, Union
 
 from telethon.tl import functions, types
@@ -294,7 +294,8 @@ async def kang(event: NewMessage.Event) -> None:
             pack = await _verify_cs_name(animated, packs)
             if not pack:
                 if "_kang_pack" in animated:
-                    await event.answer("`Making a new animated kang pack!`")
+                    await event.answer(
+                        "`Making a new animated kang pack, please wait!`")
                     pack = animated
                     _, packnick = await _get_userbot_auto_pack(is_animated)
                     new_pack = True
@@ -308,7 +309,8 @@ async def kang(event: NewMessage.Event) -> None:
             pack = await _verify_cs_name(basic, packs)
             if not pack:
                 if "_kang_pack" in basic:
-                    await event.answer("`Making a new kang pack!`")
+                    await event.answer("`Making a new kang pack, please wait!`"
+                                       )
                     pack = basic
                     _, packnick = await _get_userbot_auto_pack(is_animated)
                     new_pack = True
@@ -625,7 +627,7 @@ async def _resolve_messages(
             is_animated = True
 
     for i in args:
-        if re.search(r'[^\w\s,], i'):
+        if re.search(r'[^\w\s,]', i):
             _emojis += i
         else:
             packs.append(i)
