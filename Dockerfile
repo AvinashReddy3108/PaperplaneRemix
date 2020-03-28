@@ -1,4 +1,4 @@
-FROM python:3.7-alpine
+FROM python:3.8-alpine
 
 RUN apk add --no-cache --update \
     bash \
@@ -25,7 +25,7 @@ RUN git clone https://github.com/AvinashReddy3108/PaperplaneRemix.git /usr/src/a
 RUN rsync --ignore-existing --recursive /tmp/userbot_local/ /usr/src/app/PaperplaneRemix/
 
 RUN python3 -m pip install --upgrade pip
-RUN python3 -m pip install --no-warn-script-location --no-cache-dir -r requirements.txt
+RUN python3 -m pip install --no-warn-script-location --no-cache-dir --upgrade -r requirements.txt
 
 RUN rm -rf /var/cache/apk/* /tmp/*
 CMD ["python", "-m", "userbot"]
