@@ -20,14 +20,16 @@ from userbot import client
 from userbot.utils.events import NewMessage
 
 plugin_category = "pandemic"
-covid_str = (
-    "**{country}:**  ✅ `{confirmed}` 🦠 `{active}` ⚠️ `{critical}` 💀 `{deaths}` 💚 `{recovered}`"
-)
+covid_str = ("**{country}:**\n"
+             "✅: `{confirmed}`  🦠: `{active}`\n"
+             "💚: `{recovered}`  ⚰️: `{deaths}`")
 
 
-@client.onMessage(command="covid", outgoing=True, regex="covid(?: |$)(.*)")
+@client.onMessage(command=("covid", plugin_category),
+                  outgoing=True,
+                  regex="covid(?: |$)(.*)")
 async def covid19(event: NewMessage.Event) -> None:
-    """Get the current covid stats for a specific country or overall."""
+    """Get the current COVID-19 stats for a specific country or overall."""
     covid = Covid(source="worldometers")
     match = event.matches[0].group(1)
     if match:
@@ -39,11 +41,14 @@ async def covid19(event: NewMessage.Event) -> None:
             for c in args:
                 try:
                     country = covid.get_status_by_country_name(c)
-                    strings.append(covid_str.format(**country))
+                    string = covid_str.format(**country)
+                    if country['critical']:
+                        string += f"\n⚠️: `{country['critical']}`"
+                    strings.append(string)
                 except ValueError:
                     continue
         if strings:
-            await event.answer(',\n'.join(strings))
+            await event.answer('\n\n'.join(strings))
     else:
         country = "Worldwide"
         active = covid.get_total_active_cases()
@@ -54,6 +59,5 @@ async def covid19(event: NewMessage.Event) -> None:
                                   active=active,
                                   confirmed=confirmed,
                                   recovered=recovered,
-                                  deaths=deaths,
-                                  critical='?')
+                                  deaths=deaths)
         await event.answer(string)
