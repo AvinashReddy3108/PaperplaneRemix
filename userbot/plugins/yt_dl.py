@@ -73,6 +73,7 @@ async def yt_dl(event):
     fmt = kwargs.get('format', kwargs.get('fmt', False))
     auto_delete = kwargs.get('delete', False)
     upload = kwargs.get('upload', True)
+    progress = kwargs.get('progress', False)
     round_message = kwargs.get('round_message', kwargs.get('round', False))
     supports_streaming = kwargs.get('supports_streaming',
                                     kwargs.get('stream', False))
@@ -97,7 +98,8 @@ async def yt_dl(event):
                 elif isinstance(info, str):
                     warnings.append(info)
                 else:
-                    warning.append(f'```{await client.get_traceback(info)}```')
+                    warnings.append(
+                        f'```{await client.get_traceback(info)}```')
             if fmts:
                 text = "**Formats:**\n"
                 text += ",\n\n".join(f"```{f}```" for f in fmts)
@@ -129,9 +131,10 @@ async def yt_dl(event):
                     params.update(writethumbnail=True)
                     params['postprocessors'].append({'key': 'EmbedThumbnail'})
 
-    progress = ProgressHook(event)
-    params['progress_hooks'].append(progress.hook)
-    progress_cb = ProgressCallback(event)
+    if progress:
+        progress = ProgressHook(event)
+        params['progress_hooks'].append(progress.hook)
+        progress_cb = ProgressCallback(event)
 
     for url in args:
         await event.answer(f"`Processing {url}...`")
@@ -156,9 +159,10 @@ async def yt_dl(event):
                 result = warning + text if not ffmpeg else text
 
                 dl = io.open(path, 'rb')
-                progress_cb.filen = title
+                if progress:
+                    progress_cb.filen = title
                 uploaded = await client.fast_upload_file(
-                    dl, progress_cb.up_progress)
+                    dl, progress_cb.up_progress if progress else None)
                 dl.close()
 
                 attributes, mime_type = await fix_attributes(
