@@ -242,12 +242,12 @@ PASTAMOJIS = [
                   regex="shibe$")
 async def shibes(event: NewMessage.Event) -> None:
     """Get random pictures of Shibes."""
-    shibe = await _request_json('http://shibe.online/api/shibes')
+    shibe = await _request('http://shibe.online/api/shibes')
     if not shibe:
         await event.answer("`Couldn't fetch a shibe for you :(`")
         return
 
-    json = shibe
+    _, json = shibe
     try:
         await event.answer(file=json[0], reply_to=event.reply_to_msg_id)
         await event.delete()
@@ -259,13 +259,13 @@ async def shibes(event: NewMessage.Event) -> None:
                   outgoing=True,
                   regex="cat$")
 async def cats(event: NewMessage.Event) -> None:
-    """Get random pictures of Cats."""
-    shibe = await _request_json('http://shibe.online/api/cats')
+    """Get random pictures of cats."""
+    shibe = await _request('http://shibe.online/api/cats')
     if not shibe:
         await event.answer("`Couldn't fetch a cat for you :(`")
         return
 
-    json = shibe
+    _, json = shibe
     try:
         await event.answer(file=json[0], reply_to=event.reply_to_msg_id)
         await event.delete()
@@ -277,13 +277,13 @@ async def cats(event: NewMessage.Event) -> None:
                   outgoing=True,
                   regex="bird$")
 async def birds(event: NewMessage.Event) -> None:
-    """Get random pictures of Birds."""
-    shibe = await _request_json('http://shibe.online/api/birds')
+    """Get random pictures of birds."""
+    shibe = await _request('http://shibe.online/api/birds')
     if not shibe:
         await event.answer("`Couldn't fetch a bird for you :(`")
         return
 
-    json = shibe
+    _, json = shibe
     try:
         await event.answer(file=json[0], reply_to=event.reply_to_msg_id)
         await event.delete()
@@ -316,11 +316,12 @@ async def decide(event: NewMessage.Event) -> None:
     """Helps to make a quick decision."""
     decision = event.matches[0].group(1)
     if decision.lower() != "decide":
-        decide_data = await _request_json(f"https://yesno.wtf/api?force={decision}")
+        decide_data = await _request(f"https://yesno.wtf/api",
+                                     {'force': decision})
     else:
-        decide_data = await _request_json("https://yesno.wtf/api")
+        decide_data = await _request("https://yesno.wtf/api")
 
-    json = decide_data
+    _, json = decide_data
     try:
         await event.answer(file=json["image"], reply_to=event.reply_to_msg_id)
         await event.delete()
@@ -339,8 +340,11 @@ async def lmgtfy(event: NewMessage.Event) -> None:
         return
     query_encoded = query.replace(" ", "+")
     lmgtfy_url = f"http://letmegooglethat.com/?q={query_encoded}"
-    short_url = await _request_text(
-        f'http://is.gd/create.php?format=simple&url={lmgtfy_url}')
+    short_url = await _request(f'http://is.gd/create.php', {
+        'format': 'simple',
+        'url': lmgtfy_url
+    },
+                               data_type="text")
     clickbait = short_url if short_url else lmgtfy_url
     await event.answer(f"Here you go, help yourself.\
                       \n[{query}]({clickbait})")
@@ -596,17 +600,18 @@ async def keks(event: NewMessage.Event) -> None:
         await event.answer(":" + uio[i % 2])
 
 
-async def _request_json(url: str, params: dict = None) -> Union[dict, None]:
+async def _request(
+    url: str,
+    params: dict = None,
+    data_type: str = None
+) -> Union[Union[dict, str, Tuple[str, dict]], None]:
     async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
+        async with session.get(url, params=params) as response:
             if response.status == 200:
-                return await response.json()
-            return None
-
-
-async def _request_text(url: str, params: dict = None) -> Union[str, None]:
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
-            if response.status == 200:
-                return await response.text()
+                if data_type == "json":
+                    return await response.json()
+                elif data_type == "text":
+                    return await response.text()
+                else:
+                    return await response.text(), await response.json()
             return None
