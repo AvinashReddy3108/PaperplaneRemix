@@ -315,11 +315,10 @@ async def cowsay(event: NewMessage.Event) -> None:
 async def decide(event: NewMessage.Event) -> None:
     """Helps to make a quick decision."""
     decision = event.matches[0].group(1)
-    if decision != "decide":
-        decide_data = await _request_json("https://yesno.wtf/api",
-                                          {'force': decision})
+    if decision.lower() != "decide":
+        decide_data = await _request_json(f"https://yesno.wtf/api?force={decision}")
     else:
-        decide_data = await _request_json(f"https://yesno.wtf/api")
+        decide_data = await _request_json("https://yesno.wtf/api")
 
     json = decide_data
     try:
