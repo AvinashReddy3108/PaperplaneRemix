@@ -293,7 +293,7 @@ async def birds(event: NewMessage.Event) -> None:
 
 @client.onMessage(command=("cowsay", plugin_category),
                   outgoing=True,
-                  regex="(\w+)say(?: |$)(.*)")
+                  regex="(\w+)say(?: |$|\n)([\s\S]*)")
 async def cowsay(event: NewMessage.Event) -> None:
     """Create messages with various animals and other creatures."""
     arg = event.matches[0].group(1).lower()
@@ -331,7 +331,7 @@ async def decide(event: NewMessage.Event) -> None:
 
 @client.onMessage(command=("lmgtfy", plugin_category),
                   outgoing=True,
-                  regex="lmg(?: |$)(.*)")
+                  regex="lmg(?: |$|\n)(.*)")
 async def lmgtfy(event: NewMessage.Event) -> None:
     """Let me Google that for you real quick."""
     query = event.matches[0].group(1)
@@ -352,57 +352,49 @@ async def lmgtfy(event: NewMessage.Event) -> None:
 
 @client.onMessage(command=("vapor", plugin_category),
                   outgoing=True,
-                  regex="vpr(?: |$)(.*)")
+                  regex="vpr(?: |$|\n)([\s\S]*)")
 async def vapor(event: NewMessage.Event) -> None:
     """Vaporize everything!"""
+    text = event.matches[0].group(1)
+    if not text:
+        if event.is_reply:
+            text = (await event.get_reply_message()).message
+        else:
+            await event.answer("`Ｖａｐｏｒｉｚｅｄ ｔｈｅ ｖｏｉｄ．`")
+            return
     reply_text = list()
-    textx = await event.get_reply_message()
-    message = event.matches[0].group(1)
-    if message:
-        pass
-    elif textx:
-        message = textx.text
-    else:
-        await event.answer("`Ｖａｐｏｒｉｚｅｄ ｔｈｅ ｖｏｉｄ．`")
-        return
-
-    for charac in message:
+    for charac in text:
         if 0x21 <= ord(charac) <= 0x7F:
             reply_text.append(chr(ord(charac) + 0xFEE0))
         elif ord(charac) == 0x20:
             reply_text.append(chr(0x3000))
         else:
             reply_text.append(charac)
-
-    await event.answer("".join(reply_text))
+    vaporized_text = "".join(reply_text)
+    await event.answer(vaporized_text)
 
 
 @client.onMessage(command=("zalgo", plugin_category),
                   outgoing=True,
-                  regex="zlg(?: |$)(.*)")
+                  regex="zlg(?: |$|\n)([\s\S]*)")
 async def zalgofy(event: NewMessage.Event) -> None:
     """Invoke the feeling of chaos!"""
+    text = event.matches[0].group(1)
+    if not text:
+        if event.is_reply:
+            text = (await event.get_reply_message()).message
+        else:
+            await event.answer(
+                "`I̺͑ c̴̎a̩͘n͉͐'tͪͬ i̡͙n̺ͦṽ̘o̎͘k͇̃e̮͊ c̜̾h̩͋ä͒o̺͝s̗͟ į̶n̵ͭ t̵̙h̛ ̝e͊̀ v̗͛o̯͡i̋ͦd̙ͤ.`"
+            )
+            return
     reply_text = list()
-    textx = await event.get_reply_message()
-    message = event.matches[0].group(1)
-    if message:
-        pass
-    elif textx:
-        message = textx.text
-    else:
-        await event.answer(
-            "I̺͑ c̴̎a̩͘n͉͐'tͪͬ i̡͙n̺ͦṽ̘o̎͘k͇̃e̮͊ c̜̾h̩͋ä͒o̺͝s̗͟ į̶n̵ͭ t̵̙h̛ ̝e͊̀ v̗͛o̯͡i̋ͦd̙ͤ."
-        )
-        return
-
-    for charac in message:
+    for charac in text:
         if not charac.isalpha():
             reply_text.append(charac)
             continue
-
         for _ in range(0, 3):
             zalgint = random.randint(0, 2)
-
             if zalgint == 0:
                 charac = charac.strip() + \
                     random.choice(ZALG_LIST[0]).strip()
@@ -412,75 +404,65 @@ async def zalgofy(event: NewMessage.Event) -> None:
             else:
                 charac = charac.strip() + \
                     random.choice(ZALG_LIST[2]).strip()
-
         reply_text.append(charac)
-
-    await event.answer(''.join(reply_text))
+    chaotic_text = ''.join(reply_text)
+    await event.answer(f"`{chaotic_text}`")
 
 
 @client.onMessage(command=("stretch", plugin_category),
                   outgoing=True,
-                  regex="str(?: |$)(.*)")
+                  regex="str(?: |$|\n)([\s\S]*)")
 async def slinky(event: NewMessage.Event) -> None:
-    """Stretch it!"""
-    textx = await event.get_reply_message()
-    message = event.matches[0].group(1)
-    if message:
-        pass
-    elif textx:
-        message = textx.text
-    else:
-        await event.answer("GiiiiiiiB sooooooomeeeeeee teeeeeeext!")
-        return
-
+    """Stretch it like it's rubber!"""
+    text = event.matches[0].group(1)
+    if not text:
+        if event.is_reply:
+            text = (await event.get_reply_message()).message
+        else:
+            await event.answer("`GiiiiiiiB sooooooomeeeeeee teeeeeeext!`")
+            return
     count = random.randint(3, 10)
     reply_text = re.sub(r"([aeiouAEIOUａｅｉｏｕＡＥＩＯＵаеиоуюяыэё])", (r"\1" * count),
-                        message)
-    await event.answer(reply_text)
+                        text)
+    await event.answer(f"__{reply_text}__")
 
 
 @client.onMessage(command=("uwu", plugin_category),
                   outgoing=True,
-                  regex="uwu(?: |$)(.*)")
+                  regex="uwu(?: |$|\n)([\s\S]*)")
 async def nekofy(event: NewMessage.Event) -> None:
     """Neko-fy the text, like the degenerate you are."""
-    textx = await event.get_reply_message()
-    message = event.matches[0].group(1)
-    if message:
-        pass
-    elif textx:
-        message = textx.text
-    else:
-        await event.answer("I can't nyekofy the void.")
-        return
-
-    reply_text = re.sub(r"(r|l)", "w", message)
+    text = event.matches[0].group(1)
+    if not text:
+        if event.is_reply:
+            text = (await event.get_reply_message()).message
+        else:
+            await event.answer("`I can't nyekofy the void.`")
+            return
+    reply_text = re.sub(r"(r|l)", "w", text)
     reply_text = re.sub(r"(R|L)", "W", reply_text)
     reply_text = re.sub(r"n([aeiou])", r"ny\1", reply_text)
     reply_text = re.sub(r"N([aeiouAEIOU])", r"Ny\1", reply_text)
     reply_text = reply_text.replace("ove", "uv")
-    await event.answer(reply_text)
+    await event.answer(f"__{reply_text}__")
 
 
 @client.onMessage(command=("copypasta", plugin_category),
                   outgoing=True,
-                  regex="pasta(?: |$)(.*)")
+                  regex="pasta(?: |$|\n)([\s\S]*)")
 async def copypasta(event: NewMessage.Event) -> None:
     """Copypasta the famous meme."""
-    textx = await event.get_reply_message()
-    message = event.matches[0].group(1)
-    if message:
-        pass
-    elif textx:
-        message = textx.text
-    else:
-        await event.answer("😂🅱️IvE👐sOME👅text👅for✌️Me👌tO👐MAkE👀iT💞funNy!💦")
-        return
-
+    text = event.matches[0].group(1)
+    if not text:
+        if event.is_reply:
+            text = (await event.get_reply_message()).message
+        else:
+            await event.answer(
+                "__😂🅱️IvE👐sOME👅text👅for✌️Me👌tO👐MAkE👀iT💞funNy!💦__")
+            return
     reply_text = random.choice(PASTAMOJIS)
-    # choose a random character in the message to be substituted with 🅱️
-    b_char = random.choice(message).lower()
-    for owo in message:
+    b_char = random.choice(text).lower()
+    for owo in text:
         if owo == " ":
             reply_text += random.choice(PASTAMOJIS)
         elif owo in PASTAMOJIS:
@@ -494,33 +476,52 @@ async def copypasta(event: NewMessage.Event) -> None:
             else:
                 reply_text += owo.lower()
     reply_text += random.choice(PASTAMOJIS)
-    await event.answer(reply_text)
+    await event.answer(f"__{reply_text}__")
 
 
 @client.onMessage(command=("mock", plugin_category),
                   outgoing=True,
-                  regex="mock(?: |$)(.*)")
+                  regex="mock(?: |$|\n)([\s\S]*)")
 async def spongemock(event: NewMessage.Event) -> None:
     """sPoNgE MoCk tHe tExT!"""
+    text = event.matches[0].group(1)
+    if not text:
+        if event.is_reply:
+            text = (await event.get_reply_message()).message
+        else:
+            await event.answer("__I cAnT MoCk tHe vOId!__")
+            return
     reply_text = list()
-    textx = await event.get_reply_message()
-    message = event.matches[0].group(1)
-    if message:
-        pass
-    elif textx:
-        message = textx.text
-    else:
-        await event.answer("`I cAnT MoCk tHe vOId!`")
-        return
-
-    for charac in message:
+    for charac in text:
         if charac.isalpha() and random.randint(0, 1):
             to_app = charac.upper() if charac.islower() else charac.lower()
             reply_text.append(to_app)
         else:
             reply_text.append(charac)
     mocked_text = "".join(reply_text)
-    await event.answer(mocked_text)
+    await event.answer(f"__{mocked_text}__")
+
+
+@client.onMessage(command=("animu", plugin_category),
+                  outgoing=True,
+                  regex="animu(?: |$|\n)([\s\S]*)")
+async def spongemock(event: NewMessage.Event) -> None:
+    """Generate random waifu sticker with the text!"""
+    text = event.matches[0].group(1)
+    if not text:
+        if event.is_reply:
+            text = (await event.get_reply_message()).message
+        else:
+            await event.answer("`I can't animu-fy the void!`")
+            return
+    animus = [20, 32, 33, 40, 41, 42, 58]
+    sticcers = await client.inline_query("stickerizerbot",
+                                         f"#{random.choice(animus)}{text}")
+    await sticcers[0].click(event.chat_id,
+                            reply_to=event.reply_to_msg_id,
+                            silent=True if event.is_reply else False,
+                            hide_via=True)
+    await event.delete()
 
 
 @client.onMessage(command=("insult", plugin_category),
@@ -533,30 +534,26 @@ async def memereview(event: NewMessage.Event) -> None:
 
 @client.onMessage(command=("clap", plugin_category),
                   outgoing=True,
-                  regex="clap(?: |$)(.*)")
+                  regex="clap(?: |$|\n)([\s\S]*)")
 async def clapz(event: NewMessage.Event) -> None:
     """Praise people."""
-    textx = await event.get_reply_message()
-    message = event.matches[0].group(1)
-    if message:
-        pass
-    elif textx:
-        message = textx.text
-    else:
-        await event.answer("`Hah, I don't clap for the void!`")
-        return
-
-    clapped_text = re.sub(" ", " 👏 ", message)
+    text = event.matches[0].group(1)
+    if not text:
+        if event.is_reply:
+            text = (await event.get_reply_message()).message
+        else:
+            await event.answer("__Hah, I don't clap for the void!__")
+            return
+    clapped_text = re.sub(" ", " 👏 ", text)
     reply_text = f"👏 {clapped_text} 👏"
-    await event.answer(reply_text)
+    await event.answer(f"__{reply_text}__")
 
 
 @client.onMessage(command=("urbandictionary", plugin_category),
                   outgoing=True,
-                  regex="ud(?: |$)(.*)")
+                  regex="ud(?: |$|\n)(.*)")
 async def urban_dict(event: NewMessage.Event) -> None:
     """ Looks up words in the Urban Dictionary. """
-    await event.answer("Processing...")
     query = event.matches[0].group(1)
     urban_dict_helper = asyncurban.UrbanDictionary()
     try:
@@ -565,8 +562,8 @@ async def urban_dict(event: NewMessage.Event) -> None:
         await event.answer(
             f"`Sorry, couldn't find any results for:` **{query}**")
         return
-    await event.answer("**Text**: " + query + "\n**Meaning**: `" +
-                       urban_def.definition + "`\n" + "**Example**: __" +
+    await event.answer("**Text**: " + query + "\n\n**Meaning**: `" +
+                       urban_def.definition + "`\n\n" + "**Example**: __" +
                        urban_def.example + "__")
 
 

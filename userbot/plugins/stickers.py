@@ -196,7 +196,10 @@ async def delsticker(event: NewMessage.Event) -> None:
 
     if status is True:
         pack = f"[{short_name}](https://t.me/addstickers/{short_name})"
-        await event.answer(f"`Successfully removed the sticker from` {pack}")
+        await event.answer(
+            f"`Successfully removed the sticker from` {pack}!",
+            self_destruct=4,
+            log=("delsticker", f"Successfully deleted a sticker from {pack}!"))
         await _delete_sticker_messages(first_msg)
     else:
         await event.answer(
