@@ -16,6 +16,7 @@
 
 import configparser
 import dataclasses
+import inspect
 import logging
 import traceback
 from typing import Dict, List
@@ -83,8 +84,9 @@ class UserBotClient(TelegramClient):
                 else:
                     com = command
 
-                UBcommand = Command(func, handlers, info or func.__doc__
-                                    or no_info, builtin)
+                UBcommand = Command(
+                    func, handlers, info or inspect.cleandoc(func.__doc__)
+                    or no_info, builtin)
                 category = category.lower()
                 self.commands.update({com: UBcommand})
                 update_dict(self.commandcategories, category, com)

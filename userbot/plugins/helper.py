@@ -204,15 +204,14 @@ async def helper(event: NewMessage.Event) -> None:
             merged = {**enabled, **disabled}
             command = merged.get(arg)
             text = (f"**{arg.title()} command:**\n"
-                    f"  **Disableable:** `{not command.builtin}`\n"
-                    f"  **Info:** `{command.info}`\n")
+                    f"  **Disableable:** `{not command.builtin}`\n")
             if arg1:
                 filename = os.path.relpath(command.func.__code__.co_filename)
                 text += (
-                    f"  **Registered function:** `{command.func.__name__}`\n"
-                    f"    **File:** `{filename}`\n"
-                    f"    **Line:** `{command.func.__code__.co_firstlineno}`\n"
-                )
+                    f"**Registered function:** `{command.func.__name__}`\n"
+                    f"  **File:** `{filename}`\n"
+                    f"  **Line:** `{command.func.__code__.co_firstlineno}`\n")
+            text += ("\n" f"{command.info}")
         elif arg in categories:
             category = categories.get(arg)
             text = f"**{arg.title()} commands:**"
@@ -231,7 +230,7 @@ async def helper(event: NewMessage.Event) -> None:
                 "**Available command categories:**")
         for category in sorted(categories.keys()):
             text += f"\n    **{category}**"
-    await event.answer(text)
+    await event.answer(text, link_preview=False)
 
 
 async def solve_commands(commands: dict) -> Tuple[dict, dict]:
