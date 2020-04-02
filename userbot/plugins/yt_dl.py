@@ -118,7 +118,6 @@ async def yt_dl(event):
                 'preferredquality': '320',
             })
         elif fmt in videoFormats and ffmpeg:
-            params.update(format='bestvideo+bestaudio')
             params['postprocessors'].append({
                 'key': 'FFmpegVideoConvertor',
                 'preferedformat': fmt
