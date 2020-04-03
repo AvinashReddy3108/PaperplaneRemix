@@ -210,7 +210,8 @@ async def helper(event: NewMessage.Event) -> None:
                 text += (
                     f"  **Registered function:** `{command.func.__name__}`\n"
                     f"    **File:** `{filename}`\n"
-                    f"    **Line:** `{command.func.__code__.co_firstlineno}`\n")
+                    f"    **Line:** `{command.func.__code__.co_firstlineno}`\n"
+                )
             text += ("\n" f"{command.info}")
         elif arg in categories:
             category = categories.get(arg)
