@@ -57,6 +57,7 @@ async def _parse_arg(val: str) -> Union[int, str, float]:
 
 
 async def parse_arguments(
+        self,
         arguments: str) -> Tuple[List[Value], Dict[str, KeywordArgument]]:
     keyword_args = {}
     args = []
