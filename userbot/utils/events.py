@@ -31,6 +31,8 @@ class NewMessage(events.NewMessage):
     def __init__(self,
                  disable_prefix: bool = None,
                  regex: Tuple[str, int] or str = None,
+                 trigger_on_fwd: bool = False,
+                 trigger_on_inline: bool = False,
                  require_admin: bool = None,
                  **kwargs):
         """Overriding the default init to add additional attributes"""
@@ -52,6 +54,8 @@ class NewMessage(events.NewMessage):
 
         self.disable_prefix = disable_prefix
         self.require_admin = require_admin
+        self.trigger_on_fwd = trigger_on_fwd
+        self.trigger_on_inline = trigger_on_inline
 
     def filter(self, event):
         """Overriding the default filter to check additional values"""
@@ -78,6 +82,12 @@ class NewMessage(events.NewMessage):
             if not matches:
                 return
             event.matches = matches
+
+        if not self.trigger_on_fwd and event.fwd_from:
+            return
+
+        if event.via_bot_id and not self.trigger_on_inline:
+            return
 
         if self.require_admin:
             text = "`You need to be an admin to use this command!`"

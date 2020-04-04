@@ -910,7 +910,7 @@ async def bio_filter(event: ChatAction.Event) -> None:
             sender_id = sender.user_id
             chat_id = chat.id
             localbl = localBlacklists.get(chat_id, False)
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, AttributeError):
             return
         if (chat_id in whitelistedChats or sender_id in whitelistedUsers
                 or await is_admin(chat_id, sender_id)):

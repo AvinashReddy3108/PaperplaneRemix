@@ -322,7 +322,7 @@ async def cowsay(event: NewMessage.Event) -> None:
     cheese = cow.get_cow(arg)
     cheese = cheese()
 
-    await event.answer(f"`{cheese.milk(text).replace('`', '´')}`")
+    await event.answer(f"<code>{cheese.milk(text)}</code>", parse_mode="html")
 
 
 @client.onMessage(command=("decide", plugin_category),
