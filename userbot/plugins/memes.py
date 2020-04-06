@@ -428,7 +428,7 @@ async def decide(event: NewMessage.Event) -> None:
 
 @client.onMessage(command=("lmgtfy", plugin_category),
                   outgoing=True,
-                  regex="lmg(?: |$|\n)(.*)")
+                  regex="lmgtfy(?: |$|\n)(.*)")
 async def lmgtfy(event: NewMessage.Event) -> None:
     """Let me Google that for you real quick."""
     query = event.matches[0].group(1)
@@ -443,13 +443,13 @@ async def lmgtfy(event: NewMessage.Event) -> None:
     },
                                data_type="text")
     clickbait = short_url if short_url else lmgtfy_url
-    await event.answer(f"Here you go, help yourself.\
-                      \n[{query}]({clickbait})")
+    await event.answer(f"__Here you go, help yourself.__\
+        \n[{query}]({clickbait})")
 
 
 @client.onMessage(command=("vapor", plugin_category),
                   outgoing=True,
-                  regex="vpr(?: |$|\n)([\s\S]*)")
+                  regex="vapor(?: |$|\n)([\s\S]*)")
 async def vapor(event: NewMessage.Event) -> None:
     """Vaporize everything!"""
     text = event.matches[0].group(1)
@@ -473,7 +473,7 @@ async def vapor(event: NewMessage.Event) -> None:
 
 @client.onMessage(command=("zalgo", plugin_category),
                   outgoing=True,
-                  regex="zlg(?: |$|\n)([\s\S]*)")
+                  regex="zalgo(?: |$|\n)([\s\S]*)")
 async def zalgofy(event: NewMessage.Event) -> None:
     """Invoke the feeling of chaos!"""
     text = event.matches[0].group(1)
@@ -508,7 +508,7 @@ async def zalgofy(event: NewMessage.Event) -> None:
 
 @client.onMessage(command=("stretch", plugin_category),
                   outgoing=True,
-                  regex="str(?: |$|\n)([\s\S]*)")
+                  regex="stretch(?: |$|\n)([\s\S]*)")
 async def slinky(event: NewMessage.Event) -> None:
     """Stretch it like it's rubber!"""
     text = event.matches[0].group(1)
@@ -516,7 +516,7 @@ async def slinky(event: NewMessage.Event) -> None:
         if event.is_reply:
             text = (await event.get_reply_message()).message
         else:
-            await event.answer("`GiiiiiiiB sooooooomeeeeeee teeeeeeext!`")
+            await event.answer("__GiiiiiiiB sooooooomeeeeeee teeeeeeext!__")
             return
     count = random.randint(3, 10)
     reply_text = re.sub(r"([aeiouAEIOUａｅｉｏｕＡＥＩＯＵаеиоуюяыэё])", (r"\1" * count),
@@ -526,10 +526,10 @@ async def slinky(event: NewMessage.Event) -> None:
 
 @client.onMessage(command=("uwu", plugin_category),
                   outgoing=True,
-                  regex="uwu(?: |$|\n)([\s\S]*)")
+                  regex="(owo|uwu)(?: |$|\n)([\s\S]*)")
 async def nekofy(event: NewMessage.Event) -> None:
     """Neko-fy the text, like the degenerate you are."""
-    text = event.matches[0].group(1)
+    text = event.matches[0].group(2)
     if not text:
         if event.is_reply:
             text = (await event.get_reply_message()).message
@@ -544,7 +544,7 @@ async def nekofy(event: NewMessage.Event) -> None:
     await event.answer(f"__{reply_text}__")
 
 
-@client.onMessage(command=("copypasta", plugin_category),
+@client.onMessage(command=("pasta", plugin_category),
                   outgoing=True,
                   regex="pasta(?: |$|\n)([\s\S]*)")
 async def copypasta(event: NewMessage.Event) -> None:
@@ -599,12 +599,11 @@ async def spongemock(event: NewMessage.Event) -> None:
     await event.answer(f"__{mocked_text}__")
 
 
-@client.onMessage(command=("animu", plugin_category),
+@client.onMessage(command=("waifu", plugin_category),
                   outgoing=True,
-                  regex="animu(?: |$|\n)([\s\S]*)")
+                  regex="waifu(?: |$|\n)([\s\S]*)")
 async def waifu(event: NewMessage.Event) -> None:
-    """Generate random waifu sticker with the text!
-    Powered by: @StickerizerBot."""
+    """Generate random waifu sticker with the text!"""
     text = event.matches[0].group(1)
     if not text:
         if event.is_reply:
