@@ -252,6 +252,95 @@ PASTAMOJIS = [
     "🚰",
 ]
 
+SLAP_TEMPLATES = [
+    "{hits} {victim} with a {item}.",
+    "{hits} {victim} in the face with a {item}.",
+    "{hits} {victim} around a bit with a {item}.",
+    "{throws} a {item} at {victim}.",
+    "grabs a {item} and {throws} it at {victim}'s face.",
+    "{hits} a {item} at {victim}.", "{throws} a few {item} at {victim}.",
+    "grabs a {item} and {throws} it in {victim}'s face.",
+    "launches a {item} in {victim}'s general direction.",
+    "sits on {victim}'s face while slamming a {item} {where}.",
+    "starts slapping {victim} silly with a {item}.",
+    "pins {victim} down and repeatedly {hits} them with a {item}.",
+    "grabs up a {item} and {hits} {victim} with it.",
+    "starts slapping {victim} silly with a {item}.",
+    "holds {victim} down and repeatedly {hits} them with a {item}.",
+    "prods {victim} with a {item}.",
+    "picks up a {item} and {hits} {victim} with it.",
+    "ties {victim} to a chair and {throws} a {item} at them.",
+    "{hits} {victim} {where} with a {item}.",
+    "ties {victim} to a pole and whips them {where} with a {item}.",
+    "gave a friendly push to help {victim} learn to swim in lava.",
+    "sent {victim} to /dev/null.", "sent {victim} down the memory hole.",
+    "beheaded {victim}.", "threw {victim} off a building.",
+    "replaced all of {victim}'s music with Nickelback.",
+    "spammed {victim}'s email.", "made {victim} a knuckle sandwich.",
+    "slapped {victim} with pure nothing.",
+    "hit {victim} with a small, interstellar spaceship.",
+    "quickscoped {victim}.", "put {victim} in check-mate.",
+    "RSA-encrypted {victim} and deleted the private key.",
+    "put {victim} in the friendzone.",
+    "slaps {victim} with a DMCA takedown request!"
+]
+
+ITEMS = [
+    "cast iron skillet",
+    "large trout",
+    "baseball bat",
+    "cricket bat",
+    "wooden cane",
+    "nail",
+    "printer",
+    "shovel",
+    "pair of trousers",
+    "CRT monitor",
+    "diamond sword",
+    "baguette",
+    "physics textbook",
+    "toaster",
+    "portrait of Richard Stallman",
+    "television",
+    "mau5head",
+    "five ton truck",
+    "roll of duct tape",
+    "book",
+    "laptop",
+    "old television",
+    "sack of rocks",
+    "rainbow trout",
+    "cobblestone block",
+    "lava bucket",
+    "rubber chicken",
+    "spiked bat",
+    "gold block",
+    "fire extinguisher",
+    "heavy rock",
+    "chunk of dirt",
+    "beehive",
+    "piece of rotten meat",
+    "bear",
+    "ton of bricks",
+]
+
+THROW = [
+    "throws",
+    "flings",
+    "chucks",
+    "hurls",
+]
+
+HIT = [
+    "hits",
+    "whacks",
+    "slaps",
+    "smacks",
+    "bashes",
+]
+
+WHERE = ["in the chest", "on the head", "on the butt", "on the crotch"]
+
 
 @client.onMessage(command=("shibe", plugin_category),
                   outgoing=True,
@@ -426,7 +515,7 @@ async def decide(event: NewMessage.Event) -> None:
         await event.answer("`Event timed out!`")
 
 
-@client.onMessage(command=("lmgtfy", plugin_category),
+@client.onMessage(command=("lmg/lmgtfy", plugin_category),
                   outgoing=True,
                   regex="(lmgtfy|lmg)(?: |$|\n)(.*)")
 async def lmgtfy(event: NewMessage.Event) -> None:
@@ -447,7 +536,7 @@ async def lmgtfy(event: NewMessage.Event) -> None:
         \n[{query}]({clickbait})")
 
 
-@client.onMessage(command=("vapor", plugin_category),
+@client.onMessage(command=("vpr/vapor", plugin_category),
                   outgoing=True,
                   regex="(vpr|vapor)(?: |$|\n)([\s\S]*)")
 async def vapor(event: NewMessage.Event) -> None:
@@ -471,7 +560,7 @@ async def vapor(event: NewMessage.Event) -> None:
     await event.answer(vaporized_text)
 
 
-@client.onMessage(command=("zalgo", plugin_category),
+@client.onMessage(command=("zlg/zalgo", plugin_category),
                   outgoing=True,
                   regex="(zlg|zalgo)(?: |$|\n)([\s\S]*)")
 async def zalgofy(event: NewMessage.Event) -> None:
@@ -506,7 +595,7 @@ async def zalgofy(event: NewMessage.Event) -> None:
     await event.answer(f"`{chaotic_text}`")
 
 
-@client.onMessage(command=("stretch", plugin_category),
+@client.onMessage(command=("str/stretch", plugin_category),
                   outgoing=True,
                   regex="(str|stretch)(?: |$|\n)([\s\S]*)")
 async def slinky(event: NewMessage.Event) -> None:
@@ -524,7 +613,7 @@ async def slinky(event: NewMessage.Event) -> None:
     await event.answer(f"__{reply_text}__")
 
 
-@client.onMessage(command=("uwu", plugin_category),
+@client.onMessage(command=("owo/uwu", plugin_category),
                   outgoing=True,
                   regex="(owo|uwu)(?: |$|\n)([\s\S]*)")
 async def nekofy(event: NewMessage.Event) -> None:
@@ -544,7 +633,7 @@ async def nekofy(event: NewMessage.Event) -> None:
     await event.answer(f"__{reply_text}__")
 
 
-@client.onMessage(command=("pasta", plugin_category),
+@client.onMessage(command=("cp/pasta", plugin_category),
                   outgoing=True,
                   regex="(cp|pasta)(?: |$|\n)([\s\S]*)")
 async def copypasta(event: NewMessage.Event) -> None:
@@ -599,7 +688,7 @@ async def spongemock(event: NewMessage.Event) -> None:
     await event.answer(f"__{mocked_text}__")
 
 
-@client.onMessage(command=("wyfu", plugin_category),
+@client.onMessage(command=("wyfu/waifu", plugin_category),
                   outgoing=True,
                   regex="(wyfu|waifu)(?: |$|\n)([\s\S]*)")
 async def waifu(event: NewMessage.Event) -> None:
@@ -646,7 +735,7 @@ async def clapz(event: NewMessage.Event) -> None:
     await event.answer(f"__{reply_text}__")
 
 
-@client.onMessage(command=("urban", plugin_category),
+@client.onMessage(command=("ud/urban", plugin_category),
                   outgoing=True,
                   regex="(ud|urban)(?: |$|\n)(.*)")
 async def urban_dict(event: NewMessage.Event) -> None:
@@ -662,6 +751,42 @@ async def urban_dict(event: NewMessage.Event) -> None:
     await event.answer("**Text**:\n" + query + "\n\n**Meaning**:\n`" +
                        urban_def.definition + "`\n\n" + "**Example**:\n__" +
                        urban_def.example + "__")
+
+
+@client.onMessage(command=("slap", plugin_category),
+                  outgoing=True,
+                  regex=r"slap(?: |$|\n)([\s\S]*)")
+async def slap(event: NewMessage.Event) -> None:
+    """Slap a user with random objects for fun!"""
+    match = event.matches[0].group(1)
+    args, _ = await client.parse_arguments(match)
+
+    if not args and event.reply_to_msg_id:
+        reply = await event.get_reply_message()
+        args.append(reply.sender_id)
+    if not args:
+        await event.answer("__I can't slap the void!__")
+        return
+
+    entity = await event.get_chat()
+    for user in args:
+        if isinstance(user, list):
+            continue
+        try:
+            retard = await event.client.get_entity(user)
+            slapped = f"@{retard.username}" if retard.username else f"[{retard.first_name}](tg://user?id={retard.id})"
+            template = random.choice(SLAP_TEMPLATES)
+            caption = "..." + template.format(victim=slapped,
+                                              item=random.choice(ITEMS),
+                                              hits=random.choice(HIT),
+                                              throws=random.choice(THROW),
+                                              where=random.choice(WHERE))
+            await event.answer(f"__{caption}__",
+                               reply=True,
+                               reply_to=event.reply_to_msg_id)
+        except Exception:
+            continue
+    await event.delete()
 
 
 @client.onMessage(outgoing=True, regex="^Oof$", disable_prefix=True)
@@ -704,6 +829,7 @@ async def _request(
     params: dict = None,
     data_type: str = None
 ) -> Union[Union[dict, str, Tuple[str, dict]], None]:
+    """Helps request data from APIs faster!"""
     async with aiohttp.ClientSession() as session:
         async with session.get(url, params=params) as response:
             if response.status == 200:

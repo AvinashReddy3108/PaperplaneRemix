@@ -18,7 +18,7 @@ from userbot import client
 from userbot.utils.helpers import get_chat_link
 from userbot.utils.events import NewMessage
 
-plugin_category = "user"
+plugin_category = "purge"
 
 
 @client.onMessage(command=("purge", "admin"),

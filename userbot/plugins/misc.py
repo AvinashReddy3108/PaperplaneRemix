@@ -38,21 +38,25 @@ invite_links = {
 }
 usernexp = re.compile(r'@(\w{3,32})\[(.+?)\]')
 nameexp = re.compile(r'\[([\w\S]+)\]\(tg://user\?id=(\d+)\)\[(.+?)\]')
-dogheaders = {
-    'Content-type': 'text/plain',
-    'Accept': 'application/json',
-    'charset': 'utf-8'
-}
 
 
 def removebg_post(API_KEY: str, media: bytes or str):
     image_parameter = 'image_url' if isinstance(media, str) else 'image_file'
-    response = requests.post(
-        'https://api.remove.bg/v1.0/removebg',
-        files={image_parameter: media},
-        data={'size': 'auto'},
-        headers={'X-Api-Key': API_KEY},
-    )
+    response = requests.post('https://api.remove.bg/v1.0/removebg',
+                             files={image_parameter: media},
+                             data={'size': 'auto'},
+                             headers={'X-Api-Key': API_KEY})
+    return response
+
+
+def dogbin_post(text: str):
+    response = requests.post('https://del.dog/documents',
+                             data=text.encode('UTF-8'),
+                             headers={
+                                 'Content-type': 'text/plain',
+                                 'Accept': 'application/json',
+                                 'charset': 'utf-8'
+                             })
     return response
 
 
@@ -277,11 +281,8 @@ async def deldog(event: NewMessage.Event) -> None:
     else:
         await event.answer("`Provide something to paste on` https://del.dog")
         return
-    response = requests.post(
-        'https://del.dog/documents',
-        data=text.encode('UTF-8'),
-        headers=dogheaders,
-    )
+    response = await client.loop.run_in_executor(
+        None, functools.partial(dogbin_post, text))
     if not response.ok:
         await event.answer(
             "Couldn't post the data to [DelDog](https://del.dog/)", reply=True)
