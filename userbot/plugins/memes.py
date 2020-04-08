@@ -91,7 +91,7 @@ INSULTS = [
     "You can be the first person to step on sun. Have a try.",
 ]
 
-# Credits: https://gist.github.com/Alex-Just/e86110836f3f93fe7932290526529cd1#gistcomment-3208085
+# Credits: https://git.io/JvxOa
 EMOJI_PATTERN = re.compile(
     "["
     "\U0001F1E0-\U0001F1FF"  # flags (iOS)
@@ -428,10 +428,10 @@ async def decide(event: NewMessage.Event) -> None:
 
 @client.onMessage(command=("lmgtfy", plugin_category),
                   outgoing=True,
-                  regex="lmgtfy(?: |$|\n)(.*)")
+                  regex="(lmgtfy|lmg)(?: |$|\n)(.*)")
 async def lmgtfy(event: NewMessage.Event) -> None:
     """Let me Google that for you real quick."""
-    query = event.matches[0].group(1)
+    query = event.matches[0].group(2)
     if not query:
         await event.answer("`Let me Google the void for you real quick.`")
         return
@@ -449,10 +449,10 @@ async def lmgtfy(event: NewMessage.Event) -> None:
 
 @client.onMessage(command=("vapor", plugin_category),
                   outgoing=True,
-                  regex="vapor(?: |$|\n)([\s\S]*)")
+                  regex="(vpr|vapor)(?: |$|\n)([\s\S]*)")
 async def vapor(event: NewMessage.Event) -> None:
     """Vaporize everything!"""
-    text = event.matches[0].group(1)
+    text = event.matches[0].group(2)
     if not text:
         if event.is_reply:
             text = (await event.get_reply_message()).message
@@ -473,10 +473,10 @@ async def vapor(event: NewMessage.Event) -> None:
 
 @client.onMessage(command=("zalgo", plugin_category),
                   outgoing=True,
-                  regex="zalgo(?: |$|\n)([\s\S]*)")
+                  regex="(zlg|zalgo)(?: |$|\n)([\s\S]*)")
 async def zalgofy(event: NewMessage.Event) -> None:
     """Invoke the feeling of chaos!"""
-    text = event.matches[0].group(1)
+    text = event.matches[0].group(2)
     if not text:
         if event.is_reply:
             text = (await event.get_reply_message()).message
@@ -508,10 +508,10 @@ async def zalgofy(event: NewMessage.Event) -> None:
 
 @client.onMessage(command=("stretch", plugin_category),
                   outgoing=True,
-                  regex="stretch(?: |$|\n)([\s\S]*)")
+                  regex="(str|stretch)(?: |$|\n)([\s\S]*)")
 async def slinky(event: NewMessage.Event) -> None:
     """Stretch it like it's rubber!"""
-    text = event.matches[0].group(1)
+    text = event.matches[0].group(2)
     if not text:
         if event.is_reply:
             text = (await event.get_reply_message()).message
@@ -546,10 +546,10 @@ async def nekofy(event: NewMessage.Event) -> None:
 
 @client.onMessage(command=("pasta", plugin_category),
                   outgoing=True,
-                  regex="pasta(?: |$|\n)([\s\S]*)")
+                  regex="(cp|pasta)(?: |$|\n)([\s\S]*)")
 async def copypasta(event: NewMessage.Event) -> None:
     """Copypasta the famous meme."""
-    text = event.matches[0].group(1)
+    text = event.matches[0].group(2)
     if not text:
         if event.is_reply:
             text = (await event.get_reply_message()).message
@@ -599,12 +599,12 @@ async def spongemock(event: NewMessage.Event) -> None:
     await event.answer(f"__{mocked_text}__")
 
 
-@client.onMessage(command=("waifu", plugin_category),
+@client.onMessage(command=("wyfu", plugin_category),
                   outgoing=True,
-                  regex="waifu(?: |$|\n)([\s\S]*)")
+                  regex="(wyfu|waifu)(?: |$|\n)([\s\S]*)")
 async def waifu(event: NewMessage.Event) -> None:
     """Generate random waifu sticker with the text!"""
-    text = event.matches[0].group(1)
+    text = event.matches[0].group(2)
     if not text:
         if event.is_reply:
             text = (await event.get_reply_message()).message
@@ -646,12 +646,12 @@ async def clapz(event: NewMessage.Event) -> None:
     await event.answer(f"__{reply_text}__")
 
 
-@client.onMessage(command=("urbandictionary", plugin_category),
+@client.onMessage(command=("urban", plugin_category),
                   outgoing=True,
-                  regex="ud(?: |$|\n)(.*)")
+                  regex="(ud|urban)(?: |$|\n)(.*)")
 async def urban_dict(event: NewMessage.Event) -> None:
-    """ Looks up words in the Urban Dictionary. """
-    query = event.matches[0].group(1)
+    """ Looks up words in the Urban Dictionary."""
+    query = event.matches[0].group(2)
     urban_dict_helper = asyncurban.UrbanDictionary()
     try:
         urban_def = await urban_dict_helper.get_word(query)
@@ -659,8 +659,8 @@ async def urban_dict(event: NewMessage.Event) -> None:
         await event.answer(
             f"`Sorry, couldn't find any results for:` **{query}**")
         return
-    await event.answer("**Text**: " + query + "\n\n**Meaning**: `" +
-                       urban_def.definition + "`\n\n" + "**Example**: __" +
+    await event.answer("**Text**:\n" + query + "\n\n**Meaning**:\n`" +
+                       urban_def.definition + "`\n\n" + "**Example**:\n__" +
                        urban_def.example + "__")
 
 

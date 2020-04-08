@@ -88,7 +88,9 @@ class UserBotClient(TelegramClient):
 
                 UBcommand = Command(
                     func, handlers,
-                    inspect.cleandoc(help_doc).format(**doc_args), builtin)
+                    inspect.cleandoc(help_doc).format(prefix=self.prefix
+                                                      or '.',
+                                                      **doc_args), builtin)
                 category = category.lower()
                 self.commands.update({com: UBcommand})
                 update_dict(self.commandcategories, category, com)

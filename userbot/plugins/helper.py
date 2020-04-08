@@ -203,24 +203,27 @@ async def helper(event: NewMessage.Event) -> None:
         elif arg in [*enabled, *disabled]:
             merged = {**enabled, **disabled}
             command = merged.get(arg)
-            text = (f"**{arg.title()} command:**\n"
-                    f"  **Disableable:** `{not command.builtin}`\n")
+            text = (
+                f"**Here's the info for the** `{arg}` **command:**\n\n"
+                f"• **Can be disabled:** `{'Yes' if not command.builtin else 'No'}`\n"
+            )
             if arg1:
                 filename = os.path.relpath(command.func.__code__.co_filename)
                 text += (
-                    f"  **Registered function:** `{command.func.__name__}`\n"
-                    f"    **File:** `{filename}`\n"
-                    f"    **Line:** `{command.func.__code__.co_firstlineno}`\n"
+                    "\n• **Developer/Debug Info:**\n"
+                    f"   - **File:** `{filename}`\n"
+                    f"      - **Registered function:** `{command.func.__name__}`\n"
+                    f"      - **Line:** `{command.func.__code__.co_firstlineno}`\n"
                 )
-            text += ("\n" f"{command.info}")
+            text += ("\n• **Syntax/Docs:**\n" f"{command.info}")
         elif arg in categories:
             category = categories.get(arg)
             text = f"**{arg.title()} commands:**"
             for com in sorted(category):
-                text += f"\n    **{com}**"
+                text += f"\n    • **{com}**"
         else:
             await event.answer(
-                "`Couldn't find the specified command or command category!`")
+                "`Couldn't find the specified command or category!`")
             return
     else:
         text = (f"Documented commands can be found [HERE!]({link})\n"
@@ -230,7 +233,7 @@ async def helper(event: NewMessage.Event) -> None:
                 f"  __{client.prefix or '.'}help all__\n\n"
                 "**Available command categories:**")
         for category in sorted(categories.keys()):
-            text += f"\n    **{category}**"
+            text += f"\n    • **{category}**"
     await event.answer(text, link_preview=False)
 
 
