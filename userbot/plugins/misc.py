@@ -306,5 +306,6 @@ async def git_repo(event: NewMessage.Event) -> None:
     except Exception as e:
         LOGGER.info("Couldnt fetch the repo link.")
         LOGGER.debug(e)
-        remote_url = "https://github.com/AvinashReddy3108/PaperplaneRemix"
-    await event.answer(f"[PaperplaneRemix]({remote_url})")
+        remote_url = "https://github.com/AvinashReddy3108/PaperplaneRemix.git"
+    await event.answer(
+        f"Click [here]({remote_url}) to check out my userbot's source code.")
