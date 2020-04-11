@@ -16,14 +16,18 @@
 
 import aiohttp
 import asyncio
-from typing import Tuple, Union
+import io
+import PIL
+from typing import Tuple, Union, BinaryIO
 
 import asyncurban
 from cowpy import cow
 import random
 import re
+from PIL import ImageEnhance, ImageOps
 
 from telethon.errors import rpcerrorlist
+from telethon.tl import types
 
 from userbot import client
 from userbot.utils.events import NewMessage
@@ -517,7 +521,7 @@ async def decide(event: NewMessage.Event) -> None:
 
 @client.onMessage(command=("lmg/lmgtfy", plugin_category),
                   outgoing=True,
-                  regex="(lmgtfy|lmg)(?: |$|\n)(.*)")
+                  regex="lmg(tfy)?(?: |$|\n)(.*)")
 async def lmgtfy(event: NewMessage.Event) -> None:
     """Let me Google that for you real quick."""
     query = event.matches[0].group(2)
@@ -597,7 +601,7 @@ async def zalgofy(event: NewMessage.Event) -> None:
 
 @client.onMessage(command=("str/stretch", plugin_category),
                   outgoing=True,
-                  regex="(str|stretch)(?: |$|\n)([\s\S]*)")
+                  regex="str(etch)?(?: |$|\n)([\s\S]*)")
 async def slinky(event: NewMessage.Event) -> None:
     """Stretch it like it's rubber!"""
     text = event.matches[0].group(2)
@@ -690,7 +694,7 @@ async def spongemock(event: NewMessage.Event) -> None:
 
 @client.onMessage(command=("wyfu/waifu", plugin_category),
                   outgoing=True,
-                  regex="(wyfu|waifu)(?: |$|\n)([\s\S]*)")
+                  regex="(wy|wai)fu(?: |$|\n)([\s\S]*)")
 async def waifu(event: NewMessage.Event) -> None:
     """Generate random waifu sticker with the text!"""
     text = event.matches[0].group(2)
@@ -702,7 +706,7 @@ async def waifu(event: NewMessage.Event) -> None:
             return
     animus = [20, 32, 33, 40, 41, 42, 58]
     sticcers = await client.inline_query(
-        "stickerizerbot", f"#{random.choice(animus)}{deEmojify(text)}")
+        "stickerizerbot", f"#{random.choice(animus)}{(await deEmojify(text))}")
     await sticcers[0].click(event.chat_id,
                             reply_to=event.reply_to_msg_id,
                             silent=True if event.is_reply else False,
@@ -782,11 +786,56 @@ async def slap(event: NewMessage.Event) -> None:
                                               throws=random.choice(THROW),
                                               where=random.choice(WHERE))
             await event.answer(f"__{caption}__",
-                               reply=True,
                                reply_to=event.reply_to_msg_id)
         except Exception:
             continue
     await event.delete()
+
+
+@client.onMessage(command=("deepfry", plugin_category),
+                  outgoing=True,
+                  regex=r"(deep)?fry(?: |$)(\d*)")
+async def mamma_mia(event: NewMessage.Event) -> None:
+    """Deep fry images and stickers!"""
+    frycount = event.matches[0].group(2) or 1
+    if event.reply_to_msg_id:
+        potato = await event.get_reply_message()
+        if not await _is_fryable_event(potato):
+            await event.answer("`Invalid message type!`")
+            return
+    else:
+        potato = None
+        async for msg in client.iter_messages(event.chat_id,
+                                              offset_id=event.message.id,
+                                              limit=10):
+            if await _is_fryable_event(msg):
+                potato = msg
+                break
+        if not potato:
+            await event.answer(
+                "`Couldn't find any acceptable media in the recent messages.`")
+            return
+
+    # download photo as byte array.
+    data = potato.photo if potato.photo else potato.media.document
+    image = io.BytesIO()
+    await potato.download_media(file=image)
+    image = PIL.Image.open(image)
+
+    # fry the image
+    await event.answer("`Firing up the deepfryer! 🔥`")
+    for _ in range(frycount):
+        image = await deepfry(image)
+
+    fried_io = io.BytesIO()
+    fried_io.name = "deepfried_image.jpeg"
+    image.save(fried_io, "JPEG")
+    fried_io.seek(0)
+    try:
+        await event.answer(file=fried_io)
+        await event.delete()
+    except rpcerrorlist.TimeoutError:
+        await event.answer("`Event timed out.`")
 
 
 @client.onMessage(outgoing=True, regex="^Oof$", disable_prefix=True)
@@ -819,9 +868,60 @@ async def keks(event: NewMessage.Event) -> None:
         await event.answer(":" + uio[i % 2])
 
 
-def deEmojify(inputString):
-    """ Remove emojis and other non-safe characters from string """
+async def deEmojify(inputString: str) -> str:
+    """Remove emojis and other non-safe characters from string"""
     return re.sub(EMOJI_PATTERN, '', inputString)
+
+
+async def _is_fryable_event(event: NewMessage.Event) -> bool:
+    """Checks if the given image/sticker is worthy of the fry or not!"""
+    if (event.sticker
+            and not event.sticker.mime_type == 'application/x-tgsticker'
+        ) or event.photo:
+        return True
+    if event.document and "image" in event.document.mime_type:
+        return True
+    return False
+
+
+# Copyright (c) 2017 Ovyerus; License: MIT
+async def deepfry(img: BinaryIO) -> BinaryIO:
+    """Deepfry logic!"""
+    colours = ((random.randint(50, 200), random.randint(40, 170),
+                random.randint(40, 190)), (random.randint(190, 255),
+                                           random.randint(170, 240),
+                                           random.randint(180, 250)))
+
+    img = img.copy().convert("RGB")
+
+    # Crush image to hell and back
+    img = img.convert("RGB")
+    width, height = img.width, img.height
+    img = img.resize((int(width**random.uniform(
+        0.8, 0.9)), int(height**random.uniform(0.8, 0.9))),
+                     resample=PIL.Image.LANCZOS)
+    img = img.resize((int(width**random.uniform(
+        0.85, 0.95)), int(height**random.uniform(0.85, 0.95))),
+                     resample=PIL.Image.BILINEAR)
+    img = img.resize((int(width**random.uniform(
+        0.89, 0.98)), int(height**random.uniform(0.89, 0.98))),
+                     resample=PIL.Image.BICUBIC)
+    img = img.resize((width, height), resample=PIL.Image.BICUBIC)
+    img = ImageOps.posterize(img, random.randint(3, 7))
+
+    # Generate colour overlay
+    overlay = img.split()[0]
+    overlay = ImageEnhance.Contrast(overlay).enhance(random.uniform(1.0, 2.0))
+    overlay = ImageEnhance.Brightness(overlay).enhance(random.uniform(
+        1.0, 2.0))
+
+    overlay = ImageOps.colorize(overlay, colours[0], colours[1])
+
+    # Overlay red and yellow onto main image and sharpen the hell out of it
+    img = PIL.Image.blend(img, overlay, random.uniform(0.1, 0.4))
+    img = ImageEnhance.Sharpness(img).enhance(random.randint(5, 300))
+
+    return img
 
 
 async def _request(

@@ -62,7 +62,7 @@ class UserBotClient(TelegramClient):
                   command: str or tuple = None,
                   edited: bool = True,
                   info: str = None,
-                  doc_args: dict = {},
+                  doc_kwargs: dict = {},
                   **kwargs) -> callable:
         """Method to register a function without the client"""
 
@@ -90,7 +90,7 @@ class UserBotClient(TelegramClient):
                     func, handlers,
                     inspect.cleandoc(help_doc).format(prefix=self.prefix
                                                       or '.',
-                                                      **doc_args), builtin)
+                                                      **doc_kwargs), builtin)
                 category = category.lower()
                 self.commands.update({com: UBcommand})
                 update_dict(self.commandcategories, category, com)
