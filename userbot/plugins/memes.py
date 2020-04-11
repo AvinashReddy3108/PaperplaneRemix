@@ -519,7 +519,7 @@ async def decide(event: NewMessage.Event) -> None:
         await event.answer("`Event timed out!`")
 
 
-@client.onMessage(command=("lmg/lmgtfy", plugin_category),
+@client.onMessage(command=("lmgtfy", plugin_category),
                   outgoing=True,
                   regex="lmg(tfy)?(?: |$|\n)(.*)")
 async def lmgtfy(event: NewMessage.Event) -> None:
@@ -540,7 +540,7 @@ async def lmgtfy(event: NewMessage.Event) -> None:
         \n[{query}]({clickbait})")
 
 
-@client.onMessage(command=("vpr/vapor", plugin_category),
+@client.onMessage(command=("vapor", plugin_category),
                   outgoing=True,
                   regex="(vpr|vapor)(?: |$|\n)([\s\S]*)")
 async def vapor(event: NewMessage.Event) -> None:
@@ -564,7 +564,7 @@ async def vapor(event: NewMessage.Event) -> None:
     await event.answer(vaporized_text)
 
 
-@client.onMessage(command=("zlg/zalgo", plugin_category),
+@client.onMessage(command=("zalgo", plugin_category),
                   outgoing=True,
                   regex="(zlg|zalgo)(?: |$|\n)([\s\S]*)")
 async def zalgofy(event: NewMessage.Event) -> None:
@@ -599,7 +599,7 @@ async def zalgofy(event: NewMessage.Event) -> None:
     await event.answer(f"`{chaotic_text}`")
 
 
-@client.onMessage(command=("str/stretch", plugin_category),
+@client.onMessage(command=("stretch", plugin_category),
                   outgoing=True,
                   regex="str(etch)?(?: |$|\n)([\s\S]*)")
 async def slinky(event: NewMessage.Event) -> None:
@@ -617,7 +617,7 @@ async def slinky(event: NewMessage.Event) -> None:
     await event.answer(f"__{reply_text}__")
 
 
-@client.onMessage(command=("owo/uwu", plugin_category),
+@client.onMessage(command=("uwu", plugin_category),
                   outgoing=True,
                   regex="(owo|uwu)(?: |$|\n)([\s\S]*)")
 async def nekofy(event: NewMessage.Event) -> None:
@@ -637,7 +637,7 @@ async def nekofy(event: NewMessage.Event) -> None:
     await event.answer(f"__{reply_text}__")
 
 
-@client.onMessage(command=("cp/pasta", plugin_category),
+@client.onMessage(command=("pasta", plugin_category),
                   outgoing=True,
                   regex="(cp|pasta)(?: |$|\n)([\s\S]*)")
 async def copypasta(event: NewMessage.Event) -> None:
@@ -692,7 +692,7 @@ async def spongemock(event: NewMessage.Event) -> None:
     await event.answer(f"__{mocked_text}__")
 
 
-@client.onMessage(command=("wyfu/waifu", plugin_category),
+@client.onMessage(command=("waifu", plugin_category),
                   outgoing=True,
                   regex="(wy|wai)fu(?: |$|\n)([\s\S]*)")
 async def waifu(event: NewMessage.Event) -> None:
@@ -706,7 +706,7 @@ async def waifu(event: NewMessage.Event) -> None:
             return
     animus = [20, 32, 33, 40, 41, 42, 58]
     sticcers = await client.inline_query(
-        "stickerizerbot", f"#{random.choice(animus)}{(await deEmojify(text))}")
+        "stickerizerbot", f"#{random.choice(animus)}{(deEmojify(text))}")
     await sticcers[0].click(event.chat_id,
                             reply_to=event.reply_to_msg_id,
                             silent=True if event.is_reply else False,
@@ -739,7 +739,7 @@ async def clapz(event: NewMessage.Event) -> None:
     await event.answer(f"__{reply_text}__")
 
 
-@client.onMessage(command=("ud/urban", plugin_category),
+@client.onMessage(command=("urban", plugin_category),
                   outgoing=True,
                   regex="(ud|urban)(?: |$|\n)(.*)")
 async def urban_dict(event: NewMessage.Event) -> None:
@@ -868,7 +868,7 @@ async def keks(event: NewMessage.Event) -> None:
         await event.answer(":" + uio[i % 2])
 
 
-async def deEmojify(inputString: str) -> str:
+def deEmojify(inputString: str) -> str:
     """Remove emojis and other non-safe characters from string"""
     return re.sub(EMOJI_PATTERN, '', inputString)
 
