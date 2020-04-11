@@ -797,7 +797,7 @@ async def slap(event: NewMessage.Event) -> None:
                   regex=r"(deep)?fry(?: |$)(\d*)")
 async def mamma_mia(event: NewMessage.Event) -> None:
     """Deep fry images and stickers!"""
-    frycount = event.matches[0].group(2) or 1
+    frycount = int(event.matches[0].group(2)) or 1
     if event.reply_to_msg_id:
         potato = await event.get_reply_message()
         if not await _is_fryable_event(potato):
