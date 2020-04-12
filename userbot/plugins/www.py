@@ -142,8 +142,7 @@ async def urban_dict(event: NewMessage.Event) -> None:
             wikipedia.exceptions.PageError) as error:
         await event.answer(f"**Error:**\n`{error}`")
         return
-    await event.answer("**Text:**`" + query + "`\n**Result:**\n__" + result +
-                       "__")
+    await event.answer(f"**Text:** `{query}`\n\n**Result:**\n__{result}")
 
 
 async def _sub_shell(cmd: str) -> Tuple[str, str]:

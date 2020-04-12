@@ -752,9 +752,9 @@ async def urban_dict(event: NewMessage.Event) -> None:
         await event.answer(
             f"`Sorry, couldn't find any results for:` **{query}**")
         return
-    await event.answer("**Text**:\n" + query + "\n\n**Meaning**:\n`" +
-                       urban_def.definition + "`\n\n" + "**Example**:\n__" +
-                       urban_def.example + "__")
+    await event.answer(
+        f"**Text**: `{query}`\n\n**Meaning**:\n`{urban_def.definition}`\n\n**Example**:\n__{urban_def.example}__"
+    )
 
 
 @client.onMessage(command=("slap", plugin_category),
