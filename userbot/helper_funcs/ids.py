@@ -39,12 +39,12 @@ async def get_user_from_msg(event: NewMessage.Event) -> Union[int, str, None]:
     if event.entities:
         for entity in event.entities:
             if isinstance(entity, types.MessageEntityMentionName):
-                user = entity.user_id
+                return entity.user_id
             elif isinstance(entity, types.MessageEntityMention):
                 offset = entity.offset
                 length = entity.length
                 maxlen = offset + length
-                user = event.text[offset:maxlen]
+                return event.text[offset:maxlen]
 
     if match:
         if isinstance(match, str) and match.isdigit():
