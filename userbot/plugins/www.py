@@ -18,7 +18,6 @@ import asyncio
 import concurrent
 import datetime
 import functools
-import re
 import sys
 from typing import Tuple
 
