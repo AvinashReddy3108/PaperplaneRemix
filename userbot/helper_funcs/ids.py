@@ -26,22 +26,25 @@ LOGGER = logging.getLogger(__name__)
 
 
 async def get_user_from_msg(event: NewMessage.Event) -> Union[int, str, None]:
-    """Get a user's ID or username from the event's regex pattern match"""
+    """A legacy helper function to get user object from the event."""
     user = None
     match = event.matches[0].group(1)
 
-    if match == "this":
-        match = str(event.chat.id)
+    if event.reply_to_msg_id and not match:
+        return (await event.get_reply_message()).from_id
+
+    if match == "me":
+        return (await event.client.get_me()).id
 
     if event.entities:
         for entity in event.entities:
             if isinstance(entity, types.MessageEntityMentionName):
-                return entity.user_id
+                user = entity.user_id
             elif isinstance(entity, types.MessageEntityMention):
                 offset = entity.offset
                 length = entity.length
                 maxlen = offset + length
-                return event.text[offset:maxlen]
+                user = event.text[offset:maxlen]
 
     if match:
         if isinstance(match, str) and match.isdigit():

@@ -31,6 +31,7 @@ from telethon.tl import types
 
 from userbot import client
 from userbot.utils.events import NewMessage
+from userbot.helper_funcs.ids import get_user_from_msg
 
 plugin_category = "memes"
 
@@ -56,7 +57,7 @@ INSULTS = [
     "Brains aren't everything. In your case they're nothing.",
     "Usually people live and learn. You just live.",
     "I don't know what makes you so stupid, but it really works.",
-    "Keep talking, someday you'll say something intelligent!\n__(I doubt it though)__",
+    "Keep talking, someday you'll say something intelligent!\nI doubt it though.",
     "Shock me, say something intelligent.",
     "Your IQ's lower than your shoe size.",
     "Alas! Your neurotransmitters are no more working.",
@@ -524,10 +525,7 @@ async def decide(event: NewMessage.Event) -> None:
                   regex="lmg(tfy)?(?: |$|\n)(.*)")
 async def lmgtfy(event: NewMessage.Event) -> None:
     """Let me Google that for you real quick."""
-    query = event.matches[0].group(2)
-    if not query:
-        await event.answer("`Let me Google the void for you real quick.`")
-        return
+    query = event.matches[0].group(2) or "How to use Google?"
     query_encoded = query.replace(" ", "+")
     lmgtfy_url = f"http://letmegooglethat.com/?q={query_encoded}"
     short_url = await _request(f'http://is.gd/create.php', {
@@ -609,7 +607,7 @@ async def slinky(event: NewMessage.Event) -> None:
         if event.is_reply:
             text = (await event.get_reply_message()).message
         else:
-            await event.answer("__GiiiiiiiB sooooooomeeeeeee teeeeeeext!__")
+            await event.answer("`GiiiiiiiB sooooooomeeeeeee teeeeeeext!`")
             return
     count = random.randint(3, 10)
     reply_text = re.sub(r"([aeiouAEIOUａｅｉｏｕＡＥＩＯＵаеиоуюяыэё])", (r"\1" * count),
@@ -647,8 +645,7 @@ async def copypasta(event: NewMessage.Event) -> None:
         if event.is_reply:
             text = (await event.get_reply_message()).message
         else:
-            await event.answer(
-                "__😂🅱️IvE👐sOME👅text👅for✌️Me👌tO👐MAkE👀iT💞funNy!💦__")
+            await event.answer("`😂🅱️IvE👐sOME👅text👅for✌️Me👌tO👐MAkE👀iT💞funNy!💦`")
             return
     reply_text = random.choice(PASTAMOJIS)
     b_char = random.choice(text).lower()
@@ -679,7 +676,7 @@ async def spongemock(event: NewMessage.Event) -> None:
         if event.is_reply:
             text = (await event.get_reply_message()).message
         else:
-            await event.answer("__I cAnT MoCk tHe vOId!__")
+            await event.answer("`I cAnT MoCk tHe vOId!`")
             return
     reply_text = list()
     for charac in text:
@@ -702,7 +699,7 @@ async def waifu(event: NewMessage.Event) -> None:
         if event.is_reply:
             text = (await event.get_reply_message()).message
         else:
-            await event.answer("`I can't animu-fy the void!`")
+            await event.answer("`No text given, hence the waifu ran away.`")
             return
     animus = [20, 32, 33, 40, 41, 42, 58]
     sticcers = await client.inline_query(
@@ -732,7 +729,7 @@ async def clapz(event: NewMessage.Event) -> None:
         if event.is_reply:
             text = (await event.get_reply_message()).message
         else:
-            await event.answer("__Hah, I don't clap for the void!__")
+            await event.answer("`Hah, I don't clap for the void!`")
             return
     clapped_text = re.sub(" ", " 👏 ", text)
     reply_text = f"👏 {clapped_text} 👏"
@@ -749,8 +746,7 @@ async def urban_dict(event: NewMessage.Event) -> None:
     try:
         urban_def = await urban_dict_helper.get_word(query)
     except asyncurban.WordNotFoundError:
-        await event.answer(
-            f"`Sorry, couldn't find any results for:` **{query}**")
+        await event.answer(f"`Sorry, couldn't find any results for:` {query}")
         return
     await event.answer(
         f"**Text**: `{query}`\n\n**Meaning**:\n`{urban_def.definition}`\n\n**Example**:\n__{urban_def.example}__"
@@ -759,37 +755,53 @@ async def urban_dict(event: NewMessage.Event) -> None:
 
 @client.onMessage(command=("slap", plugin_category),
                   outgoing=True,
-                  regex=r"slap(?: |$|\n)([\s\S]*)")
+                  regex=r"slap(?: |$)(.*)")
 async def slap(event: NewMessage.Event) -> None:
     """Slap a user with random objects for fun!"""
-    match = event.matches[0].group(1)
-    args, _ = await client.parse_arguments(match)
-
-    if not args and event.reply_to_msg_id:
-        reply = await event.get_reply_message()
-        args.append(reply.sender_id)
-    if not args:
-        await event.answer("__I can't slap the void!__")
+    target = await get_user_from_msg(event)
+    if not target:
+        await event.answer("`I can't slap the void!`")
         return
 
-    entity = await event.get_chat()
-    for user in args:
-        if isinstance(user, list):
-            continue
-        try:
-            retard = await event.client.get_entity(user)
-            slapped = f"@{retard.username}" if retard.username else f"[{retard.first_name}](tg://user?id={retard.id})"
-            template = random.choice(SLAP_TEMPLATES)
-            caption = "..." + template.format(victim=slapped,
-                                              item=random.choice(ITEMS),
-                                              hits=random.choice(HIT),
-                                              throws=random.choice(THROW),
-                                              where=random.choice(WHERE))
-            await event.answer(f"__{caption}__",
-                               reply_to=event.reply_to_msg_id)
-        except Exception:
-            continue
-    await event.delete()
+    try:
+        retard = await event.client.get_entity(target)
+        slapped = f"@{retard.username}" if retard.username else f"[{retard.first_name}](tg://user?id={retard.id})"
+        template = random.choice(SLAP_TEMPLATES)
+        caption = "..." + template.format(victim=slapped,
+                                          item=random.choice(ITEMS),
+                                          hits=random.choice(HIT),
+                                          throws=random.choice(THROW),
+                                          where=random.choice(WHERE))
+        await event.answer(f"__{caption}__")
+    except:
+        await event.answer("`Unfortunately, I can't slap this person.`")
+
+
+@client.onMessage(command=("f", plugin_category),
+                  outgoing=True,
+                  regex=r"f(?: |$)(.)")
+async def payf(event: NewMessage.Event) -> None:
+    """Pay your respects, with custom/random emojis"""
+    paytext = event.matches[0].group(1)
+    if not isEmoji(paytext):
+        return
+    pay = "{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}".format(
+        paytext * 8, paytext * 8, paytext * 2, paytext * 2, paytext * 2,
+        paytext * 6, paytext * 6, paytext * 2, paytext * 2, paytext * 2,
+        paytext * 2, paytext * 2)
+    await event.answer(pay)
+
+
+@client.onMessage(command=("bluetext", plugin_category),
+                  outgoing=True,
+                  regex=r"(bt|b(lue)?text)$")
+async def bt(event: NewMessage.Event) -> None:
+    """ Believe me, you will find this useful. """
+    if event.is_group:
+        await event.answer(
+            "/BLUETEXT /MUST /CLICK.\n"
+            f"{random.choice(['/ARE /YOU', '/AM /I'])} /A /STUPID /ANIMAL /WHICH /IS /ATTRACTED /TO /COLOURS?"
+        )
 
 
 @client.onMessage(command=("deepfry", plugin_category),
@@ -823,7 +835,6 @@ async def mamma_mia(event: NewMessage.Event) -> None:
     image = PIL.Image.open(image)
 
     # fry the image
-    await event.answer("`Firing up the deepfryer! 🔥`")
     for _ in range(frycount):
         image = await deepfry(image)
 
@@ -871,6 +882,10 @@ async def keks(event: NewMessage.Event) -> None:
 def deEmojify(inputString: str) -> str:
     """Remove emojis and other non-safe characters from string"""
     return re.sub(EMOJI_PATTERN, '', inputString)
+
+
+def isEmoji(inputString: str) -> bool:
+    return bool(re.match(EMOJI_PATTERN, inputString))
 
 
 async def _is_fryable_event(event: NewMessage.Event) -> bool:

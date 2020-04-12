@@ -18,6 +18,7 @@ import asyncio
 import concurrent
 import datetime
 import functools
+import re
 import sys
 from typing import Tuple
 
@@ -31,6 +32,7 @@ from userbot.utils.helpers import get_chat_link, format_speed
 from userbot.utils.events import NewMessage
 
 plugin_category = "www"
+
 DCs = {
     1: "149.154.175.50",
     2: "149.154.167.51",
@@ -38,6 +40,7 @@ DCs = {
     4: "149.154.167.91",
     5: "91.108.56.149"
 }
+
 testing = "`Testing from %(isp)s`"
 hosted = "`Hosted by %(sponsor)s (%(name)s) [%(d)0.2f km]: %(latency)s ms`"
 download = "`Download: %0.2f %s%s/s`"
