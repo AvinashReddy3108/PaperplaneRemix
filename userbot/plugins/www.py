@@ -17,10 +17,12 @@
 import asyncio
 import concurrent
 import datetime
+import functools
 import sys
 from typing import Tuple
 
 from speedtest import Speedtest
+import wikipedia
 
 from telethon.tl import functions
 
@@ -126,6 +128,22 @@ async def speedtest(event: NewMessage.Event) -> None:
     extra = await get_chat_link(event, event.id)
     await event.answer(text,
                        log=("speedtest", f"Performed a speedtest in {extra}."))
+
+
+@client.onMessage(command=("wiki", plugin_category),
+                  outgoing=True,
+                  regex="(wk|wiki)(?: |$|\n)(.*)")
+async def urban_dict(event: NewMessage.Event) -> None:
+    """ Looks up words in the Urban Dictionary."""
+    query = event.matches[0].group(2)
+    try:
+        result = await _run_sync(functools.partial(wikipedia.summary, query))
+    except (wikipedia.exceptions.DisambiguationError,
+            wikipedia.exceptions.PageError) as error:
+        await event.answer(f"**Error:**\n`{error}`")
+        return
+    await event.answer("**Text:**`" + query + "`\n**Result:**\n__" + result +
+                       "__")
 
 
 async def _sub_shell(cmd: str) -> Tuple[str, str]:

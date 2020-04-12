@@ -47,8 +47,8 @@ AFKMEMEZ = [
     "Hello, welcome to my away message, how may I ignore you today?",
     "You know the drill, you leave a message, and I'll ignore it.",
     "I'm away from the keyboard at the moment,\
-        \nbut if you'll scream loud enough at your screen, \
-        I might just hear you.",
+        \nbut if you'll scream loud enough at your screen,\
+        \nI might just hear you.",
     "I went that way\n---->",
     "This is an away message and I am away... so leave a message.",
     "I went this way\n<----",
