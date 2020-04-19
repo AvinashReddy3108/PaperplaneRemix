@@ -521,17 +521,17 @@ async def _get_new_ub_pack(packs: list, is_animated: bool) -> Tuple[str, str]:
         if "_kang_pack" in pack:
             if "_animated" in pack:
                 if is_animated:
-                    ub_packs = ub_packs.append(pack)
+                    ub_packs.append(pack)
             else:
                 if not is_animated:
-                    ub_packs = ub_packs.append(pack)
+                    ub_packs.append(pack)
 
     pack = sorted(ub_packs)[-1]  # Fetch the last pack
     l_char = pack[-1:]  # Check if the suffix is a digit
     if l_char.isdigit():
         pack = pack[:-1] + str(int(l_char) + 1)  # ++ the suffix
     else:
-        pack = pack + "_1"  # Append the suffix
+        pack = pack + "_2"  # Append the suffix
 
     user = await client.get_me()
     tag = '@' + user.username if user.username else user.id
