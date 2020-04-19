@@ -77,7 +77,7 @@ class UserBotClient(TelegramClient):
             if self.register_commands and command:
                 handlers = events._get_handlers(func)
                 category = "misc"
-                doc_args.setdefault('prefix', self.prefix or '.')
+                doc_kwargs.setdefault('prefix', self.prefix or '.')
                 if isinstance(command, tuple):
                     if len(command) == 2:
                         com, category = command
