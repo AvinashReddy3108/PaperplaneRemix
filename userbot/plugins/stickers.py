@@ -530,7 +530,7 @@ async def _get_new_ub_pack(conv: custom.conversation.Conversation, packs: list,
     r11 = await conv.get_response()
     LOGGER.debug("Stickers:" + r11.text)
     await client.send_read_acknowledge(conv.chat_id)
-    if "120 stickers" in rx.text:
+    if "120 stickers" in r11.text:
         l_char = pack[-1:]  # Check if the suffix is a digit
         if l_char.isdigit():
             pack = pack[:-1] + str(int(l_char) + 1)  # ++ the suffix
