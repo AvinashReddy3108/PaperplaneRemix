@@ -50,13 +50,14 @@ def removebg_post(API_KEY: str, media: bytes or str):
 
 
 def dogbin_post(text: str):
-    response = requests.post('https://del.dog/documents',
-                             data=text.encode('UTF-8'),
-                             headers={
-                                 'Content-type': 'text/plain',
-                                 'Accept': 'application/json',
-                                 'charset': 'utf-8'
-                             })
+    response = requests.post(
+        'https://del.dog/documents',
+        data=text.encode('UTF-8') if isinstance(text, str) else text,
+        headers={
+            'Content-type': 'text/plain',
+            'Accept': 'application/json',
+            'charset': 'utf-8'
+        })
     return response
 
 
@@ -277,7 +278,10 @@ async def deldog(event: NewMessage.Event) -> None:
         text = match.strip()
     elif event.reply_to_msg_id:
         reply = await event.get_reply_message()
-        text = reply.raw_text
+        if reply.document and reply.document.mime_type.startswith('text'):
+            text = await reply.download_media(file=bytes)
+        else:
+            text = reply.raw_text
     else:
         await event.answer("`Provide something to paste on` https://del.dog")
         return

@@ -179,6 +179,7 @@ async def yt_dl(event):
                 await client.send_file(event.chat_id,
                                        media,
                                        caption=href,
+                                       reply_to=event.reply_to_msg_id,
                                        force_document=force_document)
                 if thumb:
                     os.remove(thumb)

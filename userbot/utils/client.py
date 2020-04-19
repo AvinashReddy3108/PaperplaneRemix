@@ -77,6 +77,7 @@ class UserBotClient(TelegramClient):
             if self.register_commands and command:
                 handlers = events._get_handlers(func)
                 category = "misc"
+                doc_args.setdefault('prefix', self.prefix or '.')
                 if isinstance(command, tuple):
                     if len(command) == 2:
                         com, category = command
@@ -88,9 +89,7 @@ class UserBotClient(TelegramClient):
 
                 UBcommand = Command(
                     func, handlers,
-                    inspect.cleandoc(help_doc).format(prefix=self.prefix
-                                                      or '.',
-                                                      **doc_kwargs), builtin)
+                    inspect.cleandoc(help_doc).format(**doc_kwargs), builtin)
                 category = category.lower()
                 self.commands.update({com: UBcommand})
                 update_dict(self.commandcategories, category, com)
