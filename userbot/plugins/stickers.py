@@ -22,7 +22,7 @@ import itertools
 import PIL
 from typing import BinaryIO, List, Sequence, Tuple, Union
 
-from telethon.tl import functions, types
+from telethon.tl import functions, types, custom
 
 from userbot import client, LOGGER
 from userbot.utils.helpers import get_chat_link
@@ -347,25 +347,20 @@ async def kang(event: NewMessage.Event) -> None:
             await client.send_read_acknowledge(conv.chat_id)
             if "120 stickers" in r2.text:
                 if "_kang_pack" in pack:
-                    await event.answer(
-                        "`Current kang pack is full, making a new one!`")
-                    await conv.send_message('/cancel')
-                    r11 = await conv.get_response()
-                    LOGGER.debug("Stickers:" + r11.text)
-                    await client.send_read_acknowledge(conv.chat_id)
-
-                    pack, packnick = await _get_new_ub_pack(packs, is_animated)
-
-                    packtype = "/newanimated" if is_animated else "/newpack"
-                    await conv.send_message(packtype)
-                    r12 = await conv.get_response()
-                    LOGGER.debug("Stickers:" + r12.text)
-                    await client.send_read_acknowledge(conv.chat_id)
-                    await conv.send_message(packnick)
-                    r13 = await conv.get_response()
-                    LOGGER.debug("Stickers:" + r13.text)
-                    await client.send_read_acknowledge(conv.chat_id)
-                    new_pack = True
+                    pack, packnick, new_pack = await _get_new_ub_pack(
+                        conv, packs, is_animated)
+                    if new_pack:
+                        await event.answer(
+                            "`Current kang pack is full, making a new one!`")
+                        packtype = "/newanimated" if is_animated else "/newpack"
+                        await conv.send_message(packtype)
+                        r13 = await conv.get_response()
+                        LOGGER.debug("Stickers:" + r12.text)
+                        await client.send_read_acknowledge(conv.chat_id)
+                        await conv.send_message(packnick)
+                        r14 = await conv.get_response()
+                        LOGGER.debug("Stickers:" + r13.text)
+                        await client.send_read_acknowledge(conv.chat_id)
                 else:
                     await event.answer(f"`{pack} has reached it's limit!`")
                     await _delete_sticker_messages(first_msg or new_first_msg)
@@ -515,8 +510,12 @@ async def _delete_sticker_messages(
     return await client.delete_messages('@Stickers', messages)
 
 
-async def _get_new_ub_pack(packs: list, is_animated: bool) -> Tuple[str, str]:
+async def _get_new_ub_pack(conv: custom.conversation.Conversation, packs: list,
+                           is_animated: bool) -> Tuple[str, str, bool]:
     ub_packs = []
+    new_pack = False
+    user = await client.get_me()
+    tag = '@' + user.username if user.username else user.id
     for pack in packs:
         if "_kang_pack" in pack:
             if "_animated" in pack:
@@ -527,20 +526,27 @@ async def _get_new_ub_pack(packs: list, is_animated: bool) -> Tuple[str, str]:
                     ub_packs.append(pack)
 
     pack = sorted(ub_packs)[-1]  # Fetch the last pack
-    l_char = pack[-1:]  # Check if the suffix is a digit
-    if l_char.isdigit():
-        pack = pack[:-1] + str(int(l_char) + 1)  # ++ the suffix
-    else:
-        pack = pack + "_2"  # Append the suffix
+    await conv.send_message(pack)
+    r11 = await conv.get_response()
+    LOGGER.debug("Stickers:" + r11.text)
+    await client.send_read_acknowledge(conv.chat_id)
+    if "120 stickers" in rx.text:
+        l_char = pack[-1:]  # Check if the suffix is a digit
+        if l_char.isdigit():
+            pack = pack[:-1] + str(int(l_char) + 1)  # ++ the suffix
+        else:
+            pack = pack + "_2"  # Append the suffix
+        new_pack = True
 
-    user = await client.get_me()
-    tag = '@' + user.username if user.username else user.id
     if is_animated:
         packnick = f"{tag}'s animated kang pack {pack[-1:]}"
     else:
         packnick = f"{tag}'s kang pack {pack[-1:]}"
-
-    return pack, packnick
+    await conv.send_message('/cancel')
+    r12 = await conv.get_response()
+    LOGGER.debug("Stickers:" + r12.text)
+    await client.send_read_acknowledge(conv.chat_id)
+    return pack, packnick, new_pack
 
 
 async def _verify_cs_name(packname: str or None, packs: list) -> str:
