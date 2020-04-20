@@ -352,6 +352,10 @@ async def kang(event: NewMessage.Event) -> None:
                     if new_pack:
                         await event.answer(
                             "`Current kang pack is full, making a new one!`")
+                        await conv.send_message('/cancel')
+                        r12 = await conv.get_response()
+                        LOGGER.debug("Stickers:" + r12.text)
+                        await client.send_read_acknowledge(conv.chat_id)
                         packtype = "/newanimated" if is_animated else "/newpack"
                         await conv.send_message(packtype)
                         r13 = await conv.get_response()
@@ -542,10 +546,7 @@ async def _get_new_ub_pack(conv: custom.conversation.Conversation, packs: list,
         packnick = f"{tag}'s animated kang pack {pack[-1:]}"
     else:
         packnick = f"{tag}'s kang pack {pack[-1:]}"
-    await conv.send_message('/cancel')
-    r12 = await conv.get_response()
-    LOGGER.debug("Stickers:" + r12.text)
-    await client.send_read_acknowledge(conv.chat_id)
+
     return pack, packnick, new_pack
 
 
