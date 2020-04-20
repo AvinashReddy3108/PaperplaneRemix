@@ -803,6 +803,28 @@ async def bt(event: NewMessage.Event) -> None:
             f"{random.choice(['/ARE /YOU', '/AM /I'])} /A /STUPID /ANIMAL /WHICH /IS /ATTRACTED /TO /COLOURS?"
         )
 
+@register(outgoing=True, pattern="^\.moon$")
+async def moon(event):
+    deq = deque(list("🌗🌘🌑🌒🌓🌔🌕🌖"))
+    try:
+        for x in range(32):
+            await sleep(0.1)
+            await event.edit("".join(deq))
+            deq.rotate(1)
+    except BaseException:
+        return
+
+
+@register(outgoing=True, pattern="^\.clock$")
+async def clock(event):
+    deq = deque(list("🕙🕘🕗🕖🕕🕔🕓🕒🕑🕐🕛"))
+    try:
+        for x in range(32):
+            await sleep(0.1)
+            await event.edit("".join(deq))
+            deq.rotate(1)
+    except BaseException:
+        return
 
 @client.onMessage(command=("deepfry", plugin_category),
                   outgoing=True,
