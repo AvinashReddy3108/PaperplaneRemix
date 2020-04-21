@@ -136,7 +136,7 @@ async def speedtest(event: NewMessage.Event) -> None:
                   outgoing=True,
                   regex="(wk|wiki)(?: |$|\n)(.*)")
 async def urban_dict(event: NewMessage.Event) -> None:
-    """ Looks up words in the Urban Dictionary."""
+    """Searches Wikipedia for the given text."""
     query = event.matches[0].group(2)
     try:
         result = await _run_sync(functools.partial(wikipedia.summary, query))

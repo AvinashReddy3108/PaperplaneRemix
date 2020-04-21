@@ -809,7 +809,8 @@ async def bt(event: NewMessage.Event) -> None:
                   regex=r"(deep)?fry(?: |$)(\d*)")
 async def mamma_mia(event: NewMessage.Event) -> None:
     """Deep fry images and stickers!"""
-    frycount = int(event.matches[0].group(2)) or 1
+    frycount = int(event.matches[0].group(
+        2)) if event.matches[0].group(2) != '' else random.randint(1, 3)
     if event.reply_to_msg_id:
         potato = await event.get_reply_message()
         if not await _is_fryable_event(potato):
@@ -829,6 +830,7 @@ async def mamma_mia(event: NewMessage.Event) -> None:
             return
 
     # download photo as byte array.
+    await event.answer("`Firing up the deep-fryer!`")
     data = potato.photo if potato.photo else potato.media.document
     image = io.BytesIO()
     await potato.download_media(file=image)
@@ -846,7 +848,7 @@ async def mamma_mia(event: NewMessage.Event) -> None:
         await event.answer(file=fried_io)
         await event.delete()
     except rpcerrorlist.TimeoutError:
-        await event.answer("`Event timed out.`")
+        await event.answer("`Ran out of oil to fry this pic :P`")
 
 
 @client.onMessage(outgoing=True, regex="^Oof$", disable_prefix=True)
@@ -906,8 +908,6 @@ async def deepfry(img: BinaryIO) -> BinaryIO:
                 random.randint(40, 190)), (random.randint(190, 255),
                                            random.randint(170, 240),
                                            random.randint(180, 250)))
-
-    img = img.copy().convert("RGB")
 
     # Crush image to hell and back
     img = img.convert("RGB")
