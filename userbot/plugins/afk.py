@@ -222,8 +222,8 @@ async def _append_msg(variable: dict, chat: int, event: int) -> None:
 
 
 async def _update_notif_settings(
-    peer: int,
-    settings: types.InputPeerNotifySettings = DEFAULT_MUTE_SETTINGS
+        peer: int,
+        settings: types.InputPeerNotifySettings = DEFAULT_MUTE_SETTINGS
 ) -> None:
     await client(
         functions.account.UpdateNotifySettingsRequest(peer=peer,

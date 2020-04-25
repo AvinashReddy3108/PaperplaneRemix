@@ -237,11 +237,11 @@ class ParallelTransferrer:
         await self._cleanup()
 
     async def download(
-        self,
-        file: TypeLocation,
-        file_size: int,
-        part_size_kb: Optional[float] = None,
-        connection_count: Optional[int] = None
+            self,
+            file: TypeLocation,
+            file_size: int,
+            part_size_kb: Optional[float] = None,
+            connection_count: Optional[int] = None
     ) -> AsyncGenerator[bytes, None]:
         connection_count = connection_count or self._get_connection_count(
             file_size)

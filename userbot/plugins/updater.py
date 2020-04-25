@@ -113,7 +113,7 @@ async def updater(event: NewMessage.Event) -> None:
 
     now = datetime.datetime.now(datetime.timezone.utc)
     def_changelog = changelog = "**PaperplaneRemix changelog:**"
-    for commit in fetched_commits:
+    for commit in reversed(list(fetched_commits)):
         changelog += summary.format(rev=repo.git.rev_parse(commit.hexsha,
                                                            short=7),
                                     summary=commit.summary,

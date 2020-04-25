@@ -892,9 +892,8 @@ def isEmoji(inputString: str) -> bool:
 
 async def _is_fryable_event(event: NewMessage.Event) -> bool:
     """Checks if the given image/sticker is worthy of the fry or not!"""
-    if (event.sticker
-            and not event.sticker.mime_type == 'application/x-tgsticker'
-        ) or event.photo:
+    if (event.sticker and not event.sticker.mime_type
+            == 'application/x-tgsticker') or event.photo:
         return True
     if event.document and "image" in event.document.mime_type:
         return True
@@ -940,9 +939,9 @@ async def deepfry(img: BinaryIO) -> BinaryIO:
 
 
 async def _request(
-    url: str,
-    params: dict = None,
-    data_type: str = None
+        url: str,
+        params: dict = None,
+        data_type: str = None
 ) -> Union[Union[dict, str, Tuple[str, dict]], None]:
     """Helps request data from APIs faster!"""
     async with aiohttp.ClientSession() as session:

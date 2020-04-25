@@ -388,8 +388,8 @@ async def kang(event: NewMessage.Event) -> None:
         sticker = io.BytesIO()
         sticker.name = name
         await sticker_event.download_media(file=sticker)
-        if (sticker_event.sticker and
-                sticker_event.sticker.mime_type == "application/x-tgsticker"):
+        if (sticker_event.sticker and sticker_event.sticker.mime_type
+                == "application/x-tgsticker"):
             sticker.seek(0)
             await conv.send_message(file=sticker, force_document=True)
         else:
@@ -618,7 +618,7 @@ async def _list_packs() -> Tuple[List[str], types.Message]:
 
 
 async def _resolve_messages(
-    args: list, kwargs: dict, sticker_event: types.Message
+        args: list, kwargs: dict, sticker_event: types.Message
 ) -> Tuple[Union[str, None], str, str, bool]:
     sticker_name = "sticker.png"
     pack = None

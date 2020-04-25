@@ -247,9 +247,8 @@ async def _next_offset(end, entities) -> Tuple[int, bool]:
 
 
 async def _self_destructor(
-    event: Union[custom.Message,
-                 Sequence[custom.Message]], timeout: int or float
-) -> Union[custom.Message, Sequence[custom.Message]]:
+        event: Union[custom.Message, Sequence[custom.Message]], timeout: int
+    or float) -> Union[custom.Message, Sequence[custom.Message]]:
     await asyncio.sleep(timeout)
     if isinstance(event, list):
         deleted = []
