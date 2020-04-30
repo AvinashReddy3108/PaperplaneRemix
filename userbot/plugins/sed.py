@@ -26,6 +26,8 @@ from userbot import client
 from userbot.helper_funcs.sed import sub_matches
 from userbot.utils.events import NewMessage
 
+from telethon.tl.types import ChannelParticipantsBots
+
 pattern = (
     r'(?:^|;.+?)'  # Ensure that the expression doesn't go blatant
     r'([1-9]+?)?'  # line: Don't match a 0, sed counts lines from 1
@@ -38,7 +40,8 @@ pattern = (
     r'((?<!;)\w+)?'  # flags: Don't capture if it starts with a semicolon
     r'(?=;|$)'  # Ensure it ends with a semicolon for the next match
 )
-ub_sed_pattern = r"^{}(?:\d+)?s(ed)?"
+ub_sed_pattern = r"^(?:\d+)?s(ed)?"
+ninja_sedbots = ['regexbot', 'regeexbot']
 
 
 @client.onMessage(command="sed",
@@ -47,8 +50,7 @@ ub_sed_pattern = r"^{}(?:\d+)?s(ed)?"
                   regex=(pattern, re.MULTILINE | re.IGNORECASE | re.DOTALL))
 async def sed_substitute(event: NewMessage.Event) -> None:
     """Perfom a GNU like SED substitution of the matched text."""
-    if not re.match(ub_sed_pattern.format(client.prefix or '.'),
-                    event.raw_text):
+    if not re.match(ub_sed_pattern, event.raw_text):
         return
 
     matches = event.matches
@@ -131,5 +133,9 @@ async def ninja(event: NewMessage.Event) -> None:
     """Deletes our sed messages if regexninja is enabled"""
     ninja = client.config['userbot'].getboolean('userbot_regexninja', False)
     if ninja:
-        await asyncio.sleep(0.5)
-        await event.delete()
+        async for bot in client.iter_participants(
+                event.chat_id, filter=ChannelParticipantsBots):
+            if bot.username in ninja_sedbots:
+                await asyncio.sleep(0.3)
+                await event.delete()
+                break
