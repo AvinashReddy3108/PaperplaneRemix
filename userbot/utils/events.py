@@ -131,10 +131,17 @@ class MessageEdited(NewMessage):
     """Custom MessageEdited event inheriting the custom NewMessage event"""
     @classmethod
     def build(cls, update, others=None, self_id=None):
-        """Required to check if message is edited, double events"""
-        if isinstance(
-                update,
-            (types.UpdateEditMessage, types.UpdateEditChannelMessage)):
+        """
+        Required to check if message is edited, double events.
+        Note: Don't handle UpdateEditChannelMessage from channels since the
+              update doesn't show which user edited the message
+        """
+        if isinstance(update, types.UpdateEditMessage):
+            return cls.Event(update.message)
+        elif isinstance(update, types.UpdateEditChannelMessage):
+            if (update.message.edit_date and update.message.is_channel
+                    and not update.message.is_group):
+                return
             return cls.Event(update.message)
 
     class Event(NewMessage.Event):
