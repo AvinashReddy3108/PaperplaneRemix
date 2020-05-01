@@ -55,7 +55,7 @@ def resolve_env(config: configparser.ConfigParser):
     userbot.update({
         userbot_var[17:]: os.getenv(userbot_var, None)
         for userbot_var in list(os.environ)
-        if userbot.var.startswith('external_userbot_')
+        if userbot_var.startswith('external_userbot_')
     })
 
     api_keys = {
