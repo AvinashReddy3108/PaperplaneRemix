@@ -53,9 +53,9 @@ def resolve_env(config: configparser.ConfigParser):
         os.getenv('default_animated_sticker_pack', None)
     }
     userbot.update({
-        userbot_var[17:]: os.getenv(userbot_var, None)
+        userbot_var[12:]: os.getenv(userbot_var, None)
         for userbot_var in list(os.environ)
-        if userbot_var.startswith('external_userbot_')
+        if userbot_var.startswith('ext_userbot_')
     })
 
     api_keys = {
@@ -63,9 +63,9 @@ def resolve_env(config: configparser.ConfigParser):
         'api_key_removebg': os.getenv('api_key_removebg', None)
     }
     api_keys.update({
-        api_key_var[17:]: os.getenv(api_key_var, None)
+        api_key_var[12:]: os.getenv(api_key_var, None)
         for api_key_var in list(os.environ)
-        if api_key_var.startswith('external_api_key_')
+        if api_key_var.startswith('ext_api_key_')
     })
 
     plugins = {
