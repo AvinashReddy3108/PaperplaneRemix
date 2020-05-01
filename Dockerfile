@@ -21,7 +21,7 @@ RUN apk add --no-cache --update \
 COPY . /tmp/userbot_local
 WORKDIR /usr/src/app/PaperplaneRemix/
 
-RUN git clone https://github.com/AvinashReddy3108/PaperplaneRemix.git /usr/src/app/PaperplaneRemix/
+RUN git clone -b staging https://github.com/AvinashReddy3108/PaperplaneRemix.git /usr/src/app/PaperplaneRemix/
 RUN rsync --ignore-existing --recursive /tmp/userbot_local/ /usr/src/app/PaperplaneRemix/
 
 RUN python3 -m pip install --upgrade pip
