@@ -29,7 +29,7 @@ from userbot.utils.events import NewMessage
 from telethon.tl.types import ChannelParticipantsBots
 
 pattern = (
-    r'(?:^|;.+?)'  # Ensure that the expression doesn't go blatant
+    r'(?:^{prefix}|;.+?)'  # Ensure that the expression doesn't go blatant
     r'([1-9]+?)?'  # line: Don't match a 0, sed counts lines from 1
     r'(?:sed|s)'  # The s command (as in substitute)
     r'(?:(?P<d>[^\n\\]))'  # Unknown delimiter with a named group d
@@ -50,9 +50,6 @@ ninja_sedbots = ['regexbot', 'regeexbot']
                   regex=(pattern, re.MULTILINE | re.IGNORECASE | re.DOTALL))
 async def sed_substitute(event: NewMessage.Event) -> None:
     """Perfom a GNU like SED substitution of the matched text."""
-    if not re.match(ub_sed_pattern, event.raw_text):
-        return
-
     matches = event.matches
     reply = await event.get_reply_message()
 
@@ -62,9 +59,9 @@ async def sed_substitute(event: NewMessage.Event) -> None:
             if not original:
                 return
 
-            newStr = await sub_matches(matches, original.raw_text)
+            newStr = await sub_matches(matches, original.text)
             if newStr:
-                await original.reply('[SED]\n\n' + newStr)
+                await original.reply('**「sed」**\n\n' + newStr)
         else:
             total_messages = []  # Append messages to avoid timeouts
             count = 0  # Don't fetch more than ten texts/captions
@@ -80,12 +77,12 @@ async def sed_substitute(event: NewMessage.Event) -> None:
                     break
 
             for message in total_messages:
-                newStr = await sub_matches(matches, message.raw_text)
+                newStr = await sub_matches(matches, message.text)
                 if newStr:
-                    await message.reply('[SED]\n\n' + newStr)
+                    await message.reply('**「sed」**\n\n' + newStr)
                     break
     except Exception as e:
-        await event.answer((f"{event.raw_text}"
+        await event.answer((f"{event.text}"
                             '\n\n'
                             'Like regexbox says, fuck me.\n'
                             '`'
@@ -94,6 +91,7 @@ async def sed_substitute(event: NewMessage.Event) -> None:
                             f"{str(e)}"
                             '`'),
                            reply=True)
+        raise e
 
 
 @client.onMessage(command="regexninja",

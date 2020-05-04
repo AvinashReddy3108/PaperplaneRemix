@@ -82,7 +82,8 @@ async def enable(event: NewMessage.Event) -> None:
         await event.answer("`Enable what? The void?`")
         return
     commands, command_list = await solve_commands(client.disabled_commands)
-    command = {**commands, **command_list}.get(arg, False)
+    arg1 = command_list.get(arg, arg)
+    command = commands.get(arg1, False)
     if command:
         for handler in command.handlers:
             client.add_event_handler(command.func, handler)
@@ -115,7 +116,8 @@ async def disable(event: NewMessage.Event) -> None:
         await event.answer("`Disable what? The void?`")
         return
     commands, command_list = await solve_commands(client.commands)
-    command = {**commands, **command_list}.get(arg, False)
+    arg1 = command_list.get(arg, arg)
+    command = commands.get(arg1, False)
     if command:
         if command.builtin:
             await event.answer("`Cannot disable a builtin command.`")
@@ -243,7 +245,7 @@ async def helper(event: NewMessage.Event) -> None:
 
 async def solve_commands(commands: dict) -> Tuple[dict, dict]:
     new_dict: dict = {}
-    com_tuples = {}
+    com_tuples: dict = {}
     for com_names, command in commands.items():
         splat = split_exp.split(com_names)
         if splat:
