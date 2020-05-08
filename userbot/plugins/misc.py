@@ -27,7 +27,7 @@ from telethon.tl import functions, types
 
 from userbot import client, LOGGER
 from userbot.helper_funcs import misc
-from userbot.utils.helpers import get_chat_link, restart
+from userbot.utils.helpers import get_chat_link
 from userbot.utils.events import NewMessage
 
 plugin_category = "misc"
@@ -59,30 +59,6 @@ def dogbin_post(text: str):
             'charset': 'utf-8'
         })
     return response
-
-
-@client.onMessage(command=("shutdown", plugin_category),
-                  outgoing=True,
-                  regex="shutdown$",
-                  builtin=True)
-async def shutdown(event: NewMessage.Event) -> None:
-    """Shutdown the userbot script."""
-    await event.answer("`Disconnecting the client and exiting. Ciao!`")
-    client.reconnect = False
-    print()
-    LOGGER.info("Disconnecting the client and exiting the main script.")
-    await client.disconnect()
-
-
-@client.onMessage(command=("restart", plugin_category),
-                  outgoing=True,
-                  regex="restart$",
-                  builtin=True)
-async def restarter(event: NewMessage.Event) -> None:
-    """Restart the userbot script."""
-    await event.answer("`BRB disconnecting and starting the script again!`",
-                       log=("restart", "Restarted the userbot script"))
-    await restart(event)
 
 
 @client.onMessage(command=("rmbg", plugin_category),

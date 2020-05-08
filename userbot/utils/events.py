@@ -20,9 +20,37 @@ from typing import Tuple
 from telethon import events
 from telethon.tl import custom, functions, types
 
-from .custom import answer
+
+async def answer(self, *args, **kwargs):
+    message = kwargs.get('message', None)
+
+    if message is not None:
+        args = message, *args
+
+    if self._client:
+        return await self._client.answer(await self.get_input_chat(), self,
+                                         *args, **kwargs)
+
+
+async def resanswer(self, *args, **kwargs):
+    message = kwargs.get('message', None)
+    kwargs.update(message=self)
+
+    if message is None and len(args) >= 1:
+        message = args[0]
+        args = args[1:]
+
+    if message is None:
+        raise Exception(
+            'Cannot call client.resanswer without a default message')
+
+    if self._client:
+        return await self._client.resanswer(await self.get_input_chat(),
+                                            message, *args, **kwargs)
+
 
 custom.Message.answer = answer
+custom.Message.resanswer = resanswer
 
 
 @events.common.name_inner_event
@@ -31,8 +59,8 @@ class NewMessage(events.NewMessage):
     def __init__(self,
                  disable_prefix: bool = None,
                  regex: Tuple[str, int] or str = None,
-                 trigger_by_inline: bool = False,
                  require_admin: bool = None,
+                 inline: bool = False,
                  **kwargs):
         """Overriding the default init to add additional attributes"""
         super().__init__(**kwargs)
@@ -53,7 +81,7 @@ class NewMessage(events.NewMessage):
 
         self.disable_prefix = disable_prefix
         self.require_admin = require_admin
-        self.trigger_by_inline = trigger_by_inline
+        self.inline = inline
 
     def filter(self, event):
         """Overriding the default filter to check additional values"""
@@ -61,10 +89,14 @@ class NewMessage(events.NewMessage):
         if not event:
             return
 
+        if self.inline is not None:
+            if bool(self.inline) != bool(event.message.via_bot_id):
+                return
+
         if event._client.prefix:
             prefix = re.escape(event._client.prefix)
         else:
-            prefix = r"[^/!#@\$A-Za-z0-9]"
+            prefix = r"[^/!#@\$A-Za-z0-9\-]"
 
         if self.regex:
             exp, flags = self.regex
@@ -81,10 +113,6 @@ class NewMessage(events.NewMessage):
             if not matches:
                 return
             event.matches = matches
-
-        if self.trigger_by_inline is not None:
-            if bool(self.trigger_by_inline) != bool(event.message.via_bot_id):
-                return
 
         if self.require_admin:
             text = "`You need to be an admin to use this command!`"

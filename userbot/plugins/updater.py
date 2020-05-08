@@ -157,7 +157,6 @@ async def updater(event: NewMessage.Event) -> None:
                 "`You seem to be running on Heroku "
                 "with an invalid environment. Couldn't update the app.`\n"
                 "`The changes will be reverted upon dyno restart.`")
-            await asyncio.sleep(2)
             repo.__del__()
             await restart(event)
         else:
@@ -207,11 +206,9 @@ async def updater(event: NewMessage.Event) -> None:
 
 
 async def update_requirements():
-    reqs = ' '.join(
-        [sys.executable, "-m", "pip", "install", "-r", 'requirements.txt'])
     try:
         process = await asyncio.create_subprocess_shell(
-            reqs,
+            f'{sys.executable} -m pip install --user -r requirements.txt',
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE)
         await process.communicate()

@@ -16,6 +16,8 @@
 
 import asyncio
 import datetime
+import importlib
+import inspect
 import io
 import logging
 import re
@@ -28,13 +30,15 @@ from telethon.tl import custom, functions, types
 LOGGER = logging.getLogger(__name__)
 MAXLIM: int = 4096
 whitespace_exp: re.Pattern = re.compile(r'^\s')
-file_kwargs: Tuple = ('file', 'caption', 'force_document', 'clear_draft',
-                      'progress_callback', 'reply_to', 'attributes', 'thumb',
-                      'allow_cache', 'voice_note', 'video_note', 'buttons',
-                      'supports_streaming')
+file_kwargs = ('file', 'caption', 'force_document', 'clear_draft',
+               'progress_callback', 'reply_to', 'attributes', 'thumb',
+               'allow_cache', 'voice_note', 'video_note', 'buttons',
+               'supports_streaming')
 
 
 async def answer(self,
+                 entity,
+                 message: custom.Message or str or None,
                  *args,
                  log: str or Tuple[str, str] = None,
                  reply: bool = False,
@@ -43,27 +47,29 @@ async def answer(self,
     """Custom bound method for the Message object"""
     message_out = None
     start_date = datetime.datetime.now(datetime.timezone.utc)
-    message = await self.client.get_messages(await self.get_input_chat(),
-                                             ids=self.id)
-    reply_to = self.reply_to_msg_id or self.id
+    if hasattr(message, 'reply_to_msg_id'):
+        reply_to = message.reply_to_msg_id or message.id
+    else:
+        reply_to = None
     if kwargs.setdefault('parse_mode', 'md') in ['html', 'HTML']:
         parser = html
     else:
         parser = markdown
-
     is_media = any([k for k in file_kwargs if kwargs.get(k, False)])
     if len(args) == 1 and isinstance(args[0], str) and not is_media:
         is_reply = reply or kwargs.get('reply_to', False)
         text = args[0]
         msg, msg_entities = parser.parse(text)
         if len(msg) <= MAXLIM:
-            if (not (message and message.out) or is_reply or self.fwd_from or
-                (self.media
-                 and not isinstance(self.media, types.MessageMediaWebPage))):
+            if (isinstance(message, str) or not (message and message.out)
+                    or is_reply or message.fwd_from or
+                (message.media and
+                 not isinstance(message.media, types.MessageMediaWebPage))):
                 kwargs.setdefault('reply_to', reply_to)
                 try:
                     kwargs.setdefault('silent', True)
-                    message_out = await self.respond(text, **kwargs)
+                    message_out = await self.send_message(
+                        entity, text, **kwargs)
                 except Exception as e:
                     raise e
             else:
@@ -72,33 +78,46 @@ async def answer(self,
                     chunks = [parser.unparse(t, e) for t, e in messages]
                     message_out = []
                     try:
-                        first_msg = await self.edit(chunks[0], **kwargs)
+                        if isinstance(message, custom.Message) and message.out:
+                            first_msg = await self.edit_message(
+                                entity, message, chunks[0], **kwargs)
+                        else:
+                            first_msg = await self.send_message(
+                                entity, chunks[0], **kwargs)
                     except errors.rpcerrorlist.MessageIdInvalidError:
-                        first_msg = await self.respond(chunks[0], **kwargs)
+                        first_msg = first_msg = await self.send_message(
+                            entity, chunks[0], **kwargs)
                     except Exception as e:
                         raise e
                     message_out.append(first_msg)
-                    for t in chunks[1:]:
+                    for chunk in chunks[1:]:
                         try:
                             kwargs.setdefault('silent', True)
-                            sent = await self.respond(t, **kwargs)
+                            sent = await self.send_message(
+                                entity, chunk, **kwargs)
                             message_out.append(sent)
                         except Exception as e:
                             raise e
                 else:
                     try:
-                        message_out = await self.edit(text, **kwargs)
+                        if isinstance(message, custom.Message) and message.out:
+                            first_msg = await self.edit_message(
+                                entity, message, text, **kwargs)
+                        else:
+                            first_msg = await self.send_message(
+                                entity, text, **kwargs)
                     except errors.rpcerrorlist.MessageIdInvalidError:
-                        message_out = await self.respond(text, **kwargs)
+                        first_msg = first_msg = await self.send_message(
+                            entity, text, **kwargs)
                     except Exception as e:
                         raise e
         else:
             if (message and message.out
                     and not (message.fwd_from or message.media)):
                 try:
-                    await self.edit("`Output exceeded the limit.`")
-                except errors.rpcerrorlist.MessageIdInvalidError:
-                    await self.respond("`Output exceeded the limit.`")
+                    await self.send_message(entity,
+                                            "`Output exceeded the limit.`",
+                                            reply_to=reply_to)
                 except Exception as e:
                     raise e
 
@@ -107,16 +126,21 @@ async def answer(self,
             output.name = "output.txt"
             try:
                 kwargs.setdefault('silent', True)
-                message_out = await self.respond(file=output, **kwargs)
+                message_out = await self.send_message(entity,
+                                                      file=output,
+                                                      **kwargs)
                 output.close()
             except Exception as e:
                 output.close()
                 raise e
     else:
         kwargs.setdefault('reply_to', reply_to)
+        if (isinstance(message, str)
+                and not (len(args) == 1 and isinstance(args[0], str))):
+            args = message, *args
         try:
             kwargs.setdefault('silent', True)
-            message_out = await self.respond(*args, **kwargs)
+            message_out = await self.send_message(entity, *args, **kwargs)
         except Exception as e:
             raise e
 
@@ -126,8 +150,9 @@ async def answer(self,
                 message.date = start_date
         else:
             message_out.date = start_date
-    if (self_destruct and self.client.config['userbot'].getboolean(
-            'self_destruct_msg', True)):
+
+    if (self_destruct
+            and self.config['userbot'].getboolean('self_destruct_msg', True)):
         asyncio.create_task(_self_destructor(message_out, self_destruct))
 
     if log:
@@ -138,12 +163,12 @@ async def answer(self,
                 text += f"\n{extra}"
         else:
             text = f"**USERBOT LOG** `Executed command:` #{log}"
-        if self.client.logger:
-            logger_group = self.client.config['userbot'].getint(
+        if self.logger:
+            logger_group = self.config['userbot'].getint(
                 'logger_group_id', False)
             entity = False
             try:
-                entity = await self.client.get_input_entity(logger_group)
+                entity = await self.get_input_entity(logger_group)
             except TypeError:
                 LOGGER.info("Your logger group ID is unsupported")
             except ValueError:
@@ -152,7 +177,7 @@ async def answer(self,
                 raise e
 
             if entity:
-                message, msg_entities = await self.client._parse_message_text(
+                message, msg_entities = await self._parse_message_text(
                     text, kwargs.get('parse_mode'))
                 if len(message) <= MAXLIM and len(msg_entities) < 100:
                     messages = [(message, msg_entities)]
@@ -160,7 +185,7 @@ async def answer(self,
                     messages = await _resolve_entities(message, msg_entities)
                 for text, entities in messages:
                     try:
-                        await self.client(
+                        await self(
                             functions.messages.SendMessageRequest(
                                 peer=entity,
                                 message=text,
@@ -169,9 +194,69 @@ async def answer(self,
                                 entities=entities))
                         await asyncio.sleep(2)
                     except Exception as e:
-                        print("Report this error to the support group.")
+                        LOGGER.error("Report this error to the support group.")
                         raise e
     return message_out
+
+
+async def resanswer(self,
+                    entity,
+                    default: str,
+                    plugin: str = None,
+                    name: str = None,
+                    formats: dict = {},
+                    chat_override: bool = False,
+                    **kwargs) -> custom.Message or None:
+    sent = None
+    chat_id = entity
+    # Required to handle replies and edits
+    message = kwargs.pop('message', None)
+    if not (plugin and name):
+        return await self.answer(entity, message, default.format(**formats),
+                                 **kwargs)
+
+    try:
+        mod = importlib.import_module('.' + plugin, package='resources')
+    except (ImportError, ModuleNotFoundError):
+        return await self.answer(entity, message, default.format(**formats),
+                                 **kwargs)
+
+    if not hasattr(mod, name):
+        sent = await self.answer(entity, message, default.format(**formats),
+                                 **kwargs)
+
+    strings = getattr(mod, name, [])
+    estrings = getattr(mod, name + '_extra', [])
+    strings = await resolve_strings(strings)
+    estrings = await resolve_strings(estrings)
+
+    try:
+        text = strings[0] if len(strings) >= 1 else None
+        if text:
+            sent = await self.answer(entity, message, text.format(**formats),
+                                     **kwargs)
+    except KeyError:
+        LOGGER.error('Invalid string %s found in %s resource', name, plugin)
+        sent = await self.answer(entity, message, default.format(**formats),
+                                 **kwargs)
+
+    # Wouldn't want to reply to a random message in a different groupchat
+    kwargs.pop('reply_to', None)
+    kwargs.pop('reply', None)
+    # Only use a different chat_id for extra messages
+    if chat_override:
+        chat_id = getattr(mod, 'chat_id', chat_id)
+    if isinstance(chat_id, str) and chat_id.isdigit():
+        chat_id = int(chat_id)
+
+    for string in estrings:
+        try:
+            await self.send_message(chat_id, string.format(**formats),
+                                    **kwargs)
+        except KeyError:
+            LOGGER.warning('Invalid extra string %s found in %s resource',
+                           name, plugin)
+    return sent
 
 
 async def _resolve_entities(message: str, entities: list) -> dict:
@@ -257,3 +342,18 @@ async def _self_destructor(
     else:
         deleted = await event.delete()
     return deleted
+
+
+async def resolve_strings(strings: str or None or list) -> list:
+    tmp = []
+    if inspect.isfunction(strings):
+        strings = strings()
+
+    if isinstance(strings, list):
+        tmp = [
+            str(s()) if inspect.isfunction(s) else str(s) for s in strings
+            if s is not None
+        ]
+    elif strings is not None:
+        tmp = [str(strings)]
+    return tmp

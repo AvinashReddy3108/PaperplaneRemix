@@ -30,7 +30,6 @@ from telethon.tl import types
 from telethon.utils import get_display_name
 
 from .client import UserBotClient
-from .log_formatter import CEND, CUSR
 from .events import NewMessage
 from userbot.plugins import plugins_data
 
@@ -41,17 +40,15 @@ def printUser(entity: types.User) -> None:
     """Print the user's first name + last name upon start"""
     user = get_display_name(entity)
     print()
-    LOGGER.warning("Successfully logged in as {0}{2}{1}".format(
-        CUSR, CEND, user))
+    LOGGER.warning("Successfully logged in as {0}".format(user))
 
 
 def printVersion(version: int, prefix: str) -> None:
     """Print the version of the bot with the default prefix"""
     if not prefix:
         prefix = '.'
-    LOGGER.warning(
-        "{0}UserBot v{2}{1} is running, test it by sending {3}ping in"
-        " any chat.".format(CUSR, CEND, version, prefix))
+    LOGGER.warning("UserBot v{0} is running, test it by sending {1}ping in"
+                   " any chat.".format(version, prefix))
     print()
 
 

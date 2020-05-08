@@ -46,20 +46,22 @@ warning = ("`You have only` **1** `message left, if you send the next one "
            "you will be blocked and reported!`")
 default = (
     "`This is an automated message, kindly wait until you're approved.`\n"
-    "`Messages remaining:` **{}**")
-samedefault = "`Messages Remaining:` **{}**"
+    "`Messages remaining:` **{remaining}**")
+samedefault = "`Messages Remaining:` **{remaining}**"
 newdefault = (
     "**This is an automated message, kindly wait until you've been approved "
     "otherwise you'll be blocked and reported for spamming.**\n\n"
-    "`Messages Remaining:` **{}**")
-esc_default = re.escape(default.format(r'\d')).replace(r'\\d', r'\d')
-esc_samedefault = re.escape(samedefault.format(r'\d')).replace(r'\\d', r'\d')
-esc_newdefault = re.escape(newdefault.format(r'\d')).replace(r'\\d', r'\d')
-
+    "`Messages Remaining:` **{remaining}**")
+esc_default = (re.escape(default.format(remaining=r'\d')).replace(
+    r'\\d', r'\d'))
+esc_samedefault = (re.escape(samedefault.format(remaining=r'\d')).replace(
+    r'\\d', r'\d'))
+esc_newdefault = (re.escape(newdefault.format(remaining=r'\d')).replace(
+    r'\\d', r'\d'))
 blocked = "`You've been blocked and reported for spamming.`"
 blocklog = (
     "{} `has been blocked for spamming, unblock them to see their messages.`")
-autoapprove = "`Successfully auto-approved` {}"
+autoapprove = "`Successfully auto-approved` {user}"
 
 DEFAULT_MUTE_SETTINGS = types.InputPeerNotifySettings(
     silent=True, mute_until=datetime.timedelta(days=365))
@@ -109,7 +111,10 @@ async def pm_incoming(event: NewMessage.Event) -> None:
         await client.delete_messages(input_entity, sent)
         await client(functions.messages.ReportSpamRequest(peer=input_entity))
         await client(functions.contacts.BlockRequest(id=input_entity))
-        await event.answer(blocked, log=('pmpermit', blocklog.format(user)))
+        await event.resanswer(blocked,
+                              plugin='pmpermit',
+                              name='blocked',
+                              log=('pmpermit', blocklog.format(user)))
         spammers.pop(sender, None)
         return
 
@@ -122,20 +127,31 @@ async def pm_incoming(event: NewMessage.Event) -> None:
     lastoutmsg = None
 
     if new_pm:
-        out = await event.answer(newdefault.format(count))
+        out = await event.resanswer(newdefault,
+                                    plugin='pmpermit',
+                                    name='newdefault',
+                                    fromats={'remaining': count})
     else:
         if count == 1:
-            out = await event.answer(warning)
+            out = await event.resanswer(warning,
+                                        plugin='pmpermit',
+                                        name='warning')
         elif (event.text in [PP_UNAPPROVED_MSG, FTG_UNAPPROVED_MSG]
               or re.search(esc_newdefault, event.text)
               or re.search(esc_default, event.text)
               or re.search(esc_samedefault, event.text)):
             pass
         elif lastmsg and event.text == lastmsg:
-            out = await event.answer(samedefault.format(count))
+            out = await event.resanswer(samedefault,
+                                        plugin='pmpermit',
+                                        name='samedefault',
+                                        formats={'remaining': count})
             lastoutmsg = out.id
         else:
-            out = await event.answer(default.format(count))
+            out = await event.resanswer(default,
+                                        plugin='pmpermit',
+                                        name='default',
+                                        formats={'remaining': count})
 
     if not lastoutmsg and out:
         sent.append(out.id)
@@ -160,11 +176,14 @@ async def pm_outgoing(event: NewMessage.Event) -> None:
             approvedUsers.append(chat.id)
             await update_db()
             user = await get_chat_link(chat)
-            text = autoapprove.format(user)
-            await event.answer(text,
-                               reply=True,
-                               self_destruct=2,
-                               log=('pmpermit', text))
+            await event.resanswer(autoapprove,
+                                  plugin='pmpermit',
+                                  name='autoapprove',
+                                  formats={'user': user},
+                                  reply=True,
+                                  self_destruct=2,
+                                  log=('pmpermit',
+                                       autoapprove.format(user=user)))
 
 
 @client.onMessage(command=("approve", plugin_category),

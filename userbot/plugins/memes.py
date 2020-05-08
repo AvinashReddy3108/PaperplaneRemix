@@ -689,28 +689,6 @@ async def spongemock(event: NewMessage.Event) -> None:
     await event.answer(f"__{mocked_text}__")
 
 
-@client.onMessage(command=("waifu", plugin_category),
-                  outgoing=True,
-                  regex="(wy|wai)fu(?: |$|\n)([\s\S]*)")
-async def waifu(event: NewMessage.Event) -> None:
-    """Generate random waifu sticker with the text!"""
-    text = event.matches[0].group(2)
-    if not text:
-        if event.is_reply:
-            text = (await event.get_reply_message()).message
-        else:
-            await event.answer("`No text given, hence the waifu ran away.`")
-            return
-    animus = [20, 32, 33, 40, 41, 42, 58]
-    sticcers = await client.inline_query(
-        "stickerizerbot", f"#{random.choice(animus)}{(deEmojify(text))}")
-    await sticcers[0].click(event.chat_id,
-                            reply_to=event.reply_to_msg_id,
-                            silent=True if event.is_reply else False,
-                            hide_via=True)
-    await event.delete()
-
-
 @client.onMessage(command=("insult", plugin_category),
                   outgoing=True,
                   regex="insult$")
@@ -851,25 +829,25 @@ async def mamma_mia(event: NewMessage.Event) -> None:
         await event.answer("`Ran out of oil to fry this pic :P`")
 
 
-@client.onMessage(outgoing=True, regex="^Oof$", disable_prefix=True)
+@client.onMessage(outgoing=True, regex="^Ooof$", disable_prefix=True)
 async def oof(event: NewMessage.Event) -> None:
     """Big Oooooof."""
     for i in range(random.randint(5, 10)):
-        await event.answer("Ooo" + "o" * i + "f")
+        await event.answer("Oooo" + "o" * i + "f")
 
 
-@client.onMessage(outgoing=True, regex="^-_-$", disable_prefix=True)
+@client.onMessage(outgoing=True, regex="^-__-$", disable_prefix=True)
 async def okay(event: NewMessage.Event) -> None:
     """Ok......"""
     for i in range(random.randint(5, 10)):
-        await event.answer("-__" + "_" * i + "-", parse_mode='html')
+        await event.answer("-___" + "_" * i + "-", parse_mode='html')
 
 
-@client.onMessage(outgoing=True, regex="^;_;$", disable_prefix=True)
+@client.onMessage(outgoing=True, regex="^;__;$", disable_prefix=True)
 async def crai(event: NewMessage.Event) -> None:
     """crai :("""
     for i in range(random.randint(5, 10)):
-        await event.answer(";__" + "_" * i + ";", parse_mode='html')
+        await event.answer(";___" + "_" * i + ";", parse_mode='html')
 
 
 @client.onMessage(outgoing=True, regex="^:/$", disable_prefix=True)
@@ -879,11 +857,6 @@ async def keks(event: NewMessage.Event) -> None:
     for i in range(1, random.randint(5, 10)):
         await asyncio.sleep(0.3)
         await event.answer(":" + uio[i % 2])
-
-
-def deEmojify(inputString: str) -> str:
-    """Remove emojis and other non-safe characters from string"""
-    return re.sub(EMOJI_PATTERN, '', inputString)
 
 
 def isEmoji(inputString: str) -> bool:

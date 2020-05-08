@@ -30,10 +30,17 @@ from userbot.utils.events import NewMessage
 
 DEFAULT_MUTE_SETTINGS = types.InputPeerNotifySettings(
     silent=True, mute_until=datetime.timedelta(days=365))
+
 AFK = plugins_data.AFK
 AFK.privates = plugins_data.load_data('userbot_afk_privates')
 AFK.groups = plugins_data.load_data('userbot_afk_groups')
 AFK.sent = plugins_data.load_data('userbot_afk_sent')
+
+going_afk = "**I am AFK!**"
+going_afk_reason = going_afk + "\n**Reason:** __{reason}__"
+not_afk = "`I am no longer AFK!`"
+currently_afk_reason = (
+    "`I am currently AFK because {reason}.`\n`Last seen: {elapsed} ago.`")
 
 AFKMEMEZ = [
     "You missed me, next time aim better.",
@@ -69,12 +76,21 @@ async def awayfromkeyboard(event: NewMessage.Event) -> None:
     arg = event.matches[0].group(1)
     curtime = time.time().__str__()
     os.environ['userbot_afk'] = f"{curtime}/{event.chat_id}/{event.id}"
-    text = "**AFK AF!**"
-    if arg:
-        os.environ['userbot_afk_reason'] = arg.strip()
-        text += f"\n**Reason:** __{arg.strip()}__"
     extra = await get_chat_link(event, event.id)
-    await event.answer(text, log=("afk", f"You just went AFK in {extra}!"))
+    log = ("afk", f"You just went AFK in {extra}!")
+    if arg:
+        arg = arg.strip()
+        os.environ['userbot_afk_reason'] = arg
+        await event.resanswer(going_afk_reason,
+                              plugin='afk',
+                              name='going_afk_reason',
+                              formats={'reason': arg},
+                              log=log)
+    else:
+        await event.resanswer(going_afk,
+                              plugin='afk',
+                              name='going_afk',
+                              log=log)
     raise StopPropagation
 
 
@@ -84,6 +100,7 @@ async def out_listner(event: NewMessage.Event) -> None:
     userbot_afk = os.environ.pop('userbot_afk', False)
     if event.from_scheduled or not userbot_afk:
         return
+
     os.environ.pop('userbot_afk_reason', None)
     _, chat, msg = userbot_afk.split('/')
     await client.delete_messages(int(chat), int(msg))
@@ -101,13 +118,13 @@ async def out_listner(event: NewMessage.Event) -> None:
         for key, value in AFK.privates.items():
             await _update_notif_settings(key, value['PeerNotifySettings'])
             total_mentions += len(value['mentions'])
-            msg = "  `{} total mentions from `[{}](tg://user?id={})`.`"
+            msg = "  `{} total mentions from` [{}](tg://user?id={})"
             to_log.append(
                 msg.format(len(value['mentions']), value['title'], key))
 
         pr_text = "`Received {} message{} from {} private chat{}.`".format(
             *(await _correct_grammer(total_mentions, len(AFK.privates))))
-        pr_log = pr_log + "\n".join("  " + t for t in to_log)
+        pr_log = pr_log + "\n\n".join("  " + t for t in to_log)
     if AFK.groups:
         total_mentions = 0
         to_log = []
@@ -117,7 +134,7 @@ async def out_listner(event: NewMessage.Event) -> None:
             total_mentions += len(value['mentions'])
             chat_msg_id = f"https://t.me/c/{key}/{value['unread_from']}"
             msg = f"[{value['title']}]({chat_msg_id}):"
-            msg += "\n    `Mentions: `"
+            msg += "\n    `Mentions:` "
             mentions = []
             for i in range(len(value['mentions'])):
                 msg_id = value['mentions'][i]
@@ -127,15 +144,17 @@ async def out_listner(event: NewMessage.Event) -> None:
 
         gr_text = "`Received {} mention{} from {} group{}.`".format(
             *(await _correct_grammer(total_mentions, len(AFK.groups))))
-        gr_log = gr_log + "\n".join("  " + t for t in to_log)
+        gr_log = gr_log + "\n\n".join("  " + t for t in to_log)
 
-    main_text = '\n'.join([pr_text, gr_text]).strip()
+    main_text = '\n\n'.join([pr_text, gr_text]).strip()
     if not client.logger:
         main_text += "\n`Use a logger group for more detailed AFK mentions!`"
-    status = await event.answer("`I am no longer AFK!`",
-                                reply_to=event.id,
-                                self_destruct=4)
-    await event.answer(message=main_text or def_text,
+    status = await event.resanswer(not_afk,
+                                   plugin='afk',
+                                   name='not_afk',
+                                   reply_to=event.id,
+                                   self_destruct=4)
+    await event.answer(main_text or def_text,
                        reply_to=status.id,
                        self_destruct=4,
                        log=("afk", '\n'.join([pr_log, gr_log]).strip()
@@ -165,13 +184,6 @@ async def inc_listner(event: NewMessage.Event) -> None:
     now = datetime.datetime.now(datetime.timezone.utc)
     reason = os.environ.get('userbot_afk_reason', False)
     elapsed = await _humanfriendly_seconds((now - since).total_seconds())
-    if reason:
-        text = "**I am currently AFK.**\
-            \n__Last seen: {} ago.__\nReason: `{}`".format(elapsed, reason)
-    else:
-        text = "**{}**\n__Last seen: {} ago.__".format(random.choice(AFKMEMEZ),
-                                                       elapsed)
-
     chat = await event.get_chat()
     if event.is_private:
         await _append_msg(AFK.privates, chat.id, event.id)
@@ -184,7 +196,22 @@ async def inc_listner(event: NewMessage.Event) -> None:
         if round((now - AFK.sent[chat.id][-1][1]).total_seconds()) <= timeout:
             return
 
-    result = await event.answer(message=text, reply_to=None)
+    if reason:
+        result = await event.resanswer(currently_afk_reason,
+                                       plugin='afk',
+                                       name='currently_afk_reason',
+                                       formats={
+                                           'elapsed': elapsed,
+                                           'reason': reason
+                                       },
+                                       reply_to=None)
+    else:
+        result = await event.resanswer(
+            f"**{random.choice(AFKMEMEZ)}**\n__Last seen: {elapsed} ago.__",
+            plugin='afk',
+            name='currently_afk',
+            formats={'elapsed': elapsed},
+            reply_to=None)
     AFK.sent.setdefault(chat.id, []).append((result.id, result.date))
 
 
