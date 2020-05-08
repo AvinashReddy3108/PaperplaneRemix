@@ -80,10 +80,11 @@ async def delme(event: NewMessage.Event) -> None:
                                          from_user="me")
 
     await client.delete_messages(entity, messages)
+    extra = await get_chat_link(entity)
     await event.answer(
         f"`Successfully deleted {len(messages)} message(s)!`",
         self_destruct=2,
-    )
+        log=("delme", f"Purged {len(messages)} of my message(s) in {extra}"))
 
 
 @client.onMessage(command="del", outgoing=True, regex=r"del$")
@@ -109,5 +110,5 @@ async def delete(event: NewMessage.Event) -> None:
 async def _offset(event: NewMessage.Event, skip: None or int) -> int:
     skip = int(skip) if skip is not None else 0
     if event.reply_to_msg_id:
-        return event.reply_to_msg_id + skip
+        return (event.reply_to_msg_id - 1) + skip
     return event.message.id - skip

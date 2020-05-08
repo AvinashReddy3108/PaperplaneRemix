@@ -45,7 +45,7 @@ async def answer(self,
                  self_destruct: int = None,
                  **kwargs) -> Union[custom.Message, Sequence[custom.Message]]:
     """Custom bound method for the Message object"""
-    message_out = None
+    message_out = []
     start_date = datetime.datetime.now(datetime.timezone.utc)
     if hasattr(message, 'reply_to_msg_id'):
         reply_to = message.reply_to_msg_id or message.id
@@ -76,7 +76,6 @@ async def answer(self,
                 if len(msg_entities) > 100:
                     messages = await _resolve_entities(msg, msg_entities)
                     chunks = [parser.unparse(t, e) for t, e in messages]
-                    message_out = []
                     try:
                         if isinstance(message, custom.Message) and message.out:
                             first_msg = await self.edit_message(
@@ -85,7 +84,7 @@ async def answer(self,
                             first_msg = await self.send_message(
                                 entity, chunks[0], **kwargs)
                     except errors.rpcerrorlist.MessageIdInvalidError:
-                        first_msg = first_msg = await self.send_message(
+                        first_msg = await self.send_message(
                             entity, chunks[0], **kwargs)
                     except Exception as e:
                         raise e
@@ -107,10 +106,11 @@ async def answer(self,
                             first_msg = await self.send_message(
                                 entity, text, **kwargs)
                     except errors.rpcerrorlist.MessageIdInvalidError:
-                        first_msg = first_msg = await self.send_message(
+                        first_msg = await self.send_message(
                             entity, text, **kwargs)
                     except Exception as e:
                         raise e
+                    message_out.append(first_msg)
         else:
             if (message and message.out
                     and not (message.fwd_from or message.media)):
