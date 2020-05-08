@@ -84,8 +84,10 @@ if "telethon" not in config:
 telethon = config['telethon']
 API_ID = telethon.getint('api_id', False)
 API_HASH = telethon.get('api_hash', False)
-REDIS_ENDPOINT = telethon.get('redis_endpoint', False)
-REDIS_PASSWORD = telethon.get('redis_password', False)
+
+database = config['database']
+REDIS_ENDPOINT = database.get('redis_endpoint', False)
+REDIS_PASSWORD = database.get('redis_password', False)
 
 userbot = config['userbot']
 LOGGER_CHAT_ID = userbot.getint('logger_group_id', 0)

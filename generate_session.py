@@ -66,8 +66,8 @@ elif os.path.exists('./config.ini'):
         sys.exit(1)
     redis_ip = input("Would you like to generate a Redis session? (yes/no): ")
     if redis_ip.lower() in ('y', 'yes'):
-        endpoint = config['telethon'].get('redis_endpoint', False)
-        password = config['telethon'].get('redis_password', False)
+        endpoint = config['database'].get('redis_endpoint', False)
+        password = config['database'].get('redis_password', False)
         if not (endpoint or password):
             print("Make sure you have redis_endpoint and redis_password"
                   "in your config.ini")
