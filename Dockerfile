@@ -8,7 +8,7 @@ RUN apt update && apt upgrade -y && \
     gcc \
     git \
     libffi-dev \
-    libjpeg62-dev \
+    libjpeg-dev \
     libjpeg62-turbo-dev \
     libwebp-dev \
     linux-headers-amd64 \
