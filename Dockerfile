@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y \
     gcc \
     git \
     libffi-dev \
-    libjpeg \
+    libjpeg-dev \
     libjpeg-turbo-dev \
     libwebp-dev \
     linux-headers \
