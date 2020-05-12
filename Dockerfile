@@ -1,7 +1,7 @@
 FROM python:3.8-slim-buster
 
 RUN apt update; apt upgrade -y; \
-    apt install -y \
+    apt install --no-install-recommends -y \
     bash \
     curl \
     ffmpeg \
