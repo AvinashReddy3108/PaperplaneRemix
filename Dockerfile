@@ -1,6 +1,6 @@
 FROM python:3.8-slim-buster
 
-RUN apt update && apt upgrade && \
+RUN apt update && apt upgrade -y && \
     apt install -y \
     bash \
     curl \
