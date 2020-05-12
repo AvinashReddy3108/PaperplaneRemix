@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
     git \
     libffi-dev \
     libjpeg-dev \
-    libjpeg-turbo-dev \
+    libjpeg62-turbo-dev \
     libwebp-dev \
     linux-headers-amd64 \
     musl \
