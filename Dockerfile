@@ -10,13 +10,13 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libjpeg-turbo-dev \
     libwebp-dev \
-    linux-headers \
+    linux-headers-amd64 \
     musl \
     musl-dev \
     neofetch \
     rsync \
-    zlib \
-    zlib-dev
+    zlib1g \
+    zlib1g-dev
 
 COPY . /tmp/userbot_local
 WORKDIR /usr/src/app/PaperplaneRemix/
