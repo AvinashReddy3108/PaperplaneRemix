@@ -1,13 +1,14 @@
 FROM python:3.8-slim-buster
 
-RUN apt-get update && apt-get install -y \
+RUN apt update && apt upgrade && \
+    apt install -y \
     bash \
     curl \
     ffmpeg \
     gcc \
     git \
     libffi-dev \
-    libjpeg-dev \
+    libjpeg62-dev \
     libjpeg62-turbo-dev \
     libwebp-dev \
     linux-headers-amd64 \
@@ -27,5 +28,5 @@ RUN rsync --ignore-existing --recursive /tmp/userbot_local/ /usr/src/app/Paperpl
 RUN python3 -m pip install --upgrade pip
 RUN python3 -m pip install --no-warn-script-location --no-cache-dir --upgrade -r requirements.txt
 
-RUN rm -rf /var/cache/apk/* /tmp/*
+RUN rm -rf /tmp/* /var/lib/apt/lists/*
 CMD ["python", "-m", "userbot"]
