@@ -854,9 +854,9 @@ async def listbld(event: NewMessage.Event) -> None:
         await event.answer(text, reply=True)
 
 
-@client.onMessage(incoming=True)
+@client.onMessage(incoming=True, forwards=True)
 async def inc_listener(event: NewMessage.Event) -> None:
-    """Filter incoming messages for blacklisting."""
+    """Filter incoming messages for blacklisted items."""
     broadcast = getattr(event.chat, 'broadcast', False)
     if not redis or event.is_private or broadcast:
         return
@@ -972,8 +972,8 @@ async def inc_listener(event: NewMessage.Event) -> None:
 
 
 @client.on(ChatAction)
-async def bio_filter(event: ChatAction.Event) -> None:
-    """Filter incoming messages for blacklisting."""
+async def join_listener(event: ChatAction.Event) -> None:
+    """Check new members of groups for blacklisted items."""
     match = False
     broadcast = getattr(event.chat, 'broadcast', False)
 
