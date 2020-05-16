@@ -22,6 +22,7 @@ import traceback
 from typing import Dict, List
 
 from telethon import events, TelegramClient
+from telethon.tl import types
 
 from .FastTelethon import download_file, upload_file
 from .parser import parse_arguments
@@ -49,7 +50,7 @@ class UserBotClient(TelegramClient):
     database: bool = True
     disabled_commands: Dict[str, Command] = {}
     failed_imports: list = []
-    logger: bool = False
+    logger: bool or types.Channel or types.User = False
     pluginManager: PluginManager = None
     plugins: list = []
     prefix: str = None
@@ -63,7 +64,7 @@ class UserBotClient(TelegramClient):
                   command: str or tuple = None,
                   edited: bool = True,
                   info: str = None,
-                  doc_kwargs: dict = {},
+                  doc_args: dict = {},
                   **kwargs) -> callable:
         """Method to register a function without the client"""
 
@@ -78,7 +79,7 @@ class UserBotClient(TelegramClient):
             if self.register_commands and command:
                 handlers = events._get_handlers(func)
                 category = "misc"
-                doc_kwargs.setdefault('prefix', self.prefix or '.')
+                doc_args.setdefault('prefix', self.prefix or '.')
                 if isinstance(command, tuple):
                     if len(command) == 2:
                         com, category = command
@@ -90,7 +91,7 @@ class UserBotClient(TelegramClient):
 
                 UBcommand = Command(
                     func, handlers,
-                    inspect.cleandoc(help_doc).format(**doc_kwargs), builtin)
+                    inspect.cleandoc(help_doc).format(**doc_args), builtin)
                 category = category.lower()
                 self.commands.update({com: UBcommand})
                 self.commandcategories.setdefault(category, []).append(com)

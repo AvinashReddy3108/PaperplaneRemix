@@ -32,7 +32,7 @@ from .utils.log_formatter import CustomFormatter, CustomMemoryHandler
 __version__ = "0.6"
 __license__ = "GNU General Public License v3.0"
 __author__ = "Kandarp <https://github.com/kandnub>"
-__copyright__ = "TG-UserBot  Copyright (C) 2019 - 2020  " + __author__
+__copyright__ = "TG-UserBot Copyright (C) 2019 - 2020  " + __author__
 root = pathlib.Path(__file__).parent.parent
 
 session = "userbot"
@@ -158,6 +158,7 @@ def verifyLoggerGroup(client: UserBotClient) -> None:
                 if entity.default_banned_rights.send_messages:
                     disable_logger("Permissions missing to send messages "
                                    "for the specified Logger group.")
+        client.logger = entity
     except ValueError:
         disable_logger("Logger group ID cannot be found. "
                        "Make sure it's correct.")
