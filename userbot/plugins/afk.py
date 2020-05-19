@@ -36,11 +36,12 @@ AFK.privates = plugins_data.load_data('userbot_afk_privates')
 AFK.groups = plugins_data.load_data('userbot_afk_groups')
 AFK.sent = plugins_data.load_data('userbot_afk_sent')
 
-going_afk = "**I am AFK!**"
-going_afk_reason = going_afk + "\n**Reason:** __{reason}__"
+going_afk = "`AFK AF!`"
+going_afk_reason = going_afk + "\n**Reason:** __{reason}.__"
 not_afk = "`I am no longer AFK!`"
-currently_afk_reason = (
-    "`I am currently AFK because {reason}.`\n`Last seen: {elapsed} ago.`")
+currently_afk_reason = ("`I am currently AFK!`\
+    \n**Last seen:** __{elapsed} ago.__\
+    \n**Reason:** __{reason}.__")
 
 AFKMEMEZ = [
     "You missed me, next time aim better.",
@@ -57,6 +58,7 @@ AFKMEMEZ = [
         \nbut if you'll scream loud enough at your screen,\
         \nI might just hear you.",
     "I went that way\n---->",
+    "<Insert witty away message here.>",
     "This is an away message and I am away... so leave a message.",
     "I went this way\n<----",
     "If I were here,\nI'd tell you where I am.\
