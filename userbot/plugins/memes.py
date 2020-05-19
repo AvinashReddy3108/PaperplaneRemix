@@ -16,6 +16,8 @@
 
 import aiohttp
 import asyncio
+from urllib import parse
+import bs4
 import io
 import PIL
 from typing import Tuple, Union, BinaryIO
@@ -110,7 +112,8 @@ EMOJI_PATTERN = re.compile(
     "\U0001FA00-\U0001FA6F"  # Chess Symbols
     "\U0001FA70-\U0001FAFF"  # Symbols and Pictographs Extended-A
     "\U00002702-\U000027B0"  # Dingbats 
-    "]+")
+    "]+",
+    flags=re.UNICODE)
 
 ZALG_LIST = [[
     "̖",
@@ -780,6 +783,30 @@ async def bt(event: NewMessage.Event) -> None:
             "/BLUETEXT /MUST /CLICK.\n"
             f"{random.choice(['/ARE /YOU', '/AM /I'])} /A /STUPID /ANIMAL /WHICH /IS /ATTRACTED /TO /COLOURS?"
         )
+
+
+@client.onMessage(command=("gangstafy", plugin_category),
+                  outgoing=True,
+                  regex=r"(420|gangsta(fy)?)(?: |$|\n)([\s\S]*)")
+async def bt(event: NewMessage.Event) -> None:
+    """ Convert the text to Snoop Dogg style! """
+    text = event.matches[0].group(3)
+    if not text:
+        if event.is_reply:
+            text = (await event.get_reply_message()).message
+        else:
+            await event.answer("`I need suttin' fo' tha homies ta translate!`")
+            return
+    async with aiohttp.ClientSession() as session:
+        async with session.post(
+                "http://www.gizoogle.net/textilizer.php",
+                data={"translatetext": EMOJI_PATTERN.sub(r'', text)}) as resp:
+            re_resp = re.sub("/name=translatetext[^>]*>/",
+                             'name="translatetext" >', await resp.text())
+            soup = bs4.BeautifulSoup(re_resp, "lxml")
+            giz = soup.find_all(text=True)
+            gizoogled_txt = giz[37].strip("\r\n")
+            await event.answer(f"__{gizoogled_txt}__")
 
 
 @client.onMessage(command=("deepfry", plugin_category),
