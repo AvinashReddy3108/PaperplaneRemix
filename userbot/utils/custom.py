@@ -149,9 +149,8 @@ async def answer(
             output = io.BytesIO(msg.strip().encode())
             output.name = "output.txt"
             try:
-                message_out = await self.send_message(entity,
-                                                      file=output,
-                                                      **kwargs,
+                kwargs['file'] = output
+                message_out = await self.send_message(entity, **kwargs,
                                                       **kwargs2)
                 output.close()
             except Exception as e:
