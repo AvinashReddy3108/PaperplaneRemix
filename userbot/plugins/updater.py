@@ -64,7 +64,7 @@ async def updater(event: NewMessage.Event) -> None:
             return
         fetched_items = origin.fetch()
         repo.create_head('master', origin.refs.master).set_tracking_branch(
-            origin.refs.master).checkout()
+            origin.refs.master).checkout(force=True)
     fetched_commits = repo.iter_commits(f"HEAD..{fetched_items[0].ref.name}")
     untracked_files = repo.untracked_files
     old_commit = repo.head.commit
