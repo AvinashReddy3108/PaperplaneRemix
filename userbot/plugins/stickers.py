@@ -608,13 +608,13 @@ async def _list_packs() -> Tuple[List[str], types.Message]:
         if r2.text.startswith("You don't have any sticker packs yet."):
             return [], first
         await client.send_read_acknowledge(conv.chat_id)
-        buttons = list(itertools.chain.from_iterable(r2.buttons))
+        buttons = list(itertools.chain.from_iterable(r2.buttons or []))
         await conv.send_message('/cancel')
         r3 = await conv.get_response()
         LOGGER.debug("Stickers:" + r3.text)
         await client.send_read_acknowledge(conv.chat_id)
 
-        return [button.text for button in buttons], first
+        return [button.text for button in buttons] if buttons else [], first
 
 
 async def _resolve_messages(
