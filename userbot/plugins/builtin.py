@@ -17,6 +17,8 @@
 import datetime
 import io
 import logging
+import os
+import sys
 
 from userbot import client, LOGGER, loggingHandler
 from userbot.utils.events import NewMessage
@@ -114,3 +116,17 @@ async def logsDump(event: NewMessage.Event) -> None:
     output = io.BytesIO('\n'.join(dump).encode())
     output.name = "logs.txt"
     await event.answer(file=output)
+
+
+@client.onMessage(command=('clearlogs', 'logging'),
+                  outgoing=True,
+                  regex=r'(clear|flush) logs$',
+                  builtin=True)
+async def flushStdOut(event: NewMessage.Event) -> None:
+    """Flush the logged buffers and clear the standard output"""
+    loggingHandler.flushBuffers()
+    if sys.platform.startswith('win'):
+        os.system('cls')
+    else:
+        os.system('clear')
+    await event.answer('`Successfully flushed all the logs`')

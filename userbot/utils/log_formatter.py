@@ -19,15 +19,15 @@ import logging.handlers
 import os
 
 HEROKU = os.environ.get('DYNO', False)
-CCRI = '\033[48;5;124m' if not HEROKU else ''
-CERR = '\033[38;5;124m' if not HEROKU else ''
-CWAR = '\033[38;5;202m' if not HEROKU else ''
-CINF = '\033[38;5;15m' if not HEROKU else ''
-CDEB = '\033[38;5;28m' if not HEROKU else ''
-CEND = '\033[0m' if not HEROKU else ''
-CORA = '\033[33;1m' if not HEROKU else ''
-CBOT = '\033[94;1m' if not HEROKU else ''
-CUSR = '\033[38;5;118m' if not HEROKU else ''
+CCRI = '\033[48;5;124m' if not HEROKU else ''  # CRITICAL
+CERR = '\033[38;5;124m' if not HEROKU else ''  # ERROR
+CWAR = '\033[38;5;202m' if not HEROKU else ''  # WARNING
+CINF = '\033[38;5;15m' if not HEROKU else ''  # INFO
+CDEB = '\033[38;5;28m' if not HEROKU else ''  # DEBUG
+CEND = '\033[0m' if not HEROKU else ''  # ANSI END
+CORA = '\033[33;1m' if not HEROKU else ''  # ORANGE
+CBOT = '\033[94;1m' if not HEROKU else ''  # BOT (blue?)
+CUSR = '\033[38;5;118m' if not HEROKU else ''  # USER (white?)
 
 
 class CustomPercentStyle(logging.PercentStyle):
@@ -42,8 +42,9 @@ class CustomPercentStyle(logging.PercentStyle):
                 first = "[%s] " % (record.levelname[:1])
             else:
                 first = "[%(asctime)s / %(levelname)s] "
-
-            if record.name.startswith('telethon'):
+            if record.name == "root":
+                second = f"{CCRI}%(name)s:{CEND} %(message)s"
+            elif record.name.startswith('telethon'):
                 second = f"{CBOT}%(name)s:{CEND} %(message)s"
             elif record.name.startswith('userbot'):
                 second = f"{CORA}%(name)s:{CEND} %(message)s"
@@ -73,8 +74,11 @@ class CustomFormatter(logging.Formatter):
         """Format a log record without ANSI escapes for dumping"""
         super().format(record)
         record.__dict__.update(levelAlias=record.levelname[:1])
-        fmt = "{asctime} [{levelAlias}] - {name}: {message}"
-        return fmt.format(**record.__dict__)
+        fmt = "{asctime} [{levelAlias}] - {name}: {message}".format(
+            **record.__dict__)
+        if record.exc_text:
+            fmt += f"\n{record.exc_text}"
+        return fmt
 
 
 class TargetNotSetError(Exception):
@@ -135,3 +139,8 @@ class CustomMemoryHandler(logging.handlers.MemoryHandler):
                 self.buffer.clear()
         finally:
             self.release()
+
+    def flushBuffers(self):
+        """Clear the handled and pending buffers list"""
+        self.buffer.clear()
+        self.handledbuffer.clear()

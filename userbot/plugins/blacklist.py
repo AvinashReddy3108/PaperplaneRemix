@@ -57,9 +57,7 @@ wl_pattern = (r"w(?:hite)?l(?:ist)?" r"(?: |$|\n)(?P<match>[\s\S]*)")
 dwl_pattern = (r"r(?:e)?m(?:ove)?"
                r"w(?:hite)?l(?:ist)?"
                r"(?: |$|\n)(?P<match>[\s\S]*)")
-dbld_pattern = (r"(?:remove|un)"
-                r"b(?:lack)?l(?:ist)?"
-                r"(?: |$|\n)(?P<match>[\s\S]*)")
+dbld_pattern = (r"unb(?:lack)?l(?:ist)?" r"(?: |$|\n)(?P<match>[\s\S]*)")
 bls_pattern = (r"(?P<global>g(?:lobal)?)?"
                r"b(?:lack)?l(?:ist)?s"
                r"(?: |$|\n)"
@@ -875,10 +873,7 @@ async def inc_listener(event: NewMessage.Event) -> None:
 
     if invite_match:
         _, invite, _ = resolve_invite_link(invite_match.group('hash'))
-        try:
-            invite = await client.get_peer_id(invite, False)
-        except Exception as e:
-            LOGGER.debug(e)
+        invite = await get_peer_id(invite)
 
     if GlobalBlacklist.txt:
         for index, value in enumerate(GlobalBlacklist.txt):
@@ -936,7 +931,7 @@ async def inc_listener(event: NewMessage.Event) -> None:
                 entity = id_pattern.search(
                     event.text[entity.offset:entity.offset + entity.length])
                 entity = entity.group('e') if entity else entity
-                value = await client.get_peer_id(entity) if entity else None
+                value = await get_peer_id(entity) if entity else None
                 counter = counter + 1
             elif isinstance(entity, types.MessageEntityMentionName):
                 value = entity.user_id

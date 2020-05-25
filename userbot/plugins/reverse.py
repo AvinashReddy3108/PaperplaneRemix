@@ -46,7 +46,6 @@ AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36"""
 
 
 @client.onMessage(command="reverse",
-                  info="Reverse search images on Google",
                   outgoing=True,
                   regex=r"reverse(?: |$)(\d*)")
 async def reverse(event: NewMessage.Event) -> None:
@@ -173,21 +172,20 @@ async def _scrape_url(googleurl):
     }
 
     best_guess = soup.find('div', {'class': 'r5a77d'})
-    similar_images = soup.find('div', {'class': 'e2BEnf U7izfe'}).find('a')
+    similar_images = soup.find('div', {'class': 'e2BEnf U7izfe'})
     matching_text = soup.find('div', {
         'class': 'rg-header V5niGc dPAwzb',
         'role': 'heading'
     })
-    matching = soup.find('div', {
-        'id': 'search'
-    }).find_all('div', {'class': 'g'})
+    _matching = soup.find('div', {'id': 'search'})
 
+    matching = _matching.find_all('div', {'class': 'g'}) if _matching else None
     if best_guess:
         result['best_guess'] = best_guess.a.get_text()
 
     if similar_images:
         result['similar_images'] = ("https://www.google.com" +
-                                    similar_images.get('href'))
+                                    similar_images.find('a').get('href'))
 
     if matching_text:
         result['matching_text'] = matching_text.get_text()

@@ -134,11 +134,11 @@ async def terminal(event: NewMessage.Event) -> None:
         await event.answer("Nice, get off the void.\nNo output for you.")
 
 
-@client.onMessage(command=("kill/terminate", plugin_category),
-                  outgoing=True,
-                  regex=r"(kill|terminate)$",
-                  info="Kill or Terminate a subprocess which is still running."
-                  )
+@client.onMessage(
+    command=("kill/terminate", plugin_category),
+    outgoing=True,
+    regex=r"(kill|terminate)$",
+)
 async def killandterminate(event: NewMessage.Event) -> None:
     """Kill or terminate a running subprocess."""
     if not event.reply_to_msg_id:

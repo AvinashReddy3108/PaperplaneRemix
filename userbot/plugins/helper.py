@@ -182,9 +182,10 @@ async def helper(event: NewMessage.Event) -> None:
     """A list of commands categories, their commands or command's details."""
     arg = event.matches[0].group(1)
     arg1 = event.matches[0].group(2)
-    enabled, _ = await solve_commands(client.commands)
-    disabled, _ = await solve_commands(client.disabled_commands)
+    enabled, senabled = await solve_commands(client.commands)
+    disabled, sdisabled = await solve_commands(client.disabled_commands)
     categories = client.commandcategories
+    prefix = client.prefix or '.'
     if arg:
         arg = arg.lower()
         if arg == "all":
@@ -204,9 +205,12 @@ async def helper(event: NewMessage.Event) -> None:
                 else:
                     text += ',\t\t'.join(
                         [f'`{name}`' for name in sorted(disabled)])
-        elif arg in [*enabled, *disabled]:
-            merged = {**enabled, **disabled}
-            command = merged.get(arg)
+        elif arg in (*enabled, *disabled, *senabled, *sdisabled):
+            command = None
+            for i in (enabled, disabled, senabled, sdisabled):
+                if arg in i:
+                    command = i.get(arg)
+                    break
             text = (
                 f"**Here's the info for the** `{arg}` **command:**\n\n"
                 f"• **Can be disabled:** `{'Yes' if not command.builtin else 'No'}`\n"
@@ -221,7 +225,10 @@ async def helper(event: NewMessage.Event) -> None:
                     f"      - **Registered function:** `{command.func.__name__}`\n"
                     f"      - **Line:** `{command.func.__code__.co_firstlineno}`\n"
                 )
-            text += ("\n• **Syntax/Docs:**\n" f"{command.info}")
+            text += ("\n• **Info:**\n"
+                     f"{command.info}\n"
+                     "\n• **Syntax:**\n"
+                     f"{command.usage.format(prefix=prefix)}")
         elif arg in categories:
             category = categories.get(arg)
             text = f"**{arg.title()} commands:**"
@@ -250,7 +257,7 @@ async def solve_commands(commands: dict) -> Tuple[dict, dict]:
         splat = split_exp.split(com_names)
         if splat:
             for n in splat:
-                com_tuples[n] = com_names
+                com_tuples[n] = command
                 new_dict[' | '.join(splat)] = command
         else:
             new_dict[com_names] = command

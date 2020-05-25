@@ -32,6 +32,7 @@ from .custom import answer, resanswer
 
 LOGGER = logging.getLogger(__name__)
 no_info = "There is no help available for this command!"
+no_usage = "There is no usage info available for this command!"
 
 
 @dataclasses.dataclass
@@ -39,6 +40,7 @@ class Command:
     func: callable
     handlers: list
     info: str
+    usage: str
     builtin: bool
 
 
@@ -88,10 +90,17 @@ class UserBotClient(TelegramClient):
                 else:
                     com = command
                 help_doc = info or func.__doc__ or no_info
+                _doc = inspect.cleandoc(help_doc).split('\n\n\n', maxsplit=1)
+                if len(_doc) > 1:
+                    comInfo = _doc[0].strip()
+                    comUsage = _doc[1].strip()
+                else:
+                    comInfo = _doc[0]
+                    comUsage = no_usage
 
-                UBcommand = Command(
-                    func, handlers,
-                    inspect.cleandoc(help_doc).format(**doc_args), builtin)
+                UBcommand = Command(func, handlers,
+                                    comInfo.format(**doc_args).strip(),
+                                    comUsage.strip(), builtin)
                 category = category.lower()
                 self.commands.update({com: UBcommand})
                 self.commandcategories.setdefault(category, []).append(com)

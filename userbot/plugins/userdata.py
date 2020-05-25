@@ -99,18 +99,26 @@ async def whois(event: NewMessage.Event) -> None:
 async def name(event: NewMessage.Event) -> None:
     """Get your current name or update it."""
     match = event.matches[0].group(1)
+    me = await client.get_me()
     if not match:
-        me = await client.get_me()
         text = f"**First name:** `{me.first_name}`"
         if me.last_name:
             text += f"\n**Last name:** `{me.last_name}`"
         await event.answer(text)
         return
 
-    split = match.split("last=")
-    first = split[0] if split[0] else None
-    last = ' '.join(split[1:]) if len(split) > 1 else ''
-    n1 = get_display_name(await client.get_me())
+    _, kwargs = await client.parse_arguments(match)
+    if kwargs:
+        first = kwargs.get('first', me.first_name)
+        last = kwargs.get('last', me.last_name)
+    else:
+        split = match.strip().split(maxsplit=1)
+        if len(split) > 1:
+            first, last = split
+        else:
+            first = split[0]
+            last = me.last_name
+    n1 = get_display_name(me)
 
     try:
         await client(

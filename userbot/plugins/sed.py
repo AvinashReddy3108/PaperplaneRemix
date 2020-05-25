@@ -40,7 +40,7 @@ pattern = (
     r'((?<!;)\w+)?'  # flags: Don't capture if it starts with a semicolon
     r'(?=;|$)'  # Ensure it ends with a semicolon for the next match
 )
-ub_sed_pattern = r"^(?:\d+)?s(ed)?"
+
 ninja_sedbots = ['regexbot', 'regeexbot']
 
 

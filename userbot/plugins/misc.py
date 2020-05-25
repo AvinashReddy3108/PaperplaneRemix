@@ -74,7 +74,7 @@ async def rmbg(event: NewMessage.Event) -> None:
     match = event.matches[0].group(1)
     reply = await event.get_reply_message()
 
-    if match and match != '':
+    if match:
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.get(match) as response:

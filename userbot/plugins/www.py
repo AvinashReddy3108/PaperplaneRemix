@@ -90,7 +90,7 @@ async def pingdc(event: NewMessage.Event) -> None:
 
 @client.onMessage(command=("speedtest", plugin_category),
                   outgoing=True,
-                  regex=r"speedtest(?: |$)(bit|byte)?(?:s$|$)")
+                  regex=r"speedtest(?: |$)(bit|byte)?s?$")
 async def speedtest(event: NewMessage.Event) -> None:
     """Perform a speedtest with the best available server based on ping."""
     unit = ("bit", 1)
