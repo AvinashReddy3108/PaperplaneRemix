@@ -313,14 +313,34 @@ async def unblacklister(event: NewMessage.Event) -> None:
     parsed = await get_values(args, kwargs)
     reason = kwargs.get('reason', None)
 
-    for option, values in parsed.items():
-        if values:
-            removed, skipped = await unappend("blacklists:" + key, option,
-                                              values)
-            if removed:
-                removed_values.update({option: removed})
-            if skipped:
-                skipped_values.update({option: skipped})
+    if index and bltype:
+        if glb:
+            gval = getattr(GlobalBlacklist, bltype, None)
+            if gval:
+                if len(gval) < index:
+                    await event.answer('`Invalid index!`')
+                    return
+                removed, skipped = await unappend("blacklists:" + key, bltype,
+                                                  gval[index])
+                removed_values.update({bltype: removed})
+        else:
+            if key in localBlacklists:
+                lval = getattr(localBlacklists[key], bltype, None)
+                if lval:
+                    if len(lval) < index:
+                        await event.answer('`Invalid index!`')
+                        return
+                    await unappend("blacklists:" + key, bltype, lval[index])
+                    removed_values.update({bltype: removed})
+    else:
+        for option, values in parsed.items():
+            if values:
+                removed, skipped = await unappend("blacklists:" + key, option,
+                                                  values)
+                if removed:
+                    removed_values.update({option: removed})
+                if skipped:
+                    skipped_values.update({option: skipped})
 
     if removed_values:
         text = f"**Removed blacklists for {key}:**\n"
@@ -915,12 +935,14 @@ async def inc_listener(event: NewMessage.Event) -> None:
         localid = getattr(localbl, 'tgid', []) or []
         if event.sender_id in globalid:
             index = globalid.index(event.sender_id)
-            if await ban_user(event, 'tgid', value.sender_id, index, True):
-                return
+            if isinstance(globalid[index], int):
+                if await ban_user(event, 'tgid', value.sender_id, index, True):
+                    return
         elif event.sender_id in localid:
             index = localid.index(event.sender_id)
-            if await ban_user(event, 'tgid', value.sender_id, index):
-                return
+            if isinstance(globalid[index], int):
+                if await ban_user(event, 'tgid', value.sender_id, index):
+                    return
         entities = getattr(event, 'entities', None) or []
         counter = 0
         for entity in entities:
@@ -948,10 +970,14 @@ async def inc_listener(event: NewMessage.Event) -> None:
                         index = localid.index(value)
                     else:
                         index = 0
+                    if not isinstance(value, int):
+                        continue
                     if await ban_user(event, 'tgid', value, index, g):
                         return
                     break
 
+            if not isinstance(value, int):
+                continue
             if value in globalid:
                 index = globalid.index(value)
                 if await ban_user(event, 'tgid', value, index, True):
@@ -969,7 +995,6 @@ async def inc_listener(event: NewMessage.Event) -> None:
 @client.on(ChatAction)
 async def bio_filter(event: ChatAction.Event) -> None:
     """Filter incoming messages for blacklisting."""
-    match = False
     broadcast = getattr(event.chat, 'broadcast', False)
 
     if not redis or event.is_private or broadcast:
@@ -993,11 +1018,11 @@ async def bio_filter(event: ChatAction.Event) -> None:
             return
         elif GlobalBlacklist.tgid and sender_id in GlobalBlacklist.tgid:
             index = GlobalBlacklist.tgid.index(sender_id)
-            if await ban_user(event, 'tgid', match, index, True):
+            if await ban_user(event, 'tgid', sender_id, index, True):
                 return
         elif localbl and localbl.tgid and sender_id in localbl.tgid:
             index = localbl.tgid.index(sender_id)
-            if await ban_user(event, 'tgid', match, index):
+            if await ban_user(event, 'tgid', sender_id, index):
                 return
 
         user = await client(functions.users.GetFullUserRequest(id=sender))
@@ -1156,6 +1181,14 @@ async def get_values(args: list, kwargs: dict) -> Dict[str, List]:
                     txt.append(str(i))
 
     temp_id = kwargs.get('id', [])
+    if not isinstance(temp_id, list):
+        temp_id = [temp_id]
+    await append_args_to_list(tgid, temp_id, True)
+    temp_tgid = kwargs.get('tgid', [])
+    if isinstance(temp_tgid, list):
+        temp_id.extend(temp_tgid)
+    else:
+        temp_id.append(temp_tgid)
     await append_args_to_list(tgid, temp_id, True)
 
     temp_bio = kwargs.get('bio', [])
@@ -1165,6 +1198,12 @@ async def get_values(args: list, kwargs: dict) -> Dict[str, List]:
     if not isinstance(temp_string, list):
         temp_string = [temp_string]
     temp_str = kwargs.get('str', [])
+    if isinstance(temp_str, list):
+        temp_string.extend(temp_str)
+    else:
+        temp_string.append(temp_str)
+    await append_args_to_list(txt, temp_string)
+    temp_str = kwargs.get('txt', [])
     if isinstance(temp_str, list):
         temp_string.extend(temp_str)
     else:

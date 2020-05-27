@@ -67,6 +67,7 @@ class ProgressHook():
         self.downloaded = None
         self.tasks = []
         self.update = update
+        self.last_edit = None
 
     def callback(self, task):
         """Cancel pending tasks else skip them if completed."""
@@ -103,11 +104,15 @@ class ProgressHook():
                 filen, prcnt, ttlbyt, spdstr, etastr))
             LOGGER.debug(finalStr)
             if float(prcnt[:-1]) - self.downloaded >= self.update:
+                # Avoid spamming recents
+                if self.last_edit and time.time() - self.last_edit < 10:
+                    return
                 self.downloaded = float(prcnt[:-1])
                 filen = re.sub(r'YT_DL\\(.+)_\d+\.', r'\1.', filen)
                 self.edit(f"`Downloading {filen} at {spdstr}.`\n"
                           f"__Progress: {prcnt} of {ttlbyt}__\n"
                           f"__ETA: {etastr}__")
+                self.last_edit = time.time()
 
         elif d['status'] == 'finished':
             filen = d.get('filename', 'Unknown filename')

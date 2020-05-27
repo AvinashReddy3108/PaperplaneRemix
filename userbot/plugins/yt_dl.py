@@ -77,7 +77,7 @@ async def yt_dl(event):
     round_message = kwargs.get('round_message', kwargs.get('round', False))
     update = kwargs.get('update', 10)
     supports_streaming = kwargs.get('supports_streaming',
-                                    kwargs.get('stream', False))
+                                    kwargs.get('stream', True))
     if not upload and auto_delete:
         await event.answer("`The void doesn't make sense!\
             \nEither don't upload or delete.`")
@@ -231,13 +231,18 @@ async def fix_attributes(path,
                 break
         video = types.DocumentAttributeVideo(duration, width, height,
                                              round_message, supports_streaming)
-
+    if audio and isinstance(attr, types.DocumentAttributeAudio):
+        new_attributes.append(audio)
+    elif video and isinstance(attr, types.DocumentAttributeAudio):
+        new_attributes.append(video)
+    else:
+        new_attributes.append(attr)
     for attr in attributes:
-        if audio and isinstance(attr, types.DocumentAttributeAudio):
-            new_attributes.append(audio)
-        elif video and isinstance(attr, types.DocumentAttributeAudio):
-            new_attributes.append(video)
-        else:
-            new_attributes.append(attr)
+        if isinstance(attr, types.DocumentAttributeAudio):
+            if not audio:
+                new_attributes.append(attr)
+        elif isinstance(attr, types.DocumentAttributeVideo):
+            if not video:
+                new_attributes.append(attr)
 
     return new_attributes, mime_type

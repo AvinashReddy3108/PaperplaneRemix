@@ -126,7 +126,11 @@ class ParallelTransferrer:
         self.upload_ticker = 0
 
     async def _cleanup(self) -> None:
-        await asyncio.gather(*[sender.disconnect() for sender in self.senders])
+        # Disconnecting from our main connection wouldn't be fun
+        await asyncio.gather(*[
+            sender.disconnect() for sender in self.senders
+            if self.dc_id != self.client.session.dc_id
+        ])
         self.senders = None
 
     @staticmethod
@@ -191,6 +195,9 @@ class ParallelTransferrer:
                             loop=self.loop)
 
     async def _create_sender(self) -> MTProtoSender:
+        # Check if we're connecting to the same DC we're connected to
+        if self.dc_id == self.client.session.dc_id:
+            return self.client._sender
         dc = await self.client._get_dc(self.dc_id)
         sender = MTProtoSender(self.auth_key,
                                self.loop,
