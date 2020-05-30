@@ -41,6 +41,7 @@ main_repo = "https://github.com/AvinashReddy3108/PaperplaneRemix.git"
 async def updater(event: NewMessage.Event) -> None:
     """Pull newest changes from the official repo and update the script/app."""
     arg = event.matches[0].group(1)
+    force_update = False
     await event.answer("`Checking for updates!`")
     try:
         repo = git.Repo(basedir)
@@ -65,6 +66,7 @@ async def updater(event: NewMessage.Event) -> None:
         fetched_items = origin.fetch()
         repo.create_head('master', origin.refs.master).set_tracking_branch(
             origin.refs.master).checkout(force=True)
+        force_update = True
     fetched_commits = repo.iter_commits(f"HEAD..{fetched_items[0].ref.name}")
     untracked_files = repo.untracked_files
     old_commit = repo.head.commit
@@ -102,7 +104,7 @@ async def updater(event: NewMessage.Event) -> None:
         return
 
     new_commit = repo.head.commit
-    if old_commit == new_commit:
+    if old_commit == new_commit and not force_update:
         await event.answer("`Already up-to-date!`")
         repo.__del__()
         return
@@ -133,11 +135,11 @@ async def updater(event: NewMessage.Event) -> None:
                                         elapsed=elspased)
         changelog += f"{committed:>{len(committed) + 8}}"
     if changelog == def_changelog:
-        changelog = "`No changelog for you! IDK what happened.`"
+        changelog = "`No changelog for you! IDK what happened.`" if not force_update else "`Forcibly synced local git repo to latest stable branch.`"
 
-    toast = await event.answer(
-        "`Successfully pulled the new commits. Updating the bot!`",
-        log=("update", changelog.strip()))
+    toast_txt = "Successfully pulled the new commits. Updating the userbot!" if not force_update else "Repairing the userbot, please wait!"
+    toast = await event.answer(f"`{toast_txt}`",
+                               log=("update", changelog.strip()))
     if not client.logger:
         await event.answer(changelog.strip(),
                            reply_to=toast.id,
@@ -187,8 +189,8 @@ async def updater(event: NewMessage.Event) -> None:
                 repo.index.add(untracked_files, force=True)
                 repo.index.commit("[PaperplaneRemix] Updater: Untracked files")
             app.enable_feature('runtime-dyno-metadata')
-            await event.answer(
-                "`Pushing all the changes to Heroku. Might take a while.`")
+            heroku_build_txt = "Pushing all the changes to Heroku." if not force_update else "Rebuilding Heroku dyno."
+            await event.answer(f"`{heroku_build_txt} Might take a while.`")
             remote = repo.remotes['heroku']
             try:
                 remote.push(refspec=f'{repo.active_branch.name}:master',
@@ -206,9 +208,11 @@ async def updater(event: NewMessage.Event) -> None:
 
 
 async def update_requirements():
+    args = ['-m', 'pip', 'install', '--user', '-r', 'requirements.txt']
     try:
-        process = await asyncio.create_subprocess_shell(
-            f'{sys.executable} -m pip install --user -r requirements.txt',
+        process = await asyncio.create_subprocess_exec(
+            sys.executable.replace(' ', '\\ '),
+            *args,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE)
         await process.communicate()
