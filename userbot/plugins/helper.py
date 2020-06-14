@@ -82,21 +82,17 @@ async def enable(event: NewMessage.Event) -> None:
         await event.answer("`Enable what? The void?`")
         return
     commands, command_list = await solve_commands(client.disabled_commands)
-    arg1 = command_list.get(arg, arg)
-    command = commands.get(arg1, False)
+    command = commands.get(arg, command_list.get(arg, False))
     if command:
         for handler in command.handlers:
             client.add_event_handler(command.func, handler)
         if arg in command_list:
-            com = command_list.get(arg)
-            client.commands[com] = command
-            client.disabled_commands.pop(com)
-            enabled_coms = ', '.join(split_exp.split(com))
+            enabled_coms = ', '.join(split_exp.split(arg))
         else:
-            client.commands[arg] = command
-            client.disabled_commands.pop(arg)
             enabled_coms = arg
 
+        client.commands[arg] = command
+        client.disabled_commands.pop(arg)
         await event.answer(f"`Successfully enabled {enabled_coms}`",
                            log=("enable",
                                 f"Enabled command(s): {enabled_coms}"))
@@ -116,22 +112,19 @@ async def disable(event: NewMessage.Event) -> None:
         await event.answer("`Disable what? The void?`")
         return
     commands, command_list = await solve_commands(client.commands)
-    arg1 = command_list.get(arg, arg)
-    command = commands.get(arg1, False)
+    command = commands.get(arg, command_list.get(arg, False))
     if command:
         if command.builtin:
             await event.answer("`Cannot disable a builtin command.`")
         else:
             client.remove_event_handler(command.func)
             if arg in command_list:
-                com = command_list.get(arg)
-                client.disabled_commands[com] = command
-                client.commands.pop(com)
-                disabled_coms = ', '.join(split_exp.split(com))
+                disabled_coms = ', '.join(split_exp.split(arg))
             else:
-                client.disabled_commands[arg] = command
-                client.commands.pop(arg)
                 disabled_coms = arg
+
+            client.disabled_commands[arg] = command
+            client.commands.pop(arg)
             await event.answer(f"`Successfully disabled {disabled_coms}`",
                                log=("disable",
                                     f"Disabled command(s): {disabled_coms}"))

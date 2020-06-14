@@ -124,8 +124,8 @@ async def out_listner(event: NewMessage.Event) -> None:
             to_log.append(
                 msg.format(len(value['mentions']), value['title'], key))
 
-        pr_text = "`Received {} message{} from {} private chat{}.`".format(
-            *(await _correct_grammer(total_mentions, len(AFK.privates))))
+        pr_text = "`Received {} message{} from {} private chat{}.`".format(*(
+            await _correct_grammer(total_mentions, len(AFK.privates))))
         pr_log = pr_log + "\n\n".join("  " + t for t in to_log)
     if AFK.groups:
         total_mentions = 0
@@ -144,8 +144,8 @@ async def out_listner(event: NewMessage.Event) -> None:
             msg += ',   '.join(mentions) + '.'
             to_log.append(msg)
 
-        gr_text = "`Received {} mention{} from {} group{}.`".format(
-            *(await _correct_grammer(total_mentions, len(AFK.groups))))
+        gr_text = "`Received {} mention{} from {} group{}.`".format(*(
+            await _correct_grammer(total_mentions, len(AFK.groups))))
         gr_log = gr_log + "\n\n".join("  " + t for t in to_log)
 
     main_text = '\n\n'.join([pr_text, gr_text]).strip()

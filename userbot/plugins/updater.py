@@ -36,7 +36,7 @@ main_repo = "https://github.com/AvinashReddy3108/PaperplaneRemix.git"
 
 @client.onMessage(command="update",
                   outgoing=True,
-                  regex="update(?: |$)(reset|add)?$",
+                  regex="update(?: |$)(reset|add|force)?$",
                   builtin=True)
 async def updater(event: NewMessage.Event) -> None:
     """Pull newest changes from the official repo and update the script/app."""
@@ -66,7 +66,6 @@ async def updater(event: NewMessage.Event) -> None:
         fetched_items = origin.fetch()
         repo.create_head('master', origin.refs.master).set_tracking_branch(
             origin.refs.master).checkout(force=True)
-        force_update = True
     fetched_commits = repo.iter_commits(f"HEAD..{fetched_items[0].ref.name}")
     untracked_files = repo.untracked_files
     old_commit = repo.head.commit
@@ -91,6 +90,8 @@ async def updater(event: NewMessage.Event) -> None:
         repo.index.commit("[PaperplaneRemix] Updater: Untracked files")
     elif arg == "reset":
         repo.head.reset('--hard')
+    elif arg == "force":
+        force_update = True
 
     try:
         repo.remotes.origin.pull()
@@ -105,7 +106,10 @@ async def updater(event: NewMessage.Event) -> None:
 
     new_commit = repo.head.commit
     if old_commit == new_commit and not force_update:
-        await event.answer("`Already up-to-date!`")
+        await event.answer(
+            "`Already up-to-date! (or so it seems.)`\n"
+            "`You may use` **{1}update force** `to forcibly update the userbot.`"
+        )
         repo.__del__()
         return
 
@@ -135,9 +139,9 @@ async def updater(event: NewMessage.Event) -> None:
                                         elapsed=elspased)
         changelog += f"{committed:>{len(committed) + 8}}"
     if changelog == def_changelog:
-        changelog = "`No changelog for you! IDK what happened.`" if not force_update else "`Forcibly synced local git repo to latest stable branch.`"
+        changelog = "`No changelog for you! IDK what happened.`" if not force_update else "`[FORCED UPDATE] Synced with latest stable codebase.`"
 
-    toast_txt = "Successfully pulled the new commits. Updating the userbot!" if not force_update else "Repairing the userbot, please wait!"
+    toast_txt = "Successfully pulled the new commits. Updating the userbot!" if not force_update else "Updating the userbot, please wait!"
     toast = await event.answer(f"`{toast_txt}`",
                                log=("update", changelog.strip()))
     if not client.logger:

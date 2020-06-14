@@ -64,7 +64,7 @@ class ProgressHook():
     """Custom hook with the event stored for YTDL."""
     def __init__(self, event, update=5):
         self.event = event
-        self.downloaded = None
+        self.downloaded = 0
         self.tasks = []
         self.update = update
         self.last_edit = None
