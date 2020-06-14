@@ -106,9 +106,10 @@ async def updater(event: NewMessage.Event) -> None:
 
     new_commit = repo.head.commit
     if old_commit == new_commit and not force_update:
+        prefix = client.prefix if client.prefix is not None else '.'
         await event.answer(
             "`Already up-to-date! (or so it seems.)`\n"
-            "`You may use` **{1}update force** `to forcibly update the userbot.`"
+            f"`You may use` **{prefix}update force** `to forcibly update the userbot.`"
         )
         repo.__del__()
         return
