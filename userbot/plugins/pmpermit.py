@@ -341,10 +341,10 @@ async def get_users(event: NewMessage.Event) -> types.User or None:
             except (TypeError, ValueError):
                 pass
     elif event.is_private and event.out:
-        users = [ await event.get_chat()]
+        users = [await event.get_chat()]
     elif event.reply_to_msg_id:
         reply = await event.get_reply_message()
-        user = [ await reply.get_sender()]
+        user = [await reply.get_sender()]
     return users
 
 

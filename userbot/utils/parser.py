@@ -48,7 +48,7 @@ async def _parse_arg(val: str) -> Union[int, str, float]:
     if isinstance(val, str):
         if re.search(r'^\[.*\]$', val):
             val = re.sub(r'[\[\]]', '', val).split(',')
-            val = [ await _parse_arg(v.strip()) for v in val]
+            val = [await _parse_arg(v.strip()) for v in val]
         else:
             val = BOOL_MAP.get(val.lower(), val)
     if isinstance(val, str):

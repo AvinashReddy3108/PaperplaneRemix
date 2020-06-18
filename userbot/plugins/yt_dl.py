@@ -42,7 +42,6 @@ ydl_opts = {
     'nocheckcertificate': True,
     'logtostderr': False,
     'quiet': True,
-    'embedthumbnail': True,
     'addmetadata': True,
     'writethumbnail': True,
     'ignoreerrors': False,
@@ -118,18 +117,23 @@ async def yt_dl(event):
                 'preferredcodec': fmt,
                 'preferredquality': '320',
             })
+            if fmt in ['mp3', 'm4a']:
+                params['postprocessors'].append({'key': 'EmbedThumbnail'})
+            if fmt in ['mp3']:
+                params['postprocessor_args'] = [
+                    '-write_id3v1', '1', '-id3v2_version', '3'
+                ]
         elif fmt in videoFormats and ffmpeg:
             params['postprocessors'].append({
                 'key': 'FFmpegVideoConvertor',
                 'preferedformat': fmt
             })
+            if fmt in ['mp4']:
+                params['postprocessors'].append({'key': 'EmbedThumbnail'})
         else:
             params.update(format=fmt)
             if ffmpeg:
                 params.update(key='FFmpegMetadata')
-                if fmt in ['mp3', 'mp4', 'm4a']:
-                    params.update(writethumbnail=True)
-                    params['postprocessors'].append({'key': 'EmbedThumbnail'})
 
     if progress:
         event.media = None

@@ -13,6 +13,7 @@ RUN apt update && apt upgrade -y && \
         libwebp-dev \
         linux-headers-amd64 \
         musl-dev \
+        atomicparsley \
         neofetch \
     && rm -rf /var/lib/apt/lists /var/cache/apt/archives /tmp
 
