@@ -155,7 +155,7 @@ async def yt_dl(event):
         elif isinstance(output, BaseException):
             warnings.append(f'```{await client.get_traceback(output)}```')
         elif output is None:
-            await event.answer('`Oh oh, sum ting went wong.`')
+            await event.answer('`Oh oh, some thing went wrong!`')
             return
         else:
             if upload:

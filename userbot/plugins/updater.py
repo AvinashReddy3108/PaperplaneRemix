@@ -55,7 +55,7 @@ async def updater(event: NewMessage.Event) -> None:
             f"`An error occured trying to get the Git Repo.`\n`{command}`")
         repo.__del__()
         return
-    except git.exc.InvalidGitRepositoryError:
+    except git.exc.InvalidGitRepositoryError or arg == "force":
         repo = git.Repo.init(basedir)
         origin = repo.create_remote('origin', main_repo)
         if not origin.exists():
@@ -66,6 +66,8 @@ async def updater(event: NewMessage.Event) -> None:
         fetched_items = origin.fetch()
         repo.create_head('master', origin.refs.master).set_tracking_branch(
             origin.refs.master).checkout(force=True)
+        if arg == "force":
+            force_update = True
     fetched_commits = repo.iter_commits(f"HEAD..{fetched_items[0].ref.name}")
     untracked_files = repo.untracked_files
     old_commit = repo.head.commit
@@ -90,8 +92,6 @@ async def updater(event: NewMessage.Event) -> None:
         repo.index.commit("[PaperplaneRemix] Updater: Untracked files")
     elif arg == "reset":
         repo.head.reset('--hard')
-    elif arg == "force":
-        force_update = True
 
     try:
         repo.remotes.origin.pull()
@@ -108,8 +108,8 @@ async def updater(event: NewMessage.Event) -> None:
     if old_commit == new_commit and not force_update:
         prefix = client.prefix if client.prefix is not None else '.'
         await event.answer(
-            "`Already up-to-date! (or so it seems.)`\n"
-            f"`You may use` **{prefix}update force** `to forcibly update the userbot.`"
+            "`Already up-to-date! (...or so it seems.)`\n"
+            f"`You may use` **{prefix}update force** `to forcibly update the userbot!`"
         )
         repo.__del__()
         return
