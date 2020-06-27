@@ -15,12 +15,15 @@
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
 import asyncio
+
 import datetime
 import os.path
 import sys
 
 import git
 import heroku3
+
+from configparser import NoSectionError, NoOptionError
 
 from userbot import client, LOGGER
 from userbot.utils.helpers import restart, _humanfriendly_seconds
@@ -94,6 +97,18 @@ async def updater(event: NewMessage.Event) -> None:
         repo.head.reset('--hard')
 
     try:
+        config = repo.config_reader()
+        try:
+            if config.get_value('user', 'name') and config.get_value(
+                    'user', 'email'):
+                pass
+        except (NoSectionError, NoOptionError):
+            LOGGER.warning(
+                "No 'git' credentials found, falling back to generic data for the git pull."
+            )
+            repo.config_writer().set_value(
+                "user", "name", "PaperplaneRemix Updater").release()
+            repo.config_writer().set_value("user", "email", "<>").release()
         repo.remotes.origin.pull()
     except git.exc.GitCommandError as command:
         text = ("`An error occured trying to Git pull:`\n`{0}`\n\n"
