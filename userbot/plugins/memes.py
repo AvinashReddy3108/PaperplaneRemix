@@ -859,29 +859,29 @@ async def mamma_mia(event: NewMessage.Event) -> None:
 @client.onMessage(outgoing=True, regex="^Ooof$", disable_prefix=True)
 async def oof(event: NewMessage.Event) -> None:
     """Big Oooooof."""
-    for i in range(random.randint(5, 10)):
-        await event.answer("Oooo" + "o" * i + "f")
+    for i in range(random.randint(2, 5)):
+        await event.answer("Oooo" + "o" * i * 2 + "f")
 
 
 @client.onMessage(outgoing=True, regex="^-__-$", disable_prefix=True)
 async def okay(event: NewMessage.Event) -> None:
     """Ok......"""
-    for i in range(random.randint(5, 10)):
-        await event.answer("-___" + "_" * i + "-", parse_mode='html')
+    for i in range(random.randint(2, 5)):
+        await event.answer("-___" + "_" * i * 2 + "-", parse_mode='html')
 
 
 @client.onMessage(outgoing=True, regex="^;__;$", disable_prefix=True)
 async def crai(event: NewMessage.Event) -> None:
     """crai :("""
-    for i in range(random.randint(5, 10)):
-        await event.answer(";___" + "_" * i + ";", parse_mode='html')
+    for i in range(random.randint(2, 5)):
+        await event.answer(";___" + "_" * i * 2 + ";", parse_mode='html')
 
 
 @client.onMessage(outgoing=True, regex="^:/$", disable_prefix=True)
 async def keks(event: NewMessage.Event) -> None:
     """kekz"""
     uio = ["/", "\\"]
-    for i in range(1, random.randint(5, 10)):
+    for i in range(1, random.randint(2, 5)):
         await asyncio.sleep(0.3)
         await event.answer(":" + uio[i % 2])
 

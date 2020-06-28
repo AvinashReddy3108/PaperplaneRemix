@@ -196,7 +196,7 @@ async def updater(event: NewMessage.Event) -> None:
             # "Dirty Fix" for Heroku Dynos to update proper environment
             # variables for external plugin flags.
             heroku_ext_flags = {
-                x[12:]: getenv(x, None)
+                x[12:]: os.getenv(x, None)
                 for x in list(os.environ) if x.startswith('ext_userbot_')
             }
             for flag in userbot_config:
