@@ -17,7 +17,7 @@
 import asyncio
 
 import datetime
-import os.path
+import os
 import sys
 
 import git
@@ -188,9 +188,23 @@ async def updater(event: NewMessage.Event) -> None:
                         "`There seems to be an ongoing build in your app.`"
                         " `Try again after it's finished.`")
                     return
+
             # Don't update the telethon environment varaibles
-            userbot_config = client.config['userbot']
-            app.config().update(dict(userbot_config))
+            userbot_config = dict(client.config['userbot'])
+            app.config().update(userbot_config)
+
+            # "Dirty Fix" for Heroku Dynos to update proper environment
+            # variables for external plugin flags.
+            heroku_ext_flags = {
+                x[12:]: getenv(x, None)
+                for x in list(os.environ) if x.startswith('ext_userbot_')
+            }
+            for flag in userbot_config:
+                if flag in heroku_ext_flags:
+                    app.config().update(
+                        {f"ext_userbot_{flag}": userbot_config[flag]})
+                    app.config().update({flag: None})
+
             app.config().update({
                 "userbot_restarted": f"{event.chat_id}/{event.message.id}",
                 "userbot_update": "True"
