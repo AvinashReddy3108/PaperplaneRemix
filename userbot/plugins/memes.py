@@ -785,30 +785,6 @@ async def bt(event: NewMessage.Event) -> None:
         )
 
 
-@client.onMessage(command=("gangstafy", plugin_category),
-                  outgoing=True,
-                  regex=r"(420|gangsta(fy)?)(?: |$|\n)([\s\S]*)")
-async def bt(event: NewMessage.Event) -> None:
-    """ Convert the text to Snoop Dogg style! """
-    text = event.matches[0].group(3)
-    if not text:
-        if event.is_reply:
-            text = (await event.get_reply_message()).message
-        else:
-            await event.answer("`I need suttin' fo' tha homies ta translate!`")
-            return
-    async with aiohttp.ClientSession() as session:
-        async with session.post(
-                "http://www.gizoogle.net/textilizer.php",
-                data={"translatetext": EMOJI_PATTERN.sub(r'', text)}) as resp:
-            re_resp = re.sub("/name=translatetext[^>]*>/",
-                             'name="translatetext" >', await resp.text())
-            soup = bs4.BeautifulSoup(re_resp, "lxml")
-            giz = soup.find_all(text=True)
-            gizoogled_txt = giz[37].strip("\r\n")
-            await event.answer(f"__{gizoogled_txt}__")
-
-
 @client.onMessage(command=("deepfry", plugin_category),
                   outgoing=True,
                   regex=r"(deep)?fry(?: |$)(\d*)")
