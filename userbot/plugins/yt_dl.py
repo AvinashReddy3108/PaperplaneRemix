@@ -43,7 +43,7 @@ ydl_opts = {
     'logtostderr': False,
     'quiet': True,
     'addmetadata': True,
-    'writethumbnail': True,
+    'write_all_thumbnails': True,
     'ignoreerrors': False,
     'noplaylist': True
 }

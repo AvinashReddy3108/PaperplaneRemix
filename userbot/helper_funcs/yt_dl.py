@@ -161,7 +161,7 @@ async def list_formats(info_dict: dict) -> str:
 
     header_line = ['format code', 'extension', 'resolution']
     fmtStr = (
-        '`Available formats for %s:`\n`%s`' %
+        'Available formats for %s:\n%s' %
         (info_dict['title'], youtube_dl.render_table(header_line, table)))
     return fmtStr
 
