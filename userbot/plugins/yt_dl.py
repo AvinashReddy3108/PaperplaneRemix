@@ -237,12 +237,12 @@ async def fix_attributes(path,
                 break
         video = types.DocumentAttributeVideo(duration, width, height,
                                              round_message, supports_streaming)
-    if audio and isinstance(attr, types.DocumentAttributeAudio):
+
+    if audio and isinstance(audio, types.DocumentAttributeAudio):
         new_attributes.append(audio)
-    elif video and isinstance(attr, types.DocumentAttributeAudio):
+    if video and isinstance(video, types.DocumentAttributeVideo):
         new_attributes.append(video)
-    else:
-        new_attributes.append(attr)
+
     for attr in attributes:
         if isinstance(attr, types.DocumentAttributeAudio):
             if not audio:
@@ -250,5 +250,7 @@ async def fix_attributes(path,
         elif isinstance(attr, types.DocumentAttributeVideo):
             if not video:
                 new_attributes.append(attr)
+        else:
+            new_attributes.append(attr)
 
     return new_attributes, mime_type
