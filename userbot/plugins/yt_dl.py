@@ -83,34 +83,14 @@ async def yt_dl(event):
         return
     ffmpeg = await is_ffmpeg_there()
     params = copy.deepcopy(ydl_opts)
+    params['postprocessor_args'] = [
+        '-preset', 'ultrafast', '-tune', 'fastdecode'
+    ] if ffmpeg else []
     warnings = []
 
     if fmt:
         fmt = fmt.strip().lower()
-        if fmt == 'listformats':
-            fmts = []
-            for url in args:
-                info = await extract_info(
-                    client.loop, concurrent.futures.ThreadPoolExecutor(),
-                    params, url)
-                if isinstance(info, dict):
-                    fmts.append(await list_formats(info))
-                elif isinstance(info, str):
-                    warnings.append(info)
-                else:
-                    warnings.append(
-                        f'```{await client.get_traceback(info)}```')
-            if fmts:
-                text = "**Formats:**\n"
-                text += ",\n\n".join(f"```{f}```" for f in fmts)
-                await event.answer(text)
-            if warnings:
-                text = "**Warnings:**\n"
-                text += ",\n\n".join(f"```{w}```" for w in warnings)
-                reply = True if fmts else False
-                await event.answer(text, reply=reply)
-            return
-        elif fmt in audioFormats and ffmpeg:
+        if fmt in audioFormats and ffmpeg:
             params.update(format='bestaudio')
             params['postprocessors'].append({
                 'key': 'FFmpegExtractAudio',
@@ -119,10 +99,10 @@ async def yt_dl(event):
             })
             if fmt in ['mp3', 'm4a']:
                 params['postprocessors'].append({'key': 'EmbedThumbnail'})
-            if fmt in ['mp3']:
-                params['postprocessor_args'] = [
-                    '-write_id3v1', '1', '-id3v2_version', '3'
-                ]
+                if fmt in ['mp3']:
+                    params['postprocessor_args'] += [
+                        '-write_id3v1', '1', '-id3v2_version', '3'
+                    ]
         elif fmt in videoFormats and ffmpeg:
             params['postprocessors'].append({
                 'key': 'FFmpegVideoConvertor',
@@ -134,6 +114,28 @@ async def yt_dl(event):
             params.update(format=fmt)
             if ffmpeg:
                 params.update(key='FFmpegMetadata')
+    else:
+        fmts = []
+        for url in args:
+            info = await extract_info(client.loop,
+                                      concurrent.futures.ThreadPoolExecutor(),
+                                      params, url)
+            if isinstance(info, dict):
+                fmts.append(await list_formats(info))
+            elif isinstance(info, str):
+                warnings.append(info)
+            else:
+                warnings.append(f'```{await client.get_traceback(info)}```')
+        if fmts:
+            text = "**Formats:**\n"
+            text += ",\n\n".join(f"```{f}```" for f in fmts)
+            await event.answer(text)
+        if warnings:
+            text = "**Warnings:**\n"
+            text += ",\n\n".join(f"```{w}```" for w in warnings)
+            reply = True if fmts else False
+            await event.answer(text, reply=reply)
+        return
 
     if progress:
         event.media = None
