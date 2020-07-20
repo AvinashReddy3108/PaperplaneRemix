@@ -747,29 +747,42 @@ async def urban_dict(event: NewMessage.Event) -> None:
 )
 async def slap(event: NewMessage.Event) -> None:
     """Slap a user with random objects for fun!"""
-    target = await get_user_from_msg(event)
-    if not target:
+    slapz, escaped = [], []
+    match = event.matches[0].group(1)
+    args, _ = await client.parse_arguments(match)
+    if not args and event.reply_to_msg_id:
+        reply = await event.get_reply_message()
+        args.append(reply.sender_id)
+    if not args:
         await event.answer("`I can't slap the void!`")
         return
 
-    try:
-        retard = await event.client.get_entity(target)
+    for target in args:
+        try:
+            retard = await event.client.get_entity(target)
+        except:
+            escaped.append(target)
+            continue
         slapped = (
             f"@{retard.username}"
             if retard.username
             else f"[{retard.first_name}](tg://user?id={retard.id})"
         )
         template = random.choice(SLAP_TEMPLATES)
-        caption = "..." + template.format(
+        caption = template.format(
             victim=slapped,
             item=random.choice(ITEMS),
             hits=random.choice(HIT),
             throws=random.choice(THROW),
             where=random.choice(WHERE),
         )
-        await event.answer(f"__{caption}__")
-    except:
-        await event.answer("`Unfortunately, I can't slap this person.`")
+        slapz.append(f"__{caption[0].upper() + caption[1:]}__")
+    if slapz:
+        await event.answer("\n".join(slapz))
+    if escaped:
+        string = "`Unfortunately, these guys escaped the beating:` "
+        string += ", ".join([f"`{x}`" for x in escaped])
+        await event.answer(string, reply=True)
 
 
 @client.onMessage(command=("f", plugin_category), outgoing=True, regex=r"f(?: |$)(.)")
