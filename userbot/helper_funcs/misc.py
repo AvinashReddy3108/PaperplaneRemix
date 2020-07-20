@@ -22,30 +22,30 @@ from ..utils.client import UserBotClient
 from ..utils.helpers import get_chat_link
 
 ChatBannedRights = {
-    'until_date': 'Banned until:',
-    'view_messages': 'Read messages:',
-    'send_messages': 'Send messages:',
-    'send_media': 'Send media:',
-    'send_stickers': 'Send stickers:',
-    'send_gifs': 'Send GIFs:',
-    'send_games': 'Send games:',
-    'send_inline': 'Send inline messages:',
-    'embed_links': 'Send embed links:',
-    'send_polls': 'Send polls:',
-    'change_info': 'Change info:',
-    'invite_users': 'Add users:',
-    'pin_messages': 'Pin messages:'
+    "until_date": "Banned until:",
+    "view_messages": "Read messages:",
+    "send_messages": "Send messages:",
+    "send_media": "Send media:",
+    "send_stickers": "Send stickers:",
+    "send_gifs": "Send GIFs:",
+    "send_games": "Send games:",
+    "send_inline": "Send inline messages:",
+    "embed_links": "Send embed links:",
+    "send_polls": "Send polls:",
+    "change_info": "Change info:",
+    "invite_users": "Add users:",
+    "pin_messages": "Pin messages:",
 }
 
 ChatAdminRights = {
-    'change_info': 'Change chat info:',
-    'post_messages': 'Post messages:',
-    'edit_messages': 'Edit messages:',
-    'delete_messages': 'Delete messages:',
-    'ban_users': 'Ban users:',
-    'invite_users': 'Invite users:',
-    'pin_messages': 'Pin messages:',
-    'add_admins': 'Add new admins:'
+    "change_info": "Change chat info:",
+    "post_messages": "Post messages:",
+    "edit_messages": "Edit messages:",
+    "delete_messages": "Delete messages:",
+    "ban_users": "Ban users:",
+    "invite_users": "Invite users:",
+    "pin_messages": "Pin messages:",
+    "add_admins": "Add new admins:",
 }
 
 
@@ -54,8 +54,8 @@ async def parse_admin_rights(AdminRights: types.ChatAdminRights) -> str:
     for attr, string in ChatAdminRights.items():
         right = getattr(AdminRights, attr, False)
         if right:
-            text.append(f'{string} {right}')
-    return '\n'.join(text)
+            text.append(f"{string} {right}")
+    return "\n".join(text)
 
 
 async def parse_banned_rights(BannedRights: types.ChatBannedRights) -> str:
@@ -64,33 +64,39 @@ async def parse_banned_rights(BannedRights: types.ChatBannedRights) -> str:
         right = getattr(BannedRights, attr, False)
         if right:
             if attr == "until_date":
-                text.append(f'{string} {right.ctime()} (UTC)')
+                text.append(f"{string} {right.ctime()} (UTC)")
             else:
-                text.append(f'{string} {right}')
-    return '\n'.join(text)
+                text.append(f"{string} {right}")
+    return "\n".join(text)
 
 
 async def get_entity_info(
     arg: Union[types.ChatFull, types.ChannelFull]
 ) -> Tuple[int, int, int, int, int, int]:
-    creator, admins, bots, participants, kicked, banned = (None, None, None,
-                                                           None, None, None)
+    creator, admins, bots, participants, kicked, banned = (
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+    )
     full_chat = arg.full_chat
     if isinstance(full_chat, types.ChannelFull):
-        if hasattr(full_chat, 'participants_count'):
+        if hasattr(full_chat, "participants_count"):
             participants = full_chat.participants_count
-        if hasattr(full_chat, 'admins_count'):
+        if hasattr(full_chat, "admins_count"):
             admins = full_chat.admins_count
-        if hasattr(full_chat, 'kicked_count'):
+        if hasattr(full_chat, "kicked_count"):
             kicked = full_chat.kicked_count
-        if hasattr(full_chat, 'banned_count'):
+        if hasattr(full_chat, "banned_count"):
             banned = full_chat.banned_count
-        if hasattr(full_chat, 'bot_info'):
+        if hasattr(full_chat, "bot_info"):
             bots = len(full_chat.bot_info)
     else:
-        if hasattr(full_chat, 'bot_info'):
+        if hasattr(full_chat, "bot_info"):
             bots = len(full_chat.bot_info)
-        if hasattr(full_chat, 'participants'):
+        if hasattr(full_chat, "participants"):
             admins, participants = 0, 0
             for p in full_chat.participants.participants:
                 if isinstance(p, types.ChatParticipantCreator):
@@ -102,9 +108,16 @@ async def get_entity_info(
     return creator, admins, bots, participants, kicked, banned
 
 
-async def unparse_info(client: UserBotClient, creator: int, admins: int,
-                       bots: int, users: int, kicked: int, banned: int) -> str:
-    text = ''
+async def unparse_info(
+    client: UserBotClient,
+    creator: int,
+    admins: int,
+    bots: int,
+    users: int,
+    kicked: int,
+    banned: int,
+) -> str:
+    text = ""
     if creator:
         c = await client.get_entity(creator)
         text += f"\n**Creator:** {await get_chat_link(c)}"
@@ -123,15 +136,14 @@ async def unparse_info(client: UserBotClient, creator: int, admins: int,
 
 async def unparse_rights(title: str, rights: str) -> str:
     text = f"**{title}**"
-    for l in rights.split('\n'):
-        splat = l.split(':')
+    for l in rights.split("\n"):
+        splat = l.split(":")
         text += f"\n  **{splat[0]}:** `{':'.join(splat[1:])}`"
     return text
 
 
-async def resolve_channel(client: UserBotClient,
-                          channel: types.ChannelFull) -> str:
-    text = ''
+async def resolve_channel(client: UserBotClient, channel: types.ChannelFull) -> str:
+    text = ""
     default_banned_rights = None
     banned_rights = None
     admin_rights = None

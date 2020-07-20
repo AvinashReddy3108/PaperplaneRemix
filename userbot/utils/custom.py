@@ -30,19 +30,30 @@ from telethon.hints import FileLike, MarkupLike, DateLike
 
 LOGGER = logging.getLogger(__name__)
 MAXLIM: int = 4096
-whitespace_exp: re.Pattern = re.compile(r'^\s')
-file_kwargs = ('file', 'caption', 'force_document', 'clear_draft',
-               'progress_callback', 'attributes', 'thumb', 'allow_cache',
-               'voice_note', 'video_note', 'buttons', 'supports_streaming')
+whitespace_exp: re.Pattern = re.compile(r"^\s")
+file_kwargs = (
+    "file",
+    "caption",
+    "force_document",
+    "clear_draft",
+    "progress_callback",
+    "attributes",
+    "thumb",
+    "allow_cache",
+    "voice_note",
+    "video_note",
+    "buttons",
+    "supports_streaming",
+)
 
 
 async def answer(
     self,
     entity,
-    message: str or None = '',
+    message: str or None = "",
     *,
     reply_to: typing.Union[int, types.Message] = None,
-    parse_mode: typing.Optional[str] = 'markdown',
+    parse_mode: typing.Optional[str] = "markdown",
     link_preview: bool = False,
     file: typing.Union[FileLike, typing.Sequence[FileLike]] = None,
     force_document: bool = False,
@@ -53,31 +64,31 @@ async def answer(
     log: str or typing.Tuple[str, str] = None,
     reply: bool = False,
     self_destruct: int = None,
-    event: custom.Message = None
+    event: custom.Message = None,
 ) -> typing.Union[None, custom.Message, typing.Sequence[custom.Message]]:
     """Custom bound method for the Message object"""
-    if hasattr(entity, 'get_input_chat'):
+    if hasattr(entity, "get_input_chat"):
         entity = await entity.get_input_chat()
     message_out = None
     kwargs = {
-        'parse_mode': parse_mode,
-        'link_preview': link_preview,
-        'file': file,
-        'force_document': force_document,
-        'buttons': buttons,
-        'schedule': schedule,
+        "parse_mode": parse_mode,
+        "link_preview": link_preview,
+        "file": file,
+        "force_document": force_document,
+        "buttons": buttons,
+        "schedule": schedule,
     }
     kwargs2 = {
-        'reply_to': reply_to,
-        'silent': silent,
-        'clear_draft': clear_draft,
+        "reply_to": reply_to,
+        "silent": silent,
+        "clear_draft": clear_draft,
     }
     start_date = datetime.datetime.now(datetime.timezone.utc)
     reply_to = event.reply_to_msg_id or event.id if reply and event else None
-    _reply_to = kwargs2.get('reply_to', None)
+    _reply_to = kwargs2.get("reply_to", None)
     is_outgoing = event.out if event else False
     is_forward = event.fwd_from if event else False
-    parser = html if parse_mode in ('html', 'HTML') else markdown
+    parser = html if parse_mode in ("html", "HTML") else markdown
     if event is not None:
         is_media = any([k for k in file_kwargs if getattr(event, k, False)])
     else:
@@ -85,18 +96,19 @@ async def answer(
     if _reply_to and not isinstance(_reply_to, int):
         if isinstance(_reply_to, events.ChatAction.Event):
             action = _reply_to.action_message
-            kwargs2['reply_to'] = action.reply_to_msg_id or action.id
-    if kwargs2['reply_to'] is None:
-        kwargs2['reply_to'] = reply_to
+            kwargs2["reply_to"] = action.reply_to_msg_id or action.id
+    if kwargs2["reply_to"] is None:
+        kwargs2["reply_to"] = reply_to
 
     if message and isinstance(message, str) and not is_media:
-        is_reply = reply or kwargs2.get('reply_to', False)
+        is_reply = reply or kwargs2.get("reply_to", False)
         msg, msg_entities = parser.parse(message)
         if len(msg) <= MAXLIM:
             if is_reply or not is_outgoing or is_forward:
                 try:
                     message_out = await self.send_message(
-                        entity, message, **kwargs, **kwargs2)
+                        entity, message, **kwargs, **kwargs2
+                    )
                 except Exception as e:
                     raise e
             else:
@@ -107,20 +119,24 @@ async def answer(
                     try:
                         if event and is_outgoing:
                             first_msg = await self.edit_message(
-                                event.chat_id, event.id, chunks[0], **kwargs)
+                                event.chat_id, event.id, chunks[0], **kwargs
+                            )
                         else:
                             first_msg = await self.send_message(
-                                entity, chunks[0], **kwargs, **kwargs2)
+                                entity, chunks[0], **kwargs, **kwargs2
+                            )
                     except errors.rpcerrorlist.MessageIdInvalidError:
                         first_msg = await self.send_message(
-                            entity, chunks[0], **kwargs, **kwargs2)
+                            entity, chunks[0], **kwargs, **kwargs2
+                        )
                     except Exception as e:
                         raise e
                     message_out.append(first_msg)
                     for chunk in chunks[1:]:
                         try:
                             sent = await self.send_message(
-                                entity, chunk, **kwargs, **kwargs2)
+                                entity, chunk, **kwargs, **kwargs2
+                            )
                             message_out.append(sent)
                         except Exception as e:
                             raise e
@@ -128,39 +144,41 @@ async def answer(
                     try:
                         if event and is_outgoing:
                             message_out = await self.edit_message(
-                                event.chat_id, event.id, message, **kwargs)
+                                event.chat_id, event.id, message, **kwargs
+                            )
                         else:
                             message_out = await self.send_message(
-                                entity, message, **kwargs, **kwargs2)
+                                entity, message, **kwargs, **kwargs2
+                            )
                     except errors.rpcerrorlist.MessageIdInvalidError:
                         message_out = await self.send_message(
-                            entity, message, **kwargs, **kwargs2)
+                            entity, message, **kwargs, **kwargs2
+                        )
                     except Exception as e:
                         raise e
         else:
             if event and not is_forward and not is_media and is_outgoing:
                 try:
-                    await self.edit_message(event.chat_id, event.id,
-                                            "`Output exceeded the limit.`")
+                    await self.edit_message(
+                        event.chat_id, event.id, "`Output exceeded the limit.`"
+                    )
                 except Exception as e:
                     raise e
 
             output = io.BytesIO(msg.strip().encode())
             output.name = "output.txt"
-            kwargs['file'] = output
+            kwargs["file"] = output
             try:
-                message_out = await self.send_message(entity, **kwargs,
-                                                      **kwargs2)
+                message_out = await self.send_message(entity, **kwargs, **kwargs2)
                 output.close()
             except Exception as e:
                 output.close()
                 raise e
     else:
         try:
-            if is_outgoing and not kwargs2['reply_to']:
+            if is_outgoing and not kwargs2["reply_to"]:
                 await event.delete()
-            message_out = await self.send_message(entity, message, **kwargs,
-                                                  **kwargs2)
+            message_out = await self.send_message(entity, message, **kwargs, **kwargs2)
         except Exception as e:
             raise e
 
@@ -171,8 +189,7 @@ async def answer(
         else:
             message_out.date = start_date
 
-    if (self_destruct
-            and self.config['userbot'].getboolean('self_destruct_msg', True)):
+    if self_destruct and self.config["userbot"].getboolean("self_destruct_msg", True):
         asyncio.create_task(_self_destructor(message_out, self_destruct))
 
     if log:
@@ -185,7 +202,8 @@ async def answer(
             text = f"**USERBOT LOG** `Executed command:` #{log}"
         if self.logger:
             message, msg_entities = await self._parse_message_text(
-                text, kwargs.get('parse_mode'))
+                text, kwargs.get("parse_mode")
+            )
             if len(message) <= MAXLIM and len(msg_entities) < 100:
                 messages = [(message, msg_entities)]
             else:
@@ -198,7 +216,9 @@ async def answer(
                             message=text,
                             no_webpage=True,
                             silent=True,
-                            entities=entities))
+                            entities=entities,
+                        )
+                    )
                     await asyncio.sleep(2)
                 except Exception as e:
                     LOGGER.error("Report this error to the support group.")
@@ -206,14 +226,16 @@ async def answer(
     return message_out
 
 
-async def resanswer(self,
-                    entity,
-                    message: str,
-                    plugin: str = None,
-                    name: str = None,
-                    formats: dict = {},
-                    **kwargs) -> custom.Message or None:
-    if hasattr(entity, 'get_input_chat'):
+async def resanswer(
+    self,
+    entity,
+    message: str,
+    plugin: str = None,
+    name: str = None,
+    formats: dict = {},
+    **kwargs,
+) -> custom.Message or None:
+    if hasattr(entity, "get_input_chat"):
         entity = await entity.get_input_chat()
     sent = None
     chat_id = entity
@@ -222,7 +244,7 @@ async def resanswer(self,
         return await self.answer(entity, message.format(**formats), **kwargs)
 
     try:
-        mod = importlib.import_module('.' + plugin, package='resources')
+        mod = importlib.import_module("." + plugin, package="resources")
     except (ImportError, ModuleNotFoundError):
         return await self.answer(entity, message.format(**formats), **kwargs)
 
@@ -230,7 +252,7 @@ async def resanswer(self,
         sent = await self.answer(entity, message.format(**formats), **kwargs)
 
     strings = getattr(mod, name, [])
-    estrings = getattr(mod, name + '_extra', [])
+    estrings = getattr(mod, name + "_extra", [])
     strings = await resolve_strings(strings)
     estrings = await resolve_strings(estrings)
 
@@ -239,14 +261,14 @@ async def resanswer(self,
         if text is not None:
             sent = await self.answer(entity, text.format(**formats), **kwargs)
     except KeyError:
-        LOGGER.error('Invalid string %s found in %s resource', name, plugin)
+        LOGGER.error("Invalid string %s found in %s resource", name, plugin)
         sent = await self.answer(entity, message.format(**formats), **kwargs)
 
     # Wouldn't want to reply to a random message in a different groupchat
-    kwargs.pop('reply_to', None)
-    kwargs.pop('reply', None)
+    kwargs.pop("reply_to", None)
+    kwargs.pop("reply", None)
     # Only use a different chat_id for extra messages
-    chat_id = getattr(mod, 'chat_id', chat_id)
+    chat_id = getattr(mod, "chat_id", chat_id)
     if isinstance(chat_id, str) and chat_id.isdigit():
         chat_id = int(chat_id)
     if not isinstance(chat_id, list):
@@ -255,11 +277,9 @@ async def resanswer(self,
     for string in estrings:
         try:
             for chat in chat_id:
-                await self.send_message(chat, string.format(**formats),
-                                        **kwargs)
+                await self.send_message(chat, string.format(**formats), **kwargs)
         except KeyError:
-            LOGGER.warning('Invalid extra string %s found in %s resource',
-                           name, plugin)
+            LOGGER.warning("Invalid extra string %s found in %s resource", name, plugin)
     return sent
 
 
@@ -269,8 +289,10 @@ async def _resolve_entities(message: str, entities: list) -> dict:
     while entities:
         end = 100 if len(entities) >= 100 else len(entities)
         if len(message) > MAXLIM:
-            end, _ = min(enumerate(entities[:end]),
-                         key=lambda x: abs(x[1].offset + x[1].length - MAXLIM))
+            end, _ = min(
+                enumerate(entities[:end]),
+                key=lambda x: abs(x[1].offset + x[1].length - MAXLIM),
+            )
             if end == 0:
                 msg_end = entities[0].offset + entities[0].length
                 if msg_end > MAXLIM:
@@ -309,7 +331,7 @@ async def _resolve_entities(message: str, entities: list) -> dict:
         t_chunk = message[:msg_end]
         messages.append((t_chunk, e_chunk))
         entities = entities[end:]
-        message = message[len(t_chunk):]
+        message = message[len(t_chunk) :]
         if entities:
             await _reset_entities(entities, msg_end, next_offset)
     return messages
@@ -336,8 +358,8 @@ async def _next_offset(end, entities) -> typing.Tuple[int, bool]:
 
 
 async def _self_destructor(
-    event: typing.Union[custom.Message,
-                        typing.Sequence[custom.Message]], timeout: int or float
+    event: typing.Union[custom.Message, typing.Sequence[custom.Message]],
+    timeout: int or float,
 ) -> typing.Union[custom.Message, typing.Sequence[custom.Message]]:
     await asyncio.sleep(timeout)
     if isinstance(event, list):
@@ -356,7 +378,8 @@ async def resolve_strings(strings: str or None or list) -> list:
 
     if isinstance(strings, list):
         tmp = [
-            str(s()) if inspect.isfunction(s) else str(s) for s in strings
+            str(s()) if inspect.isfunction(s) else str(s)
+            for s in strings
             if s is not None
         ]
     elif strings is not None:

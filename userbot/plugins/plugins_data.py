@@ -46,11 +46,11 @@ class AFK:
 def dump_AFK() -> None:
     cls_dict = dump_data(AFK)
     if "privates" in cls_dict:
-        os.environ['userbot_afk_privates'] = cls_dict['privates']
+        os.environ["userbot_afk_privates"] = cls_dict["privates"]
     if "groups" in cls_dict:
-        os.environ['userbot_afk_groups'] = cls_dict['groups']
+        os.environ["userbot_afk_groups"] = cls_dict["groups"]
     if "sent" in cls_dict:
-        os.environ['userbot_afk_sent'] = cls_dict['sent']
+        os.environ["userbot_afk_sent"] = cls_dict["sent"]
 
 
 @dataclasses.dataclass

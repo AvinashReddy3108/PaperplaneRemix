@@ -56,9 +56,8 @@ async def get_user_from_msg(event: NewMessage.Event) -> Union[int, str, None]:
 
 
 async def get_entity_from_msg(
-    event: NewMessage.Event
-) -> Tuple[Union[None, types.User], Union[None, bool, str], Union[None, bool,
-                                                                  str]]:
+    event: NewMessage.Event,
+) -> Tuple[Union[None, types.User], Union[None, bool, str], Union[None, bool, str]]:
     """Get a User entity and/or a reason from the event's regex pattern"""
     exception = False
     entity = None

@@ -24,7 +24,7 @@ import userbot
 from userbot import client
 from .utils import helpers, pluginManager
 
-LOGGER = logging.getLogger('userbot')
+LOGGER = logging.getLogger("userbot")
 print(userbot.__copyright__)
 print("Licensed under the terms of the " + userbot.__license__)
 
@@ -42,15 +42,16 @@ if __name__ == "__main__":
     try:
         client.loop.run_until_complete(client.connect())
         config = client.loop.run_until_complete(
-            client(functions.help.GetConfigRequest()))
+            client(functions.help.GetConfigRequest())
+        )
         for option in config.dc_options:
             if option.ip_address == client.session.server_address:
                 if client.session.dc_id != option.id:
                     LOGGER.warning(
                         f"Fixed DC ID in session from {client.session.dc_id}"
-                        f" to {option.id}")
-                client.session.set_dc(option.id, option.ip_address,
-                                      option.port)
+                        f" to {option.id}"
+                    )
+                client.session.set_dc(option.id, option.ip_address, option.port)
                 client.session.save()
                 break
         client.start()
@@ -58,7 +59,8 @@ if __name__ == "__main__":
         client.session.delete()
         LOGGER.error(
             "Your old session was invalid and has been automatically deleted! "
-            "Run the script again to generate a new session.")
+            "Run the script again to generate a new session."
+        )
         sys.exit(1)
 
     userbot.verifyLoggerGroup(client)
@@ -67,7 +69,7 @@ if __name__ == "__main__":
     client.loop.create_task(helpers.isRestart(client))
 
     try:
-        if sys.platform.startswith('win'):
+        if sys.platform.startswith("win"):
             client.loop.call_later(0.1, wakeup)  # Needed for SIGINT handling
         client.loop.run_until_complete(client.disconnected)
         if client.reconnect:

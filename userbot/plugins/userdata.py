@@ -28,9 +28,11 @@ from userbot.utils.events import NewMessage
 plugin_category = "user"
 
 
-@client.onMessage(command=("whois", plugin_category),
-                  outgoing=True,
-                  regex=r"(?:who|what)is(?: |$|\n)([\s\S]*)")
+@client.onMessage(
+    command=("whois", plugin_category),
+    outgoing=True,
+    regex=r"(?:who|what)is(?: |$|\n)([\s\S]*)",
+)
 async def whois(event: NewMessage.Event) -> None:
     """Get your or a user's/chat's information."""
     match = event.matches[0].group(1)
@@ -61,17 +63,20 @@ async def whois(event: NewMessage.Event) -> None:
             input_entity = await client.get_input_entity(user)
             if isinstance(input_entity, types.InputPeerChat):
                 full_chat = await client(
-                    functions.messages.GetFullChatRequest(input_entity))
+                    functions.messages.GetFullChatRequest(input_entity)
+                )
                 string = await Parser.parse_full_chat(full_chat, event)
                 chats += f"\n{chats}\n"
             elif isinstance(input_entity, types.InputPeerChannel):
                 full_channel = await client(
-                    functions.channels.GetFullChannelRequest(input_entity))
+                    functions.channels.GetFullChannelRequest(input_entity)
+                )
                 string = await Parser.parse_full_chat(full_channel, event)
                 channels += f"\n{string}\n"
             else:
                 full_user = await client(
-                    functions.users.GetFullUserRequest(input_entity))
+                    functions.users.GetFullUserRequest(input_entity)
+                )
                 string = await Parser.parse_full_user(full_user, event)
                 users += f"\n{string}\n"
         except Exception as e:
@@ -87,15 +92,15 @@ async def whois(event: NewMessage.Event) -> None:
 
     if failed:
         failedtext = "**Unable to fetch:**\n"
-        failedtext += ", ".join(f'`{u}`' for u in failed)
+        failedtext += ", ".join(f"`{u}`" for u in failed)
         await event.answer(failedtext)
     elif not (users or chats or channels):
         await event.answer("__Something went wrong!__", self_destruct=2)
 
 
-@client.onMessage(command=("name", plugin_category),
-                  outgoing=True,
-                  regex="name(?: |$)(.*)$")
+@client.onMessage(
+    command=("name", plugin_category), outgoing=True, regex="name(?: |$)(.*)$"
+)
 async def name(event: NewMessage.Event) -> None:
     """Get your current name or update it."""
     match = event.matches[0].group(1)
@@ -109,8 +114,8 @@ async def name(event: NewMessage.Event) -> None:
 
     _, kwargs = await client.parse_arguments(match)
     if kwargs:
-        first = kwargs.get('first', me.first_name)
-        last = kwargs.get('last', me.last_name)
+        first = kwargs.get("first", me.first_name)
+        last = kwargs.get("last", me.last_name)
     else:
         split = match.strip().split(maxsplit=1)
         if len(split) > 1:
@@ -122,20 +127,22 @@ async def name(event: NewMessage.Event) -> None:
 
     try:
         await client(
-            functions.account.UpdateProfileRequest(first_name=first,
-                                                   last_name=last))
+            functions.account.UpdateProfileRequest(first_name=first, last_name=last)
+        )
         n2 = get_display_name(await client.get_me())
-        await event.answer(f"`Name was successfully changed to {n2}.`",
-                           log=("name", f"Name changed from {n1} to {n2}"))
+        await event.answer(
+            f"`Name was successfully changed to {n2}.`",
+            log=("name", f"Name changed from {n1} to {n2}"),
+        )
     except errors.FirstNameInvalidError:
         await event.answer("`The first name is invalid.`")
     except Exception as e:
-        await event.answer(f'```{await client.get_traceback(e)}```')
+        await event.answer(f"```{await client.get_traceback(e)}```")
 
 
-@client.onMessage(command=("bio", plugin_category),
-                  outgoing=True,
-                  regex="bio(?: |$)(.*)$")
+@client.onMessage(
+    command=("bio", plugin_category), outgoing=True, regex="bio(?: |$)(.*)$"
+)
 async def bio(event: NewMessage.Event) -> None:
     """Get your current bio or update it."""
     match = event.matches[0].group(1)
@@ -149,15 +156,17 @@ async def bio(event: NewMessage.Event) -> None:
 
     try:
         await client(functions.account.UpdateProfileRequest(about=match))
-        await event.answer(f"`Bio was successfully changed to {match}.`",
-                           log=("bio", f"Bio changed from {about} to {match}"))
+        await event.answer(
+            f"`Bio was successfully changed to {match}.`",
+            log=("bio", f"Bio changed from {about} to {match}"),
+        )
     except errors.AboutTooLongError:
         await event.answer("`The about text is too long.`")
 
 
-@client.onMessage(command=("username", plugin_category),
-                  outgoing=True,
-                  regex="username(?: |$)(.*)$")
+@client.onMessage(
+    command=("username", plugin_category), outgoing=True, regex="username(?: |$)(.*)$"
+)
 async def username(event: NewMessage.Event) -> None:
     """Get your current username or update it."""
     match = event.matches[0].group(1)
@@ -171,9 +180,10 @@ async def username(event: NewMessage.Event) -> None:
 
     try:
         await client(functions.account.UpdateUsernameRequest(username=match))
-        await event.answer(f"`Username was successfully changed to {match}`",
-                           log=("username",
-                                f"Username changed from {u1} to {match}"))
+        await event.answer(
+            f"`Username was successfully changed to {match}`",
+            log=("username", f"Username changed from {u1} to {match}"),
+        )
     except errors.UsernameOccupiedError:
         await event.answer("`The username is already in use.`")
     except errors.UsernameNotModifiedError:
@@ -182,9 +192,7 @@ async def username(event: NewMessage.Event) -> None:
         await event.answer("`The username is invalid.`")
 
 
-@client.onMessage(command=("pfp", plugin_category),
-                  outgoing=True,
-                  regex="pfp$")
+@client.onMessage(command=("pfp", plugin_category), outgoing=True, regex="pfp$")
 async def pfp(event: NewMessage.Event) -> None:
     """Get your current profile picture or update it."""
     reply = await event.get_reply_message()
@@ -199,12 +207,14 @@ async def pfp(event: NewMessage.Event) -> None:
         return
 
     if not reply.media:
-        await event.answer(
-            "`What do I use to update the profile picture, a text?`")
+        await event.answer("`What do I use to update the profile picture, a text?`")
         return
 
-    if ((reply.document and reply.document.mime_type.startswith("image"))
-            or reply.photo or reply.sticker):
+    if (
+        (reply.document and reply.document.mime_type.startswith("image"))
+        or reply.photo
+        or reply.sticker
+    ):
         if reply.sticker and not reply.sticker.mime_type == "image/webp":
             await event.answer("`Invalid sticker type.`")
             return
@@ -212,8 +222,7 @@ async def pfp(event: NewMessage.Event) -> None:
             temp_file = io.BytesIO()
             await client.download_media(reply, temp_file)
         except Exception as e:
-            await event.answer(f'```{await client.get_traceback(e)}```',
-                               reply=True)
+            await event.answer(f"```{await client.get_traceback(e)}```", reply=True)
             temp_file.close()
             return
         temp_file.seek(0)
@@ -236,8 +245,10 @@ async def pfp(event: NewMessage.Event) -> None:
 
     try:
         await client(functions.photos.UploadProfilePhotoRequest(photo))
-        await event.answer("`Profile photo was successfully changed.`",
-                           log=("pfp", "Changed profile picture"))
+        await event.answer(
+            "`Profile photo was successfully changed.`",
+            log=("pfp", "Changed profile picture"),
+        )
     except errors.FilePartsInvalidError:
         await event.answer("`The number of file parts is invalid.`")
     except errors.ImageProcessFailedError:
@@ -248,16 +259,15 @@ async def pfp(event: NewMessage.Event) -> None:
         await event.answer("`The extension of the photo is invalid.`")
 
 
-@client.onMessage(command=("delpfp", plugin_category),
-                  outgoing=True,
-                  regex=r"delpfp(?: |$)(\d*|all)$")
+@client.onMessage(
+    command=("delpfp", plugin_category), outgoing=True, regex=r"delpfp(?: |$)(\d*|all)$"
+)
 async def delpfp(event: NewMessage.Event) -> None:
     """Get your current profile picture count or delete them."""
     match = event.matches[0].group(1)
     if not match:
         count = (await client.get_profile_photos("self")).total
-        amount = ("one profile picture."
-                  if count == 1 else f"{count} profile pictures.")
+        amount = "one profile picture." if count == 1 else f"{count} profile pictures."
         await event.answer(f"`You currently have {amount}`")
         return
 
@@ -266,16 +276,16 @@ async def delpfp(event: NewMessage.Event) -> None:
     photos = await client.get_profile_photos("self", limit)
     count = len(photos)
     await client(functions.photos.DeletePhotosRequest(photos))
-    amount = ("the current profile picture."
-              if count == 1 else f"{count} profile pictures.")
+    amount = (
+        "the current profile picture." if count == 1 else f"{count} profile pictures."
+    )
     text = f"`Successfully deleted {amount}`"
-    await event.answer(text,
-                       log=("delpfp", f"Deleted {count} profile picture(s)"))
+    await event.answer(text, log=("delpfp", f"Deleted {count} profile picture(s)"))
 
 
-@client.onMessage(command=("id", plugin_category),
-                  outgoing=True,
-                  regex=r"id(?: |$|\n)([\s\S]*)")
+@client.onMessage(
+    command=("id", plugin_category), outgoing=True, regex=r"id(?: |$|\n)([\s\S]*)"
+)
 async def whichid(event: NewMessage.Event) -> None:
     """Get the ID of a chat/channel or user."""
     match = event.matches[0].group(1)
@@ -308,7 +318,7 @@ async def whichid(event: NewMessage.Event) -> None:
             text = ",\n".join(strings)
         if failed:
             ftext = "**Users which weren't resolved:**\n"
-            ftext += ", ".join(f'`{f}`' for f in failed)
+            ftext += ", ".join(f"`{f}`" for f in failed)
             await event.answer(ftext, reply=True)
     if text:
         await event.answer(text)

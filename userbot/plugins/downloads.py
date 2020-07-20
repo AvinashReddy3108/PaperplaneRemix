@@ -25,13 +25,15 @@ from userbot.utils.helpers import ProgressCallback
 from userbot.utils.events import NewMessage
 
 plugin_category = "downloads"
-downloads = pathlib.Path('./downloads/').absolute()
-NAME = 'untitled'
+downloads = pathlib.Path("./downloads/").absolute()
+NAME = "untitled"
 
 
-@client.onMessage(command=("download", plugin_category),
-                  outgoing=True,
-                  regex=r"d(own)?l(oad)?(?: |$)(.+)?$")
+@client.onMessage(
+    command=("download", plugin_category),
+    outgoing=True,
+    regex=r"d(own)?l(oad)?(?: |$)(.+)?$",
+)
 async def download(event: NewMessage.Event) -> None:
     """Download documents from Telegram."""
     name = NAME
@@ -49,18 +51,18 @@ async def download(event: NewMessage.Event) -> None:
         await event.answer("__There is no document to download.__")
         return
 
-    for attr in getattr(reply.document, 'attributes', []):
+    for attr in getattr(reply.document, "attributes", []):
         if isinstance(attr, types.DocumentAttributeFilename):
             name = attr.file_name
     ext = get_extension(reply.document)
     if path and not path.suffix and ext:
         path = path.with_suffix(ext)
     if name == NAME:
-        name += ('_' + str(getattr(reply.document, 'id', reply.id)) + ext)
+        name += "_" + str(getattr(reply.document, "id", reply.id)) + ext
 
     if path and path.exists():
         if path.is_file():
-            newname = str(path.stem) + '_OLD'
+            newname = str(path.stem) + "_OLD"
             path.rename(path.with_name(newname).with_suffix(path.suffix))
             file_name = path
         else:
@@ -73,25 +75,29 @@ async def download(event: NewMessage.Event) -> None:
         file_name = downloads / name
     file_name.parent.mkdir(parents=True, exist_ok=True)
 
-    prog = ProgressCallback(event,
-                            filen=await _get_file_name(file_name, False))
+    prog = ProgressCallback(event, filen=await _get_file_name(file_name, False))
     if reply.document:
-        dl = io.FileIO(file_name.absolute(), 'a')
-        await client.fast_download_file(location=reply.document,
-                                        out=dl,
-                                        progress_callback=prog.dl_progress)
+        dl = io.FileIO(file_name.absolute(), "a")
+        await client.fast_download_file(
+            location=reply.document, out=dl, progress_callback=prog.dl_progress
+        )
         dl.close()
     else:
-        await reply.download_media(file=file_name.absolute(),
-                                   progress_callback=prog.dl_progress)
+        await reply.download_media(
+            file=file_name.absolute(), progress_callback=prog.dl_progress
+        )
 
-    await event.answer(f"__Downloaded successfully!__\n"
-                       f"**Path:** `{await _get_file_name(file_name)}`")
+    await event.answer(
+        f"__Downloaded successfully!__\n"
+        f"**Path:** `{await _get_file_name(file_name)}`"
+    )
 
 
-@client.onMessage(command=("upload", plugin_category),
-                  outgoing=True,
-                  regex=r"u(p)?l(oad)?(?: |$)(.+)?$")
+@client.onMessage(
+    command=("upload", plugin_category),
+    outgoing=True,
+    regex=r"u(p)?l(oad)?(?: |$)(.+)?$",
+)
 async def upload(event: NewMessage.Event) -> None:
     """Upload media to Telegram."""
     match = event.matches[0].group(3)
@@ -100,17 +106,17 @@ async def upload(event: NewMessage.Event) -> None:
         await event.answer("__Uploaded the void?__")
         return
 
-    match = match.strip().replace('\\', '/') if match else ''
+    match = match.strip().replace("\\", "/") if match else ""
     fmatch = pathlib.Path(match)
     dmatch = pathlib.Path(downloads / match)
 
-    if '*' not in match:
+    if "*" not in match:
         if fmatch.exists():
             target_files.append(fmatch)
         elif dmatch.exists():
             target_files.append(dmatch)
     if not target_files:
-        for f in downloads.glob('*.*'):
+        for f in downloads.glob("*.*"):
             if f.match(match) and f.is_file():
                 target_files.append(f)
     # Un-comment this for recursive file fetching from the bot's root dir
@@ -124,7 +130,7 @@ async def upload(event: NewMessage.Event) -> None:
         await event.answer("__Couldn't find what you were looking for.__")
         return
 
-    files = '\n'.join([f'`{await _get_file_name(f)}`' for f in target_files])
+    files = "\n".join([f"`{await _get_file_name(f)}`" for f in target_files])
     if len(target_files) > 1:
         await event.answer(f"**Found multiple files for {match}:**\n{files}")
         return
@@ -133,18 +139,17 @@ async def upload(event: NewMessage.Event) -> None:
         f = f.absolute()
         prog = ProgressCallback(event, filen=await _get_file_name(f, False))
         attributes, mime_type = get_attributes(str(f))
-        ul = io.open(f, 'rb')
+        ul = io.open(f, "rb")
         uploaded = await client.fast_upload_file(
-            file=ul, progress_callback=prog.up_progress)
+            file=ul, progress_callback=prog.up_progress
+        )
         ul.close()
-        media = types.InputMediaUploadedDocument(file=uploaded,
-                                                 mime_type=mime_type,
-                                                 attributes=attributes,
-                                                 thumb=None)
-        await client.send_file(event.chat_id,
-                               file=media,
-                               force_document=True,
-                               reply_to=event)
+        media = types.InputMediaUploadedDocument(
+            file=uploaded, mime_type=mime_type, attributes=attributes, thumb=None
+        )
+        await client.send_file(
+            event.chat_id, file=media, force_document=True, reply_to=event
+        )
 
     await event.answer(f"__Successfully uploaded {files}.__")
 

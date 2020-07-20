@@ -41,17 +41,17 @@ async def amount_to_secs(amount: tuple) -> int:
 
     num = int(num)
     if not unit:
-        unit = 's'
+        unit = "s"
 
-    if unit == 's':
+    if unit == "s":
         return num
-    elif unit == 'm':
+    elif unit == "m":
         return num * 60
-    elif unit == 'h':
+    elif unit == "h":
         return num * 60 * 60
-    elif unit == 'd':
+    elif unit == "d":
         return num * 60 * 60 * 24
-    elif unit == 'w':
+    elif unit == "w":
         return num * 60 * 60 * 24 * 7
     else:
         return 0
@@ -86,13 +86,12 @@ async def string_to_secs(string: str) -> int:
         return total
 
 
-async def split_extra_string(
-        string: str) -> Tuple[Union[str, None], Union[int, None]]:
+async def split_extra_string(string: str) -> Tuple[Union[str, None], Union[int, None]]:
     reason = string
     time = adminregexp.findall(string)
     for u in time:
-        reason = reason.replace(u, '').strip()
+        reason = reason.replace(u, "").strip()
 
-    total_time = await string_to_secs(''.join(time))
+    total_time = await string_to_secs("".join(time))
 
     return reason or None, total_time or None

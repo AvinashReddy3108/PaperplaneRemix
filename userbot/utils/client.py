@@ -46,6 +46,7 @@ class Command:
 
 class UserBotClient(TelegramClient):
     """UserBot client with additional attributes inheriting TelegramClient"""
+
     commandcategories: Dict[str, List[str]] = {}
     commands: Dict[str, Command] = {}
     config: configparser.ConfigParser = None
@@ -61,16 +62,18 @@ class UserBotClient(TelegramClient):
     running_processes: dict = {}
     version: int = 0
 
-    def onMessage(self: TelegramClient,
-                  builtin: bool = False,
-                  command: str or tuple = None,
-                  edited: bool = True,
-                  info: str = None,
-                  doc_args: dict = {},
-                  **kwargs) -> callable:
+    def onMessage(
+        self: TelegramClient,
+        builtin: bool = False,
+        command: str or tuple = None,
+        edited: bool = True,
+        info: str = None,
+        doc_args: dict = {},
+        **kwargs
+    ) -> callable:
         """Method to register a function without the client"""
 
-        kwargs.setdefault('forwards', False)
+        kwargs.setdefault("forwards", False)
 
         def wrapper(func: callable) -> callable:
             events.register(NewMessage(**kwargs))(func)
@@ -81,7 +84,7 @@ class UserBotClient(TelegramClient):
             if self.register_commands and command:
                 handlers = events._get_handlers(func)
                 category = "misc"
-                doc_args.setdefault('prefix', self.prefix or '.')
+                doc_args.setdefault("prefix", self.prefix or ".")
                 if isinstance(command, tuple):
                     if len(command) == 2:
                         com, category = command
@@ -90,7 +93,7 @@ class UserBotClient(TelegramClient):
                 else:
                     com = command
                 help_doc = info or func.__doc__ or no_info
-                _doc = inspect.cleandoc(help_doc).split('\n\n\n', maxsplit=1)
+                _doc = inspect.cleandoc(help_doc).split("\n\n\n", maxsplit=1)
                 if len(_doc) > 1:
                     comInfo = _doc[0].strip()
                     comUsage = _doc[1].strip()
@@ -98,28 +101,30 @@ class UserBotClient(TelegramClient):
                     comInfo = _doc[0]
                     comUsage = no_usage
 
-                UBcommand = Command(func, handlers,
-                                    comInfo.format(**doc_args).strip(),
-                                    comUsage.strip(), builtin)
+                UBcommand = Command(
+                    func,
+                    handlers,
+                    comInfo.format(**doc_args).strip(),
+                    comUsage.strip(),
+                    builtin,
+                )
                 category = category.lower()
                 self.commands.update({com: UBcommand})
                 self.commandcategories.setdefault(category, []).append(com)
                 if builtin:
-                    self.commandcategories.setdefault('builtin',
-                                                      []).append(com)
+                    self.commandcategories.setdefault("builtin", []).append(com)
             return func
 
         return wrapper
 
     async def get_traceback(self, exc: Exception) -> str:
-        return ''.join(
-            traceback.format_exception(etype=type(exc),
-                                       value=exc,
-                                       tb=exc.__traceback__))
+        return "".join(
+            traceback.format_exception(etype=type(exc), value=exc, tb=exc.__traceback__)
+        )
 
     def _updateconfig(self) -> bool:
         """Update the config. Sync method to avoid issues."""
-        with open('config.ini', 'w+') as configfile:
+        with open("config.ini", "w+") as configfile:
             self.config.write(configfile)
         return True
 

@@ -32,41 +32,44 @@ from userbot.utils.events import NewMessage
 
 plugin_category = "misc"
 invite_links = {
-    'private': re.compile(r'^(?:https?://)?(t\.me/joinchat/\w+)/?$'),
-    'public': re.compile(r'^(?:https?://)?t\.me/(\w+)/?$'),
-    'username': re.compile(r'^@?(\w{5,32})$')
+    "private": re.compile(r"^(?:https?://)?(t\.me/joinchat/\w+)/?$"),
+    "public": re.compile(r"^(?:https?://)?t\.me/(\w+)/?$"),
+    "username": re.compile(r"^@?(\w{5,32})$"),
 }
-usernexp = re.compile(r'@(\w{3,32})\[(.+?)\]')
-nameexp = re.compile(r'\[([\w\S]+)\]\(tg://user\?id=(\d+)\)\[(.+?)\]')
+usernexp = re.compile(r"@(\w{3,32})\[(.+?)\]")
+nameexp = re.compile(r"\[([\w\S]+)\]\(tg://user\?id=(\d+)\)\[(.+?)\]")
 
 
 def removebg_post(API_KEY: str, media: bytes or str):
-    image_parameter = 'image_url' if isinstance(media, str) else 'image_file'
-    response = requests.post('https://api.remove.bg/v1.0/removebg',
-                             files={image_parameter: media},
-                             data={'size': 'auto'},
-                             headers={'X-Api-Key': API_KEY})
+    image_parameter = "image_url" if isinstance(media, str) else "image_file"
+    response = requests.post(
+        "https://api.remove.bg/v1.0/removebg",
+        files={image_parameter: media},
+        data={"size": "auto"},
+        headers={"X-Api-Key": API_KEY},
+    )
     return response
 
 
 def dogbin_post(text: str):
     response = requests.post(
-        'https://del.dog/documents',
-        data=text.encode('UTF-8') if isinstance(text, str) else text,
+        "https://del.dog/documents",
+        data=text.encode("UTF-8") if isinstance(text, str) else text,
         headers={
-            'Content-type': 'text/plain',
-            'Accept': 'application/json',
-            'charset': 'utf-8'
-        })
+            "Content-type": "text/plain",
+            "Accept": "application/json",
+            "charset": "utf-8",
+        },
+    )
     return response
 
 
-@client.onMessage(command=("rmbg", plugin_category),
-                  outgoing=True,
-                  regex="rmbg(?: |$)(.*)$")
+@client.onMessage(
+    command=("rmbg", plugin_category), outgoing=True, regex="rmbg(?: |$)(.*)$"
+)
 async def rmbg(event: NewMessage.Event) -> None:
     """Remove the background from an image or sticker."""
-    API_KEY = client.config['api_keys'].get('api_key_removebg', False)
+    API_KEY = client.config["api_keys"].get("api_key_removebg", False)
     if not API_KEY:
         await event.answer("`You don't have an API key set for remove.bg!`")
         return
@@ -78,10 +81,11 @@ async def rmbg(event: NewMessage.Event) -> None:
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.get(match) as response:
-                    if not (response.status == 200
-                            and response.content_type.startswith('image/')):
-                        await event.answer(
-                            "`The provided link seems to be invalid.`")
+                    if not (
+                        response.status == 200
+                        and response.content_type.startswith("image/")
+                    ):
+                        await event.answer("`The provided link seems to be invalid.`")
                         return
             except aiohttp.client_exceptions.InvalidURL:
                 await event.answer("`Invalid URL provided!`")
@@ -106,7 +110,7 @@ async def rmbg(event: NewMessage.Event) -> None:
             try:
                 pilImg = PIL.Image.open(media)
             except OSError as e:
-                await event.answer(f'`OSError: {e}`')
+                await event.answer(f"`OSError: {e}`")
                 return
             pilImg.save(new_media, format="PNG")
             pilImg.close()
@@ -117,7 +121,8 @@ async def rmbg(event: NewMessage.Event) -> None:
         return
 
     response = await client.loop.run_in_executor(
-        None, functools.partial(removebg_post, API_KEY, media.getvalue()))
+        None, functools.partial(removebg_post, API_KEY, media.getvalue())
+    )
     if not isinstance(media, str):
         media.close()
     if response.status_code == 200:
@@ -127,17 +132,17 @@ async def rmbg(event: NewMessage.Event) -> None:
         await event.answer(file=image, force_document=True, reply=True)
         image.close()
     else:
-        error = response.json()['errors'][0]
-        code = error.get('code', False)
-        title = error.get('title', 'No title?')
-        body = code + ': ' + title if code else title
+        error = response.json()["errors"][0]
+        code = error.get("code", False)
+        title = error.get("title", "No title?")
+        body = code + ": " + title if code else title
         text = f"`[{response.status_code}] {body}`"
         await event.answer(text)
 
 
-@client.onMessage(command=("resolve", plugin_category),
-                  outgoing=True,
-                  regex="resolve(?: |$)(.*)$")
+@client.onMessage(
+    command=("resolve", plugin_category), outgoing=True, regex="resolve(?: |$)(.*)$"
+)
 async def resolver(event: NewMessage.Event) -> None:
     """Resolve an invite link or a username."""
     link = event.matches[0].group(1)
@@ -172,11 +177,13 @@ async def resolver(event: NewMessage.Event) -> None:
 
                 if isinstance(chat, types.Channel):
                     result = await client(
-                        functions.channels.GetFullChannelRequest(channel=chat))
+                        functions.channels.GetFullChannelRequest(channel=chat)
+                    )
                     text += await misc.resolve_channel(event.client, result)
                 elif isinstance(chat, types.Chat):
                     result = await client(
-                        functions.messages.GetFullChatRequest(chat_id=chat))
+                        functions.messages.GetFullChatRequest(chat_id=chat)
+                    )
                     text += await misc.resolve_chat(event.client, result)
                 break
             else:
@@ -198,7 +205,8 @@ async def resolver(event: NewMessage.Event) -> None:
                 elif isinstance(chat, types.Chat):
                     text = f"**Chat:** @{valid}"
                     result = await client(
-                        functions.messages.GetFullChatRequest(chat_id=chat))
+                        functions.messages.GetFullChatRequest(chat_id=chat)
+                    )
                     text += await misc.resolve_chat(event.client, result)
 
                 if isinstance(chat, types.ChannelForbidden):
@@ -206,7 +214,8 @@ async def resolver(event: NewMessage.Event) -> None:
                 elif isinstance(chat, types.Channel):
                     text = f"**Channel:** @{valid}"
                     result = await client(
-                        functions.channels.GetFullChannelRequest(channel=chat))
+                        functions.channels.GetFullChannelRequest(channel=chat)
+                    )
                     text += await misc.resolve_channel(event.client, result)
     await event.answer(text, link_preview=False)
 
@@ -220,7 +229,7 @@ async def bot_mention(event: NewMessage.Event) -> None:
         for match in usernexp.finditer(newstr):
             user = match.group(1)
             text = match.group(2)
-            name, entities = await client._parse_message_text(text, 'md')
+            name, entities = await client._parse_message_text(text, "md")
             rep = f'<a href="tg://resolve?domain={user}">{name}</a>'
             if entities:
                 for e in entities:
@@ -241,12 +250,12 @@ async def bot_mention(event: NewMessage.Event) -> None:
                         rep = tag.format(rep)
             newstr = re.sub(re.escape(match.group(0)), rep, newstr)
     if newstr != event.text:
-        await event.answer(newstr, parse_mode='html')
+        await event.answer(newstr, parse_mode="html")
 
 
-@client.onMessage(command=('paste', plugin_category),
-                  outgoing=True,
-                  regex=r'paste(?: |$|\n)([\s\S]*)')
+@client.onMessage(
+    command=("paste", plugin_category), outgoing=True, regex=r"paste(?: |$|\n)([\s\S]*)"
+)
 async def deldog(event: NewMessage.Event) -> None:
     """Paste the content to DelDog."""
     match = event.matches[0].group(1)
@@ -254,7 +263,7 @@ async def deldog(event: NewMessage.Event) -> None:
         text = match.strip()
     elif event.reply_to_msg_id:
         reply = await event.get_reply_message()
-        if reply.document and reply.document.mime_type.startswith('text'):
+        if reply.document and reply.document.mime_type.startswith("text"):
             text = await reply.download_media(file=bytes)
         else:
             text = reply.raw_text
@@ -262,30 +271,30 @@ async def deldog(event: NewMessage.Event) -> None:
         await event.answer("`Provide something to paste on` https://del.dog")
         return
     response = await client.loop.run_in_executor(
-        None, functools.partial(dogbin_post, text))
+        None, functools.partial(dogbin_post, text)
+    )
     if not response.ok:
         await event.answer(
-            "Couldn't post the data to [DelDog](https://del.dog/)", reply=True)
+            "Couldn't post the data to [DelDog](https://del.dog/)", reply=True
+        )
         return
-    key = response.json()['key']
-    await event.answer(
-        f'`Successfully pasted on` [DelDog](https://del.dog/{key})')
+    key = response.json()["key"]
+    await event.answer(f"`Successfully pasted on` [DelDog](https://del.dog/{key})")
 
 
-@client.onMessage(command=("repo", plugin_category),
-                  outgoing=True,
-                  regex="repo$")
+@client.onMessage(command=("repo", plugin_category), outgoing=True, regex="repo$")
 async def git_repo(event: NewMessage.Event) -> None:
     """Get the repo url."""
     try:
-        repo = git.Repo('.')
-        remote_url = repo.remote().url.replace(".git", '/')
-        if remote_url[-1] != '/':
-            remote_url = remote_url + '/'
+        repo = git.Repo(".")
+        remote_url = repo.remote().url.replace(".git", "/")
+        if remote_url[-1] != "/":
+            remote_url = remote_url + "/"
         repo.__del__()
     except Exception as e:
         LOGGER.info("Couldnt fetch the repo link.")
         LOGGER.debug(e)
         remote_url = "https://github.com/AvinashReddy3108/PaperplaneRemix.git"
     await event.answer(
-        f"Click [here]({remote_url}) to check out my userbot's source code.")
+        f"Click [here]({remote_url}) to check out my userbot's source code."
+    )

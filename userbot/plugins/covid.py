@@ -27,9 +27,11 @@ covid_str = f"""`{'Confirmed':<9}:`  **%(confirmed)s**
 critical_str = f"\n`{'Critical':<9}:`  **%(critical)s**"
 
 
-@client.onMessage(command=("covid", plugin_category),
-                  outgoing=True,
-                  regex="(?:covid|corona)(?: |$)(.*)")
+@client.onMessage(
+    command=("covid", plugin_category),
+    outgoing=True,
+    regex="(?:covid|corona)(?: |$)(.*)",
+)
 async def covid19(event: NewMessage.Event) -> None:
     """Get the current COVID-19 stats for a specific country or overall."""
     covid = Covid(source="worldometers")
@@ -46,17 +48,17 @@ async def covid19(event: NewMessage.Event) -> None:
                     country = covid.get_status_by_country_name(c)
                     string = f"**COVID-19** __({country['country']})__\n"
                     string += covid_str % country
-                    if country['critical']:
+                    if country["critical"]:
                         string += critical_str % country
                     strings.append(string)
                 except ValueError:
                     failed.append(c)
                     continue
         if strings:
-            await event.answer('\n\n'.join(strings))
+            await event.answer("\n\n".join(strings))
         if failed:
             string = "`Couldn't find the following countries:` "
-            string += ', '.join([f'`{x}`' for x in failed])
+            string += ", ".join([f"`{x}`" for x in failed])
             await event.answer(string, reply=True)
     else:
         active = covid.get_total_active_cases()
@@ -65,9 +67,9 @@ async def covid19(event: NewMessage.Event) -> None:
         deaths = covid.get_total_deaths()
         string = f"**COVID-19** __(Worldwide)__\n"
         string += covid_str % {
-            'active': active,
-            'confirmed': confirmed,
-            'recovered': recovered,
-            'deaths': deaths
+            "active": active,
+            "confirmed": confirmed,
+            "recovered": recovered,
+            "deaths": deaths,
         }
         await event.answer(string)

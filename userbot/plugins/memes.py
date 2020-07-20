@@ -111,123 +111,126 @@ EMOJI_PATTERN = re.compile(
     "\U0001F900-\U0001F9FF"  # Supplemental Symbols and Pictographs
     "\U0001FA00-\U0001FA6F"  # Chess Symbols
     "\U0001FA70-\U0001FAFF"  # Symbols and Pictographs Extended-A
-    "\U00002702-\U000027B0"  # Dingbats 
+    "\U00002702-\U000027B0"  # Dingbats
     "]+",
-    flags=re.UNICODE)
+    flags=re.UNICODE,
+)
 
-ZALG_LIST = [[
-    "̖",
-    " ̗",
-    " ̘",
-    " ̙",
-    " ̜",
-    " ̝",
-    " ̞",
-    " ̟",
-    " ̠",
-    " ̤",
-    " ̥",
-    " ̦",
-    " ̩",
-    " ̪",
-    " ̫",
-    " ̬",
-    " ̭",
-    " ̮",
-    " ̯",
-    " ̰",
-    " ̱",
-    " ̲",
-    " ̳",
-    " ̹",
-    " ̺",
-    " ̻",
-    " ̼",
-    " ͅ",
-    " ͇",
-    " ͈",
-    " ͉",
-    " ͍",
-    " ͎",
-    " ͓",
-    " ͔",
-    " ͕",
-    " ͖",
-    " ͙",
-    " ͚",
-    " ",
-],
-             [
-                 " ̍",
-                 " ̎",
-                 " ̄",
-                 " ̅",
-                 " ̿",
-                 " ̑",
-                 " ̆",
-                 " ̐",
-                 " ͒",
-                 " ͗",
-                 " ͑",
-                 " ̇",
-                 " ̈",
-                 " ̊",
-                 " ͂",
-                 " ̓",
-                 " ̈́",
-                 " ͊",
-                 " ͋",
-                 " ͌",
-                 " ̃",
-                 " ̂",
-                 " ̌",
-                 " ͐",
-                 " ́",
-                 " ̋",
-                 " ̏",
-                 " ̽",
-                 " ̉",
-                 " ͣ",
-                 " ͤ",
-                 " ͥ",
-                 " ͦ",
-                 " ͧ",
-                 " ͨ",
-                 " ͩ",
-                 " ͪ",
-                 " ͫ",
-                 " ͬ",
-                 " ͭ",
-                 " ͮ",
-                 " ͯ",
-                 " ̾",
-                 " ͛",
-                 " ͆",
-                 " ̚",
-             ],
-             [
-                 " ̕",
-                 " ̛",
-                 " ̀",
-                 " ́",
-                 " ͘",
-                 " ̡",
-                 " ̢",
-                 " ̧",
-                 " ̨",
-                 " ̴",
-                 " ̵",
-                 " ̶",
-                 " ͜",
-                 " ͝",
-                 " ͞",
-                 " ͟",
-                 " ͠",
-                 " ͢",
-                 " ̸",
-                 " ̷",
-                 " ͡",
-             ]]
+ZALG_LIST = [
+    [
+        "̖",
+        " ̗",
+        " ̘",
+        " ̙",
+        " ̜",
+        " ̝",
+        " ̞",
+        " ̟",
+        " ̠",
+        " ̤",
+        " ̥",
+        " ̦",
+        " ̩",
+        " ̪",
+        " ̫",
+        " ̬",
+        " ̭",
+        " ̮",
+        " ̯",
+        " ̰",
+        " ̱",
+        " ̲",
+        " ̳",
+        " ̹",
+        " ̺",
+        " ̻",
+        " ̼",
+        " ͅ",
+        " ͇",
+        " ͈",
+        " ͉",
+        " ͍",
+        " ͎",
+        " ͓",
+        " ͔",
+        " ͕",
+        " ͖",
+        " ͙",
+        " ͚",
+        " ",
+    ],
+    [
+        " ̍",
+        " ̎",
+        " ̄",
+        " ̅",
+        " ̿",
+        " ̑",
+        " ̆",
+        " ̐",
+        " ͒",
+        " ͗",
+        " ͑",
+        " ̇",
+        " ̈",
+        " ̊",
+        " ͂",
+        " ̓",
+        " ̈́",
+        " ͊",
+        " ͋",
+        " ͌",
+        " ̃",
+        " ̂",
+        " ̌",
+        " ͐",
+        " ́",
+        " ̋",
+        " ̏",
+        " ̽",
+        " ̉",
+        " ͣ",
+        " ͤ",
+        " ͥ",
+        " ͦ",
+        " ͧ",
+        " ͨ",
+        " ͩ",
+        " ͪ",
+        " ͫ",
+        " ͬ",
+        " ͭ",
+        " ͮ",
+        " ͯ",
+        " ̾",
+        " ͛",
+        " ͆",
+        " ̚",
+    ],
+    [
+        " ̕",
+        " ̛",
+        " ̀",
+        " ́",
+        " ͘",
+        " ̡",
+        " ̢",
+        " ̧",
+        " ̨",
+        " ̴",
+        " ̵",
+        " ̶",
+        " ͜",
+        " ͝",
+        " ͞",
+        " ͟",
+        " ͠",
+        " ͢",
+        " ̸",
+        " ̷",
+        " ͡",
+    ],
+]
 
 PASTAMOJIS = [
     "😂",
@@ -266,7 +269,8 @@ SLAP_TEMPLATES = [
     "{hits} {victim} around a bit with a {item}.",
     "{throws} a {item} at {victim}.",
     "grabs a {item} and {throws} it at {victim}'s face.",
-    "{hits} a {item} at {victim}.", "{throws} a few {item} at {victim}.",
+    "{hits} a {item} at {victim}.",
+    "{throws} a few {item} at {victim}.",
     "grabs a {item} and {throws} it in {victim}'s face.",
     "launches a {item} in {victim}'s general direction.",
     "sits on {victim}'s face while slamming a {item} {where}.",
@@ -281,16 +285,20 @@ SLAP_TEMPLATES = [
     "{hits} {victim} {where} with a {item}.",
     "ties {victim} to a pole and whips them {where} with a {item}.",
     "gave a friendly push to help {victim} learn to swim in lava.",
-    "sent {victim} to /dev/null.", "sent {victim} down the memory hole.",
-    "beheaded {victim}.", "threw {victim} off a building.",
+    "sent {victim} to /dev/null.",
+    "sent {victim} down the memory hole.",
+    "beheaded {victim}.",
+    "threw {victim} off a building.",
     "replaced all of {victim}'s music with Nickelback.",
-    "spammed {victim}'s email.", "made {victim} a knuckle sandwich.",
+    "spammed {victim}'s email.",
+    "made {victim} a knuckle sandwich.",
     "slapped {victim} with pure nothing.",
     "hit {victim} with a small, interstellar spaceship.",
-    "quickscoped {victim}.", "put {victim} in check-mate.",
+    "quickscoped {victim}.",
+    "put {victim} in check-mate.",
     "RSA-encrypted {victim} and deleted the private key.",
     "put {victim} in the friendzone.",
-    "slaps {victim} with a DMCA takedown request!"
+    "slaps {victim} with a DMCA takedown request!",
 ]
 
 ITEMS = [
@@ -350,12 +358,10 @@ HIT = [
 WHERE = ["in the chest", "on the head", "on the butt", "on the crotch"]
 
 
-@client.onMessage(command=("shibe", plugin_category),
-                  outgoing=True,
-                  regex="shibe$")
+@client.onMessage(command=("shibe", plugin_category), outgoing=True, regex="shibe$")
 async def shibes(event: NewMessage.Event) -> None:
     """Get random pictures of shibes."""
-    shibe = await _request('http://shibe.online/api/shibes')
+    shibe = await _request("http://shibe.online/api/shibes")
     if not shibe:
         await event.answer("`Couldn't fetch a shibe for you :(`")
         return
@@ -368,12 +374,10 @@ async def shibes(event: NewMessage.Event) -> None:
         await event.answer("`Event timed out!`")
 
 
-@client.onMessage(command=("cat", plugin_category),
-                  outgoing=True,
-                  regex=r"(cat|🐈)$")
+@client.onMessage(command=("cat", plugin_category), outgoing=True, regex=r"(cat|🐈)$")
 async def cats(event: NewMessage.Event) -> None:
     """Get random pictures of cats."""
-    shibe = await _request('http://shibe.online/api/cats')
+    shibe = await _request("http://shibe.online/api/cats")
     if not shibe:
         await event.answer("`Couldn't fetch a cat for you :(`")
         return
@@ -386,12 +390,10 @@ async def cats(event: NewMessage.Event) -> None:
         await event.answer("`Event timed out!`")
 
 
-@client.onMessage(command=("bird", plugin_category),
-                  outgoing=True,
-                  regex=r"(bird|🐦)$")
+@client.onMessage(command=("bird", plugin_category), outgoing=True, regex=r"(bird|🐦)$")
 async def birds(event: NewMessage.Event) -> None:
     """Get random pictures of birds."""
-    shibe = await _request('http://shibe.online/api/birds')
+    shibe = await _request("http://shibe.online/api/birds")
     if not shibe:
         await event.answer("`Couldn't fetch a bird for you :(`")
         return
@@ -404,9 +406,11 @@ async def birds(event: NewMessage.Event) -> None:
         await event.answer("`Event timed out!`")
 
 
-@client.onMessage(command=("dog", plugin_category),
-                  outgoing=True,
-                  regex=r"(?:🐕|dog)(?: |$)(\w+)?(?: |$)(\w+)?")
+@client.onMessage(
+    command=("dog", plugin_category),
+    outgoing=True,
+    regex=r"(?:🐕|dog)(?: |$)(\w+)?(?: |$)(\w+)?",
+)
 async def dogs(event: NewMessage.Event) -> None:
     """Get random pictures of dogs."""
     breed = event.matches[0].group(1)
@@ -424,70 +428,69 @@ async def dogs(event: NewMessage.Event) -> None:
 
     _, json = dog
     try:
-        await event.answer(file=json['message'],
-                           reply_to=event.reply_to_msg_id)
+        await event.answer(file=json["message"], reply_to=event.reply_to_msg_id)
         await event.delete()
     except rpcerrorlist.TimeoutError:
         await event.answer("`Event timed out!`")
 
 
-@client.onMessage(command=("fox", plugin_category),
-                  outgoing=True,
-                  regex=r"(fox|🦊)$")
+@client.onMessage(command=("fox", plugin_category), outgoing=True, regex=r"(fox|🦊)$")
 async def foxes(event: NewMessage.Event) -> None:
     """Get random pictures of foxes."""
-    fox = await _request('https://some-random-api.ml/img/fox')
+    fox = await _request("https://some-random-api.ml/img/fox")
     if not fox:
         await event.answer("`Couldn't fetch a fox for you :(`")
         return
 
     _, json = fox
     try:
-        await event.answer(file=json['link'], reply_to=event.reply_to_msg_id)
+        await event.answer(file=json["link"], reply_to=event.reply_to_msg_id)
         await event.delete()
     except rpcerrorlist.TimeoutError:
         await event.answer("`Event timed out!`")
 
 
-@client.onMessage(command=("panda", plugin_category),
-                  outgoing=True,
-                  regex=r"(panda|🐼)$")
+@client.onMessage(
+    command=("panda", plugin_category), outgoing=True, regex=r"(panda|🐼)$"
+)
 async def pandas(event: NewMessage.Event) -> None:
     """Get random pictures of pandas."""
-    panda = await _request('https://some-random-api.ml/img/panda')
+    panda = await _request("https://some-random-api.ml/img/panda")
     if not panda:
         await event.answer("`Couldn't fetch a panda for you :(`")
         return
 
     _, json = panda
     try:
-        await event.answer(file=json['link'], reply_to=event.reply_to_msg_id)
+        await event.answer(file=json["link"], reply_to=event.reply_to_msg_id)
         await event.delete()
     except rpcerrorlist.TimeoutError:
         await event.answer("`Event timed out!`")
 
 
-@client.onMessage(command=("redpanda", plugin_category),
-                  outgoing=True,
-                  regex=r"red(panda|🐼)$")
+@client.onMessage(
+    command=("redpanda", plugin_category), outgoing=True, regex=r"red(panda|🐼)$"
+)
 async def redpandas(event: NewMessage.Event) -> None:
     """Get random pictures of red pandas."""
-    panda = await _request('https://some-random-api.ml/img/red_panda')
+    panda = await _request("https://some-random-api.ml/img/red_panda")
     if not panda:
         await event.answer("`Couldn't fetch a red panda for you :(`")
         return
 
     _, json = panda
     try:
-        await event.answer(file=json['link'], reply_to=event.reply_to_msg_id)
+        await event.answer(file=json["link"], reply_to=event.reply_to_msg_id)
         await event.delete()
     except rpcerrorlist.TimeoutError:
         await event.answer("`Event timed out!`")
 
 
-@client.onMessage(command=("cowsay", plugin_category),
-                  outgoing=True,
-                  regex="(\w+)say(?: |$|\n)([\s\S]*)")
+@client.onMessage(
+    command=("cowsay", plugin_category),
+    outgoing=True,
+    regex="(\w+)say(?: |$|\n)([\s\S]*)",
+)
 async def cowsay(event: NewMessage.Event) -> None:
     """Create messages with various animals and other creatures."""
     arg = event.matches[0].group(1).lower()
@@ -503,15 +506,14 @@ async def cowsay(event: NewMessage.Event) -> None:
     await event.answer(f"<code>{cheese.milk(text)}</code>", parse_mode="html")
 
 
-@client.onMessage(command=("decide", plugin_category),
-                  outgoing=True,
-                  regex="(yes|no|maybe|decide)$")
+@client.onMessage(
+    command=("decide", plugin_category), outgoing=True, regex="(yes|no|maybe|decide)$"
+)
 async def decide(event: NewMessage.Event) -> None:
     """Helps to make a quick decision."""
     decision = event.matches[0].group(1)
     if decision.lower() != "decide":
-        decide_data = await _request(f"https://yesno.wtf/api",
-                                     {'force': decision})
+        decide_data = await _request(f"https://yesno.wtf/api", {"force": decision})
     else:
         decide_data = await _request("https://yesno.wtf/api")
 
@@ -523,27 +525,31 @@ async def decide(event: NewMessage.Event) -> None:
         await event.answer("`Event timed out!`")
 
 
-@client.onMessage(command=("lmgtfy", plugin_category),
-                  outgoing=True,
-                  regex="lmg(tfy)?(?: |$|\n)(.*)")
+@client.onMessage(
+    command=("lmgtfy", plugin_category), outgoing=True, regex="lmg(tfy)?(?: |$|\n)(.*)"
+)
 async def lmgtfy(event: NewMessage.Event) -> None:
     """Let me Google that for you real quick."""
     query = event.matches[0].group(2) or "How to use Google?"
     query_encoded = query.replace(" ", "+")
     lmgtfy_url = f"http://letmegooglethat.com/?q={query_encoded}"
-    short_url = await _request(f'http://is.gd/create.php', {
-        'format': 'simple',
-        'url': lmgtfy_url
-    },
-                               data_type="text")
+    short_url = await _request(
+        f"http://is.gd/create.php",
+        {"format": "simple", "url": lmgtfy_url},
+        data_type="text",
+    )
     clickbait = short_url if short_url else lmgtfy_url
-    await event.answer(f"__Here you go, help yourself.__\
-        \n[{query}]({clickbait})")
+    await event.answer(
+        f"__Here you go, help yourself.__\
+        \n[{query}]({clickbait})"
+    )
 
 
-@client.onMessage(command=("vapor", plugin_category),
-                  outgoing=True,
-                  regex="(vpr|vapor)(?: |$|\n)([\s\S]*)")
+@client.onMessage(
+    command=("vapor", plugin_category),
+    outgoing=True,
+    regex="(vpr|vapor)(?: |$|\n)([\s\S]*)",
+)
 async def vapor(event: NewMessage.Event) -> None:
     """Vaporize everything!"""
     text = event.matches[0].group(2)
@@ -565,9 +571,11 @@ async def vapor(event: NewMessage.Event) -> None:
     await event.answer(vaporized_text)
 
 
-@client.onMessage(command=("zalgo", plugin_category),
-                  outgoing=True,
-                  regex="(zlg|zalgo)(?: |$|\n)([\s\S]*)")
+@client.onMessage(
+    command=("zalgo", plugin_category),
+    outgoing=True,
+    regex="(zlg|zalgo)(?: |$|\n)([\s\S]*)",
+)
 async def zalgofy(event: NewMessage.Event) -> None:
     """Invoke the feeling of chaos!"""
     text = event.matches[0].group(2)
@@ -587,22 +595,21 @@ async def zalgofy(event: NewMessage.Event) -> None:
         for _ in range(0, 3):
             zalgint = random.randint(0, 2)
             if zalgint == 0:
-                charac = charac.strip() + \
-                    random.choice(ZALG_LIST[0]).strip()
+                charac = charac.strip() + random.choice(ZALG_LIST[0]).strip()
             elif zalgint == 1:
-                charac = charac.strip() + \
-                    random.choice(ZALG_LIST[1]).strip()
+                charac = charac.strip() + random.choice(ZALG_LIST[1]).strip()
             else:
-                charac = charac.strip() + \
-                    random.choice(ZALG_LIST[2]).strip()
+                charac = charac.strip() + random.choice(ZALG_LIST[2]).strip()
         reply_text.append(charac)
-    chaotic_text = ''.join(reply_text)
+    chaotic_text = "".join(reply_text)
     await event.answer(f"`{chaotic_text}`")
 
 
-@client.onMessage(command=("stretch", plugin_category),
-                  outgoing=True,
-                  regex="str(etch)?(?: |$|\n)([\s\S]*)")
+@client.onMessage(
+    command=("stretch", plugin_category),
+    outgoing=True,
+    regex="str(etch)?(?: |$|\n)([\s\S]*)",
+)
 async def slinky(event: NewMessage.Event) -> None:
     """Stretch it like it's rubber!"""
     text = event.matches[0].group(2)
@@ -613,14 +620,15 @@ async def slinky(event: NewMessage.Event) -> None:
             await event.answer("`GiiiiiiiB sooooooomeeeeeee teeeeeeext!`")
             return
     count = random.randint(3, 10)
-    reply_text = re.sub(r"([aeiouAEIOUａｅｉｏｕＡＥＩＯＵаеиоуюяыэё])", (r"\1" * count),
-                        text)
+    reply_text = re.sub(r"([aeiouAEIOUａｅｉｏｕＡＥＩＯＵаеиоуюяыэё])", (r"\1" * count), text)
     await event.answer(f"__{reply_text}__")
 
 
-@client.onMessage(command=("uwu", plugin_category),
-                  outgoing=True,
-                  regex="(owo|uwu)(?: |$|\n)([\s\S]*)")
+@client.onMessage(
+    command=("uwu", plugin_category),
+    outgoing=True,
+    regex="(owo|uwu)(?: |$|\n)([\s\S]*)",
+)
 async def nekofy(event: NewMessage.Event) -> None:
     """Neko-fy the text, like the degenerate you are."""
     text = event.matches[0].group(2)
@@ -638,9 +646,11 @@ async def nekofy(event: NewMessage.Event) -> None:
     await event.answer(f"__{reply_text}__")
 
 
-@client.onMessage(command=("pasta", plugin_category),
-                  outgoing=True,
-                  regex="(cp|pasta)(?: |$|\n)([\s\S]*)")
+@client.onMessage(
+    command=("pasta", plugin_category),
+    outgoing=True,
+    regex="(cp|pasta)(?: |$|\n)([\s\S]*)",
+)
 async def copypasta(event: NewMessage.Event) -> None:
     """Copypasta the famous meme."""
     text = event.matches[0].group(2)
@@ -669,9 +679,9 @@ async def copypasta(event: NewMessage.Event) -> None:
     await event.answer(f"__{reply_text}__")
 
 
-@client.onMessage(command=("mock", plugin_category),
-                  outgoing=True,
-                  regex="mock(?: |$|\n)([\s\S]*)")
+@client.onMessage(
+    command=("mock", plugin_category), outgoing=True, regex="mock(?: |$|\n)([\s\S]*)"
+)
 async def spongemock(event: NewMessage.Event) -> None:
     """sPoNgE MoCk tHe tExT!"""
     text = event.matches[0].group(1)
@@ -692,17 +702,15 @@ async def spongemock(event: NewMessage.Event) -> None:
     await event.answer(f"__{mocked_text}__")
 
 
-@client.onMessage(command=("insult", plugin_category),
-                  outgoing=True,
-                  regex="insult$")
+@client.onMessage(command=("insult", plugin_category), outgoing=True, regex="insult$")
 async def memereview(event: NewMessage.Event) -> None:
     """Insult people."""
     await event.answer(f"__{random.choice(INSULTS)}__")
 
 
-@client.onMessage(command=("clap", plugin_category),
-                  outgoing=True,
-                  regex="clap(?: |$|\n)([\s\S]*)")
+@client.onMessage(
+    command=("clap", plugin_category), outgoing=True, regex="clap(?: |$|\n)([\s\S]*)"
+)
 async def clapz(event: NewMessage.Event) -> None:
     """Praise people."""
     text = event.matches[0].group(1)
@@ -717,9 +725,9 @@ async def clapz(event: NewMessage.Event) -> None:
     await event.answer(f"__{reply_text}__")
 
 
-@client.onMessage(command=("urban", plugin_category),
-                  outgoing=True,
-                  regex="(ud|urban)(?: |$|\n)(.*)")
+@client.onMessage(
+    command=("urban", plugin_category), outgoing=True, regex="(ud|urban)(?: |$|\n)(.*)"
+)
 async def urban_dict(event: NewMessage.Event) -> None:
     """ Looks up words in the Urban Dictionary."""
     query = event.matches[0].group(2)
@@ -734,9 +742,9 @@ async def urban_dict(event: NewMessage.Event) -> None:
     )
 
 
-@client.onMessage(command=("slap", plugin_category),
-                  outgoing=True,
-                  regex=r"slap(?: |$)(.*)")
+@client.onMessage(
+    command=("slap", plugin_category), outgoing=True, regex=r"slap(?: |$)(.*)"
+)
 async def slap(event: NewMessage.Event) -> None:
     """Slap a user with random objects for fun!"""
     target = await get_user_from_msg(event)
@@ -746,36 +754,50 @@ async def slap(event: NewMessage.Event) -> None:
 
     try:
         retard = await event.client.get_entity(target)
-        slapped = f"@{retard.username}" if retard.username else f"[{retard.first_name}](tg://user?id={retard.id})"
+        slapped = (
+            f"@{retard.username}"
+            if retard.username
+            else f"[{retard.first_name}](tg://user?id={retard.id})"
+        )
         template = random.choice(SLAP_TEMPLATES)
-        caption = "..." + template.format(victim=slapped,
-                                          item=random.choice(ITEMS),
-                                          hits=random.choice(HIT),
-                                          throws=random.choice(THROW),
-                                          where=random.choice(WHERE))
+        caption = "..." + template.format(
+            victim=slapped,
+            item=random.choice(ITEMS),
+            hits=random.choice(HIT),
+            throws=random.choice(THROW),
+            where=random.choice(WHERE),
+        )
         await event.answer(f"__{caption}__")
     except:
         await event.answer("`Unfortunately, I can't slap this person.`")
 
 
-@client.onMessage(command=("f", plugin_category),
-                  outgoing=True,
-                  regex=r"f(?: |$)(.)")
+@client.onMessage(command=("f", plugin_category), outgoing=True, regex=r"f(?: |$)(.)")
 async def payf(event: NewMessage.Event) -> None:
     """Pay your respects, with custom/random emojis"""
     paytext = event.matches[0].group(1)
     if not isEmoji(paytext):
         return
     pay = "{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}".format(
-        paytext * 8, paytext * 8, paytext * 2, paytext * 2, paytext * 2,
-        paytext * 6, paytext * 6, paytext * 2, paytext * 2, paytext * 2,
-        paytext * 2, paytext * 2)
+        paytext * 8,
+        paytext * 8,
+        paytext * 2,
+        paytext * 2,
+        paytext * 2,
+        paytext * 6,
+        paytext * 6,
+        paytext * 2,
+        paytext * 2,
+        paytext * 2,
+        paytext * 2,
+        paytext * 2,
+    )
     await event.answer(pay)
 
 
-@client.onMessage(command=("bluetext", plugin_category),
-                  outgoing=True,
-                  regex=r"(bt|b(lue)?text)$")
+@client.onMessage(
+    command=("bluetext", plugin_category), outgoing=True, regex=r"(bt|b(lue)?text)$"
+)
 async def bt(event: NewMessage.Event) -> None:
     """ Believe me, you will find this useful. """
     if event.is_group:
@@ -785,13 +807,16 @@ async def bt(event: NewMessage.Event) -> None:
         )
 
 
-@client.onMessage(command=("deepfry", plugin_category),
-                  outgoing=True,
-                  regex=r"(deep)?fry(?: |$)(\d*)")
+@client.onMessage(
+    command=("deepfry", plugin_category), outgoing=True, regex=r"(deep)?fry(?: |$)(\d*)"
+)
 async def mamma_mia(event: NewMessage.Event) -> None:
     """Deep fry images and stickers!"""
-    frycount = int(event.matches[0].group(
-        2)) if event.matches[0].group(2) != '' else random.randint(1, 3)
+    frycount = (
+        int(event.matches[0].group(2))
+        if event.matches[0].group(2) != ""
+        else random.randint(1, 3)
+    )
     if event.reply_to_msg_id:
         potato = await event.get_reply_message()
         if not await _is_fryable_event(potato):
@@ -799,15 +824,16 @@ async def mamma_mia(event: NewMessage.Event) -> None:
             return
     else:
         potato = None
-        async for msg in client.iter_messages(event.chat_id,
-                                              offset_id=event.message.id,
-                                              limit=10):
+        async for msg in client.iter_messages(
+            event.chat_id, offset_id=event.message.id, limit=10
+        ):
             if await _is_fryable_event(msg):
                 potato = msg
                 break
         if not potato:
             await event.answer(
-                "`Couldn't find any acceptable media in the recent messages.`")
+                "`Couldn't find any acceptable media in the recent messages.`"
+            )
             return
 
     # download photo as byte array.
@@ -841,15 +867,13 @@ async def oof(event: NewMessage.Event) -> None:
 @client.onMessage(outgoing=True, regex="^-__-$", disable_prefix=True)
 async def okay(event: NewMessage.Event) -> None:
     """Ok......"""
-    await event.answer("-___" + "_" * random.randint(5, 10) + "-",
-                       parse_mode='html')
+    await event.answer("-___" + "_" * random.randint(5, 10) + "-", parse_mode="html")
 
 
 @client.onMessage(outgoing=True, regex="^;__;$", disable_prefix=True)
 async def crai(event: NewMessage.Event) -> None:
     """crai :("""
-    await event.answer(";___" + "_" * random.randint(5, 10) + ";",
-                       parse_mode='html')
+    await event.answer(";___" + "_" * random.randint(5, 10) + ";", parse_mode="html")
 
 
 def isEmoji(inputString: str) -> bool:
@@ -858,8 +882,9 @@ def isEmoji(inputString: str) -> bool:
 
 async def _is_fryable_event(event: NewMessage.Event) -> bool:
     """Checks if the given image/sticker is worthy of the fry or not!"""
-    if (event.sticker and not event.sticker.mime_type
-            == 'application/x-tgsticker') or event.photo:
+    if (
+        event.sticker and not event.sticker.mime_type == "application/x-tgsticker"
+    ) or event.photo:
         return True
     if event.document and "image" in event.document.mime_type:
         return True
@@ -869,31 +894,42 @@ async def _is_fryable_event(event: NewMessage.Event) -> bool:
 # Copyright (c) 2017 Ovyerus; License: MIT
 async def deepfry(img: BinaryIO) -> BinaryIO:
     """Deepfry logic!"""
-    colours = ((random.randint(50, 200), random.randint(40, 170),
-                random.randint(40, 190)), (random.randint(190, 255),
-                                           random.randint(170, 240),
-                                           random.randint(180, 250)))
+    colours = (
+        (random.randint(50, 200), random.randint(40, 170), random.randint(40, 190)),
+        (random.randint(190, 255), random.randint(170, 240), random.randint(180, 250)),
+    )
 
     # Crush image to hell and back
     img = img.convert("RGB")
     width, height = img.width, img.height
-    img = img.resize((int(width**random.uniform(
-        0.8, 0.9)), int(height**random.uniform(0.8, 0.9))),
-                     resample=PIL.Image.LANCZOS)
-    img = img.resize((int(width**random.uniform(
-        0.85, 0.95)), int(height**random.uniform(0.85, 0.95))),
-                     resample=PIL.Image.BILINEAR)
-    img = img.resize((int(width**random.uniform(
-        0.89, 0.98)), int(height**random.uniform(0.89, 0.98))),
-                     resample=PIL.Image.BICUBIC)
+    img = img.resize(
+        (
+            int(width ** random.uniform(0.8, 0.9)),
+            int(height ** random.uniform(0.8, 0.9)),
+        ),
+        resample=PIL.Image.LANCZOS,
+    )
+    img = img.resize(
+        (
+            int(width ** random.uniform(0.85, 0.95)),
+            int(height ** random.uniform(0.85, 0.95)),
+        ),
+        resample=PIL.Image.BILINEAR,
+    )
+    img = img.resize(
+        (
+            int(width ** random.uniform(0.89, 0.98)),
+            int(height ** random.uniform(0.89, 0.98)),
+        ),
+        resample=PIL.Image.BICUBIC,
+    )
     img = img.resize((width, height), resample=PIL.Image.BICUBIC)
     img = ImageOps.posterize(img, random.randint(3, 7))
 
     # Generate colour overlay
     overlay = img.split()[0]
     overlay = ImageEnhance.Contrast(overlay).enhance(random.uniform(1.0, 2.0))
-    overlay = ImageEnhance.Brightness(overlay).enhance(random.uniform(
-        1.0, 2.0))
+    overlay = ImageEnhance.Brightness(overlay).enhance(random.uniform(1.0, 2.0))
 
     overlay = ImageOps.colorize(overlay, colours[0], colours[1])
 
@@ -905,9 +941,7 @@ async def deepfry(img: BinaryIO) -> BinaryIO:
 
 
 async def _request(
-        url: str,
-        params: dict = None,
-        data_type: str = None
+    url: str, params: dict = None, data_type: str = None
 ) -> Union[Union[dict, str, Tuple[str, dict]], None]:
     """Helps request data from APIs faster!"""
     async with aiohttp.ClientSession() as session:

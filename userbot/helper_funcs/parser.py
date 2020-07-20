@@ -25,9 +25,9 @@ from ..utils.events import NewMessage
 
 class Parser:
     """Parse UserFull, ChannelFull and ChatFull objects."""
+
     @staticmethod
-    async def parse_full_user(usr_obj: types.UserFull,
-                              event: NewMessage.Event) -> str:
+    async def parse_full_user(usr_obj: types.UserFull, event: NewMessage.Event) -> str:
         """Human-friendly string of an User obj's attributes"""
         user = usr_obj.user
 
@@ -57,8 +57,8 @@ class Parser:
         if last_name:
             text += f"\n  **Last name:** `{last_name}`"
         if about:
-            about = re.sub(r'(@\w{5,32})', r'`\1`', about, count=0)
-            text += re.sub(r'`{2}', r'', f"\n  **Bio:** `{about}`")
+            about = re.sub(r"(@\w{5,32})", r"`\1`", about, count=0)
+            text += re.sub(r"`{2}", r"", f"\n  **Bio:** `{about}`")
         if username:
             text += f"\n  **Username:** @{username}"
         if common_chats_count:
@@ -90,9 +90,9 @@ class Parser:
         return text
 
     @staticmethod
-    async def parse_full_chat(chat_obj: Union[types.ChatFull,
-                                              types.ChannelFull],
-                              event: NewMessage.Event) -> str:
+    async def parse_full_chat(
+        chat_obj: Union[types.ChatFull, types.ChannelFull], event: NewMessage.Event
+    ) -> str:
         """Human-friendly string of a Chat/Channel obj's attributes"""
         full_chat = chat_obj.full_chat
         chats = chat_obj.chats[0]
@@ -130,8 +130,8 @@ class Parser:
         if title:
             text += f"\n  **Title:** `{title}`"
         if about:
-            about = re.sub(r'(@\w{5,32})', r'`\1`', about, count=0)
-            text += re.sub(r'`{2}', r'', f"\n  **About:** `{about}`")
+            about = re.sub(r"(@\w{5,32})", r"`\1`", about, count=0)
+            text += re.sub(r"`{2}", r"", f"\n  **About:** `{about}`")
         if username:
             text += f"\n  **Username:** @{username}"
         if participants:

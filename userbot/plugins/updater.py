@@ -37,10 +37,9 @@ authored = "{author}` authored and `{committer}` committed {elapsed} ago`\n"
 main_repo = "https://github.com/AvinashReddy3108/PaperplaneRemix.git"
 
 
-@client.onMessage(command="update",
-                  outgoing=True,
-                  regex="update(?: |$)(reset|add)?$",
-                  builtin=True)
+@client.onMessage(
+    command="update", outgoing=True, regex="update(?: |$)(reset|add)?$", builtin=True
+)
 async def updater(event: NewMessage.Event) -> None:
     """Pull newest changes from the official repo and update the script/app."""
     arg = event.matches[0].group(1)
@@ -54,24 +53,27 @@ async def updater(event: NewMessage.Event) -> None:
         return
     except git.exc.GitCommandError as command:
         await event.answer(
-            f"`An error occured trying to get the Git Repo.`\n`{command}`")
+            f"`An error occured trying to get the Git Repo.`\n`{command}`"
+        )
         repo.__del__()
         return
     except git.exc.InvalidGitRepositoryError or arg == "force":
         repo = git.Repo.init(basedir)
-        origin = repo.create_remote('origin', main_repo)
+        origin = repo.create_remote("origin", main_repo)
         if not origin.exists():
             await event.answer(
-                "`The main repository does not exist. Remote is invalid!`")
+                "`The main repository does not exist. Remote is invalid!`"
+            )
             repo.__del__()
             return
         fetched_items = origin.fetch()
-        repo.create_head('master', origin.refs.master).set_tracking_branch(
-            origin.refs.master).checkout(force=True)
+        repo.create_head("master", origin.refs.master).set_tracking_branch(
+            origin.refs.master
+        ).checkout(force=True)
     fetched_commits = repo.iter_commits(f"HEAD..{fetched_items[0].ref.name}")
     untracked_files = repo.untracked_files
     old_commit = repo.head.commit
-    for diff_added in old_commit.diff('FETCH_HEAD').iter_change_type('M'):
+    for diff_added in old_commit.diff("FETCH_HEAD").iter_change_type("M"):
         if "requirements.txt" in diff_added.b_path:
             await event.answer("`Updating the pip requirements!`")
             updated = await update_requirements()
@@ -81,9 +83,10 @@ async def updater(event: NewMessage.Event) -> None:
                 if isinstance(updated, int):
                     await event.answer(
                         "`Failed trying to install requirements."
-                        " Install them manually and run the command again.`")
+                        " Install them manually and run the command again.`"
+                    )
                 else:
-                    await event.answer(f'```{updated}```')
+                    await event.answer(f"```{updated}```")
                 return
             break
 
@@ -91,27 +94,29 @@ async def updater(event: NewMessage.Event) -> None:
         repo.index.add(untracked_files, force=True)
         repo.index.commit("[PaperplaneRemix] Updater: Untracked files")
     elif arg == "reset":
-        repo.head.reset('--hard')
+        repo.head.reset("--hard")
 
     try:
         config = repo.config_reader()
         try:
-            if config.get_value('user', 'name') and config.get_value(
-                    'user', 'email'):
+            if config.get_value("user", "name") and config.get_value("user", "email"):
                 pass
         except (NoSectionError, NoOptionError):
             LOGGER.warning(
                 "No 'git' credentials found, falling back to generic data for the git pull."
             )
             repo.config_writer().set_value(
-                "user", "name", "PaperplaneRemix Updater").release()
+                "user", "name", "PaperplaneRemix Updater"
+            ).release()
             repo.config_writer().set_value("user", "email", "<>").release()
         repo.remotes.origin.pull()
     except git.exc.GitCommandError as command:
-        text = ("`An error occured trying to Git pull:`\n`{0}`\n\n"
-                "`You may use` **{1}update reset** `or` **{1}update add** "
-                "`to reset your repo or add and commit your changes as well.`")
-        prefix = client.prefix if client.prefix is not None else '.'
+        text = (
+            "`An error occured trying to Git pull:`\n`{0}`\n\n"
+            "`You may use` **{1}update reset** `or` **{1}update add** "
+            "`to reset your repo or add and commit your changes as well.`"
+        )
+        prefix = client.prefix if client.prefix is not None else "."
         await event.answer(text.format(command, prefix))
         repo.__del__()
         return
@@ -122,44 +127,42 @@ async def updater(event: NewMessage.Event) -> None:
         repo.__del__()
         return
 
-    remote_url = repo.remote().url.replace(".git", '/')
-    if remote_url[-1] != '/':
-        remote_url = remote_url + '/'
+    remote_url = repo.remote().url.replace(".git", "/")
+    if remote_url[-1] != "/":
+        remote_url = remote_url + "/"
 
     now = datetime.datetime.now(datetime.timezone.utc)
     def_changelog = changelog = "**PaperplaneRemix changelog:**"
     for commit in reversed(list(fetched_commits)):
-        changelog += summary.format(rev=repo.git.rev_parse(commit.hexsha,
-                                                           short=7),
-                                    summary=commit.summary,
-                                    url=remote_url,
-                                    sha=commit.hexsha)
+        changelog += summary.format(
+            rev=repo.git.rev_parse(commit.hexsha, short=7),
+            summary=commit.summary,
+            url=remote_url,
+            sha=commit.hexsha,
+        )
         ago = (now - commit.committed_datetime).total_seconds()
-        elspased = (await _humanfriendly_seconds(ago)).split(',')[0]
-        committers_link = author_link.format(author=commit.committer,
-                                             url=remote_url)
+        elspased = (await _humanfriendly_seconds(ago)).split(",")[0]
+        committers_link = author_link.format(author=commit.committer, url=remote_url)
         authors_link = author_link.format(author=commit.author, url=remote_url)
         if commit.author == commit.committer:
-            committed = commited.format(committer=committers_link,
-                                        elapsed=elspased)
+            committed = commited.format(committer=committers_link, elapsed=elspased)
         else:
-            committed = authored.format(author=authors_link,
-                                        committer=committers_link,
-                                        elapsed=elspased)
+            committed = authored.format(
+                author=authors_link, committer=committers_link, elapsed=elspased
+            )
         changelog += f"{committed:>{len(committed) + 8}}"
     if changelog == def_changelog:
         changelog = "`No changelog for you! IDK what happened.`"
 
     toast = await event.answer(
         "`Successfully pulled the new commits. Updating the userbot!`",
-        log=("update", changelog.strip()))
+        log=("update", changelog.strip()),
+    )
     if not client.logger:
-        await event.answer(changelog.strip(),
-                           reply_to=toast.id,
-                           link_preview=False)
+        await event.answer(changelog.strip(), reply_to=toast.id, link_preview=False)
 
-    os.environ['userbot_update'] = "True"
-    heroku_api_key = client.config['api_keys'].get('api_key_heroku', False)
+    os.environ["userbot_update"] = "True"
+    heroku_api_key = client.config["api_keys"].get("api_key_heroku", False)
     if os.getenv("DYNO", False) and heroku_api_key:
         heroku_conn = heroku3.from_key(heroku_api_key)
         app = None
@@ -171,7 +174,8 @@ async def updater(event: NewMessage.Event) -> None:
             await event.answer(
                 "`You seem to be running on Heroku "
                 "with an invalid environment. Couldn't update the app.`\n"
-                "`The changes will be reverted upon dyno restart.`")
+                "`The changes will be reverted upon dyno restart.`"
+            )
             repo.__del__()
             await restart(event)
         else:
@@ -179,55 +183,57 @@ async def updater(event: NewMessage.Event) -> None:
                 if build.status == "pending":
                     await event.answer(
                         "`There seems to be an ongoing build in your app.`"
-                        " `Try again after it's finished.`")
+                        " `Try again after it's finished.`"
+                    )
                     return
 
             # Don't update the telethon environment varaibles
-            userbot_config = dict(client.config['userbot'])
+            userbot_config = dict(client.config["userbot"])
             app.config().update(userbot_config)
 
             # "Dirty Fix" for Heroku Dynos to update proper environment
             # variables for external plugin flags.
             heroku_ext_flags = {
                 x[12:]: os.getenv(x, None)
-                for x in list(os.environ) if x.startswith('ext_userbot_')
+                for x in list(os.environ)
+                if x.startswith("ext_userbot_")
             }
             for flag in userbot_config:
                 if flag in heroku_ext_flags:
-                    app.config().update(
-                        {f"ext_userbot_{flag}": userbot_config[flag]})
+                    app.config().update({f"ext_userbot_{flag}": userbot_config[flag]})
                     app.config().update({flag: None})
 
-            app.config().update({
-                "userbot_restarted": f"{event.chat_id}/{event.message.id}",
-                "userbot_update": "True"
-            })
+            app.config().update(
+                {
+                    "userbot_restarted": f"{event.chat_id}/{event.message.id}",
+                    "userbot_update": "True",
+                }
+            )
             if event.client.disabled_commands:
                 disabled_list = ", ".join(client.disabled_commands.keys())
-                app.config().update(
-                    {"userbot_disabled_commands": disabled_list})
+                app.config().update({"userbot_disabled_commands": disabled_list})
 
             url = f"https://api:{heroku_api_key}@git.heroku.com/{app.name}.git"
             if "heroku" in repo.remotes:
-                repo.remotes['heroku'].set_url(url)
+                repo.remotes["heroku"].set_url(url)
             else:
-                repo.create_remote('heroku', url)
+                repo.create_remote("heroku", url)
             if repo.untracked_files:
                 repo.index.add(untracked_files, force=True)
                 repo.index.commit("[PaperplaneRemix] Updater: Untracked files")
-            app.enable_feature('runtime-dyno-metadata')
+            app.enable_feature("runtime-dyno-metadata")
             await event.answer(
                 f"`Pushing all the changes to Heroku. This might take a while.`"
             )
-            remote = repo.remotes['heroku']
+            remote = repo.remotes["heroku"]
             try:
-                remote.push(refspec=f'{repo.active_branch.name}:master',
-                            force=True)
+                remote.push(refspec=f"{repo.active_branch.name}:master", force=True)
                 await event.answer("`There was nothing to push to Heroku?`")
             except git.exc.GitCommandError as command:
                 await event.answer(
                     "`An error occured trying to pull and push to Heorku`"
-                    f"\n`{command}`")
+                    f"\n`{command}`"
+                )
                 LOGGER.exception(command)
             repo.__del__()
     else:
@@ -236,13 +242,14 @@ async def updater(event: NewMessage.Event) -> None:
 
 
 async def update_requirements():
-    args = ['-m', 'pip', 'install', '--user', '-r', 'requirements.txt']
+    args = ["-m", "pip", "install", "--user", "-r", "requirements.txt"]
     try:
         process = await asyncio.create_subprocess_exec(
-            sys.executable.replace(' ', '\\ '),
+            sys.executable.replace(" ", "\\ "),
             *args,
             stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE)
+            stderr=asyncio.subprocess.PIPE,
+        )
         await process.communicate()
         return process.returncode
     except Exception as e:

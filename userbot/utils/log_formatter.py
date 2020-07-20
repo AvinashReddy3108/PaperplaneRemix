@@ -18,20 +18,21 @@ import logging
 import logging.handlers
 import os
 
-HEROKU = os.environ.get('DYNO', False)
-CCRI = '\033[48;5;124m' if not HEROKU else ''  # CRITICAL
-CERR = '\033[38;5;124m' if not HEROKU else ''  # ERROR
-CWAR = '\033[38;5;202m' if not HEROKU else ''  # WARNING
-CINF = '\033[38;5;15m' if not HEROKU else ''  # INFO
-CDEB = '\033[38;5;28m' if not HEROKU else ''  # DEBUG
-CEND = '\033[0m' if not HEROKU else ''  # ANSI END
-CORA = '\033[33;1m' if not HEROKU else ''  # ORANGE
-CBOT = '\033[94;1m' if not HEROKU else ''  # BOT (blue?)
-CUSR = '\033[38;5;118m' if not HEROKU else ''  # USER (white?)
+HEROKU = os.environ.get("DYNO", False)
+CCRI = "\033[48;5;124m" if not HEROKU else ""  # CRITICAL
+CERR = "\033[38;5;124m" if not HEROKU else ""  # ERROR
+CWAR = "\033[38;5;202m" if not HEROKU else ""  # WARNING
+CINF = "\033[38;5;15m" if not HEROKU else ""  # INFO
+CDEB = "\033[38;5;28m" if not HEROKU else ""  # DEBUG
+CEND = "\033[0m" if not HEROKU else ""  # ANSI END
+CORA = "\033[33;1m" if not HEROKU else ""  # ORANGE
+CBOT = "\033[94;1m" if not HEROKU else ""  # BOT (blue?)
+CUSR = "\033[38;5;118m" if not HEROKU else ""  # USER (white?)
 
 
 class CustomPercentStyle(logging.PercentStyle):
     """Replace the default_format to our own and override the format method."""
+
     default_format = "[%(levelname)s / %(asctime)s] %(name)s: %(message)s"
 
     def format(self, record):
@@ -44,9 +45,9 @@ class CustomPercentStyle(logging.PercentStyle):
                 first = "[%(asctime)s / %(levelname)s] "
             if record.name == "root":
                 second = f"{CCRI}%(name)s:{CEND} %(message)s"
-            elif record.name.startswith('telethon'):
+            elif record.name.startswith("telethon"):
                 second = f"{CBOT}%(name)s:{CEND} %(message)s"
-            elif record.name.startswith('userbot'):
+            elif record.name.startswith("userbot"):
                 second = f"{CORA}%(name)s:{CEND} %(message)s"
             else:
                 second = "%(name)s: %(message)s"
@@ -57,9 +58,9 @@ class CustomPercentStyle(logging.PercentStyle):
                 logging.WARNING: CWAR + first + CEND + second,
                 logging.INFO: CINF + first + CEND + second,
                 logging.DEBUG: CDEB + first + CEND + second,
-                'DEFAULT': self.default_format
+                "DEFAULT": self.default_format,
             }
-            fmt = FORMATS.get(record.levelno, FORMATS['DEFAULT'])
+            fmt = FORMATS.get(record.levelno, FORMATS["DEFAULT"])
         else:
             fmt = self._fmt
         return fmt % record.__dict__
@@ -67,15 +68,14 @@ class CustomPercentStyle(logging.PercentStyle):
 
 class CustomFormatter(logging.Formatter):
     """Update the default Formatter's _STYLES dict to use our custom one"""
-    _STYLES = logging._STYLES.update(
-        {'%': (CustomPercentStyle, logging.BASIC_FORMAT)})
+
+    _STYLES = logging._STYLES.update({"%": (CustomPercentStyle, logging.BASIC_FORMAT)})
 
     def logFormat(self, record):
         """Format a log record without ANSI escapes for dumping"""
         super().format(record)
         record.__dict__.update(levelAlias=record.levelname[:1])
-        fmt = "{asctime} [{levelAlias}] - {name}: {message}".format(
-            **record.__dict__)
+        fmt = "{asctime} [{levelAlias}] - {name}: {message}".format(**record.__dict__)
         if record.exc_text:
             fmt += f"\n{record.exc_text}"
         return fmt
@@ -83,11 +83,13 @@ class CustomFormatter(logging.Formatter):
 
 class TargetNotSetError(Exception):
     """Raised when dumps is called without a target"""
+
     pass
 
 
 class CustomMemoryHandler(logging.handlers.MemoryHandler):
     """Inherits the default MemoryHandler and implements handled buffers"""
+
     handledbuffer = []
 
     def setFlushLevel(self, level):
@@ -102,13 +104,14 @@ class CustomMemoryHandler(logging.handlers.MemoryHandler):
         """Returns a list of strings for all the handled and pending records"""
         if self.target is None:
             raise TargetNotSetError(
-                'Target handler is not set. Cannot format the records.')
+                "Target handler is not set. Cannot format the records."
+            )
         _format = self.target.format
-        if (self.target.formatter
-                and hasattr(self.target.formatter, 'logFormat')):
+        if self.target.formatter and hasattr(self.target.formatter, "logFormat"):
             _format = self.target.formatter.logFormat
         return [
-            _format(record) for record in (self.handledbuffer + self.buffer)
+            _format(record)
+            for record in (self.handledbuffer + self.buffer)
             if record.levelno >= (level if level else self.flushLevel or 0)
         ]
 

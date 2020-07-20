@@ -25,14 +25,14 @@ import youtube_dl
 from .. import LOGGER
 
 downloads = {}
-audio = re.compile(r'\[ffmpeg\] Destination\: (.+)')
-video = re.compile(
-    r'\[ffmpeg\] Converting video from \w+ to \w+, Destination: (.+)')
+audio = re.compile(r"\[ffmpeg\] Destination\: (.+)")
+video = re.compile(r"\[ffmpeg\] Converting video from \w+ to \w+, Destination: (.+)")
 merger = re.compile(r'\[ffmpeg\] Merging formats into "(.+)"')
 
 
 class YTdlLogger(object):
     """Logger used for YoutubeDL which logs to UserBot logger."""
+
     def debug(self, msg: str) -> None:
         """Logs debug messages with youtube-dl tag to UserBot logger."""
         LOGGER.debug("youtube-dl: " + msg)
@@ -45,7 +45,7 @@ class YTdlLogger(object):
             if merger.search(msg):
                 f = merger.match(msg).group(1)
             if f:
-                downloads.update({f.split('.')[0]: f})
+                downloads.update({f.split(".")[0]: f})
 
     def warning(self, msg: str) -> None:
         """Logs warning messages with youtube-dl tag to UserBot logger."""
@@ -60,8 +60,9 @@ class YTdlLogger(object):
         LOGGER.critical("youtube-dl: " + msg)
 
 
-class ProgressHook():
+class ProgressHook:
     """Custom hook with the event stored for YTDL."""
+
     def __init__(self, event, update=5):
         self.event = event
         self.downloaded = 0
@@ -80,8 +81,7 @@ class ProgressHook():
 
     def edit(self, *args, **kwargs):
         """Create a Task of the progress edit."""
-        task = self.event.client.loop.create_task(
-            self.event.answer(*args, **kwargs))
+        task = self.event.client.loop.create_task(self.event.answer(*args, **kwargs))
         # task.add_done_callback(self.callback)
         self.tasks.append(task)
         return task
@@ -90,36 +90,39 @@ class ProgressHook():
         """
             YoutubeDL's hook which logs progress and errors to UserBot logger.
         """
-        if d['status'] == 'downloading':
-            filen = d.get('filename', 'Unknown filename')
-            prcnt = d.get('_percent_str', None)
-            ttlbyt = d.get('_total_bytes_str', None)
-            spdstr = d.get('_speed_str', None)
-            etastr = d.get('_eta_str', None)
+        if d["status"] == "downloading":
+            filen = d.get("filename", "Unknown filename")
+            prcnt = d.get("_percent_str", None)
+            ttlbyt = d.get("_total_bytes_str", None)
+            spdstr = d.get("_speed_str", None)
+            etastr = d.get("_eta_str", None)
 
             if not prcnt or not ttlbyt or not spdstr or not etastr:
                 return
 
-            finalStr = ("Downloading {}: {} of {} at {} ETA: {}".format(
-                filen, prcnt, ttlbyt, spdstr, etastr))
+            finalStr = "Downloading {}: {} of {} at {} ETA: {}".format(
+                filen, prcnt, ttlbyt, spdstr, etastr
+            )
             LOGGER.debug(finalStr)
             if float(prcnt[:-1]) - self.downloaded >= self.update:
                 # Avoid spamming recents
                 if self.last_edit and time.time() - self.last_edit < 10:
                     return
                 self.downloaded = float(prcnt[:-1])
-                filen = re.sub(r'YT_DL\\(.+)_\d+\.', r'\1.', filen)
-                self.edit(f"`Downloading {filen} at {spdstr}.`\n"
-                          f"__Progress: {prcnt} of {ttlbyt}__\n"
-                          f"__ETA: {etastr}__")
+                filen = re.sub(r"YT_DL\\(.+)_\d+\.", r"\1.", filen)
+                self.edit(
+                    f"`Downloading {filen} at {spdstr}.`\n"
+                    f"__Progress: {prcnt} of {ttlbyt}__\n"
+                    f"__ETA: {etastr}__"
+                )
                 self.last_edit = time.time()
 
-        elif d['status'] == 'finished':
-            filen = d.get('filename', 'Unknown filename')
-            filen1 = re.sub(r'YT_DL\\(.+)_\d+\.', r'\1.', filen)
-            ttlbyt = d.get('_total_bytes_str', None)
-            elpstr = d.get('_elapsed_str', None)
-            downloads.update({filen.split('.')[0]: filen})
+        elif d["status"] == "finished":
+            filen = d.get("filename", "Unknown filename")
+            filen1 = re.sub(r"YT_DL\\(.+)_\d+\.", r"\1.", filen)
+            ttlbyt = d.get("_total_bytes_str", None)
+            elpstr = d.get("_elapsed_str", None)
+            downloads.update({filen.split(".")[0]: filen})
 
             if not ttlbyt or not elpstr:
                 return
@@ -127,14 +130,14 @@ class ProgressHook():
             finalStr = f"Downloaded {filen}: 100% of {ttlbyt} in {elpstr}"
             LOGGER.warning(finalStr)
             self.event.client.loop.create_task(
-                self.event.answer(
-                    f"`Successfully downloaded {filen1} in {elpstr}!`"))
+                self.event.answer(f"`Successfully downloaded {filen1} in {elpstr}!`")
+            )
             for task in self.tasks:
                 if not task.done():
                     task.cancel()
             self.tasks.clear()
 
-        elif d['status'] == 'error':
+        elif d["status"] == "error":
             finalStr = "Error: " + str(d)
             LOGGER.error(finalStr)
 
@@ -150,27 +153,30 @@ async def list_formats(info_dict: dict) -> str:
         ``str``:
             All available formats in order as a string instead of stdout.
     """
-    formats = info_dict.get('formats', [info_dict])
-    table = [[
-        f['format_id'], f['ext'],
-        youtube_dl.YoutubeDL.format_resolution(f)
-    ] for f in formats
-             if f.get('preference') is None or f['preference'] >= -1000]
+    formats = info_dict.get("formats", [info_dict])
+    table = [
+        [f["format_id"], f["ext"], youtube_dl.YoutubeDL.format_resolution(f)]
+        for f in formats
+        if f.get("preference") is None or f["preference"] >= -1000
+    ]
     if len(formats) > 1:
-        table[-1][-1] += (' ' if table[-1][-1] else '') + '(best)'
+        table[-1][-1] += (" " if table[-1][-1] else "") + "(best)"
 
-    header_line = ['format code', 'extension', 'resolution']
-    fmtStr = (
-        'Available formats for %s:\n%s' %
-        (info_dict['title'], youtube_dl.render_table(header_line, table)))
+    header_line = ["format code", "extension", "resolution"]
+    fmtStr = "Available formats for %s:\n%s" % (
+        info_dict["title"],
+        youtube_dl.render_table(header_line, table),
+    )
     return fmtStr
 
 
-async def extract_info(loop,
-                       executor: concurrent.futures.Executor,
-                       ydl_opts: dict,
-                       url: str,
-                       download: bool = False) -> str:
+async def extract_info(
+    loop,
+    executor: concurrent.futures.Executor,
+    ydl_opts: dict,
+    url: str,
+    download: bool = False,
+) -> str:
     """Runs YoutubeDL's extract_info method without blocking the event loop.
 
     Args:
@@ -188,7 +194,7 @@ async def extract_info(loop,
             Successfull string or info_dict on success or an exception's
             string if any occur.
     """
-    ydl_opts['outtmpl'] = ydl_opts['outtmpl'].format(time=time.time_ns())
+    ydl_opts["outtmpl"] = ydl_opts["outtmpl"].format(time=time.time_ns())
     ytdl = youtube_dl.YoutubeDL(ydl_opts)
 
     def downloader(url, download):
@@ -202,7 +208,8 @@ async def extract_info(loop,
         except youtube_dl.utils.GeoRestrictedError:
             eStr = (
                 "`Video is not available from your geographic location due "
-                "to geographic restrictions imposed by a website.`")
+                "to geographic restrictions imposed by a website.`"
+            )
         except youtube_dl.utils.MaxDownloadsReached:
             eStr = "`Max-downloads limit has been reached.`"
         except youtube_dl.utils.PostProcessingError:
@@ -220,7 +227,7 @@ async def extract_info(loop,
 
         if download:
             filen = ytdl.prepare_filename(info_dict)
-            opath = downloads.pop(filen.rsplit('.', maxsplit=1)[0], filen)
+            opath = downloads.pop(filen.rsplit(".", maxsplit=1)[0], filen)
             downloaded = pathlib.Path(opath)
             if not downloaded.exists():
                 pattern = f"*{info_dict['title']}*"
@@ -228,8 +235,8 @@ async def extract_info(loop,
                     if f.suffix != ".jpg":
                         opath = f"YT_DL/{f.name}{f.suffix}"
                         break
-            npath = re.sub(r'_\d+(\.\w+)$', r'\1', opath)
-            thumb = pathlib.Path(re.sub(r'\.\w+$', r'.jpg', opath))
+            npath = re.sub(r"_\d+(\.\w+)$", r"\1", opath)
+            thumb = pathlib.Path(re.sub(r"\.\w+$", r".jpg", opath))
 
             old_f = pathlib.Path(npath)
             new_f = pathlib.Path(opath)
@@ -237,9 +244,8 @@ async def extract_info(loop,
                 if old_f.samefile(new_f):
                     os.remove(str(new_f.absolute()))
                 else:
-                    newname = str(old_f.stem) + '_OLD'
-                    old_f.replace(
-                        old_f.with_name(newname).with_suffix(old_f.suffix))
+                    newname = str(old_f.stem) + "_OLD"
+                    old_f.replace(old_f.with_name(newname).with_suffix(old_f.suffix))
             path = new_f.parent.parent / npath
             new_f.rename(new_f.parent.parent / npath)
             thumb = str(thumb.absolute()) if thumb.exists() else None
@@ -254,7 +260,8 @@ async def extract_info(loop,
     try:
         result = await loop.run_in_executor(
             concurrent.futures.ThreadPoolExecutor(),
-            functools.partial(downloader, url, download))
+            functools.partial(downloader, url, download),
+        )
     except Exception as e:
         result = f"```{type(e)}: {e}```"
     finally:

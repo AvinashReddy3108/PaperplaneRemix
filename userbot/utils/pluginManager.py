@@ -33,11 +33,11 @@ from typing import Dict, List, Tuple, Union
 from telethon import events, TelegramClient
 
 LOGGER = logging.getLogger(__name__)
-package_patern = re.compile(r'([\w-]+)(?:=|<|>|!)')
-github_patern = re.compile(
-    r'(?:https?)?(?:www.)?(?:github.com/)?([\w\-.]+/[\w\-.]+)/?')
+package_patern = re.compile(r"([\w-]+)(?:=|<|>|!)")
+github_patern = re.compile(r"(?:https?)?(?:www.)?(?:github.com/)?([\w\-.]+/[\w\-.]+)/?")
 github_raw_pattern = re.compile(
-    r'(?:https?)?(?:raw.)?(?:githubusercontent.com/)?([\w\-.]+/[\w\-.]+)/?')
+    r"(?:https?)?(?:raw.)?(?:githubusercontent.com/)?([\w\-.]+/[\w\-.]+)/?"
+)
 trees_pattern = "https://api.github.com/repos/{}/git/trees/master"
 raw_pattern = "https://raw.githubusercontent.com/{}/master/{}"
 root = pathlib.Path(__file__).parent.parent.parent
@@ -59,7 +59,8 @@ class Plugin:
 
 class SourcelessPluginLoader(importlib.abc.SourceLoader):
     """Loader for (byte) strings which don't have a source."""
-    def __init__(self, name, data, path: str = '<string>'):
+
+    def __init__(self, name, data, path: str = "<string>"):
         self.data = data
         self.path = path
         self.name = name
@@ -98,12 +99,13 @@ class PluginManager:
         self.client: TelegramClient = client
         self.config = client.config["plugins"]
         self.plugin_path: pathlib.Path = pathlib.Path(
-            self.config.setdefault("root", "./userbot/plugins"))
+            self.config.setdefault("root", "./userbot/plugins")
+        )
 
         self.include: list = _split_plugins(self.config.get("include", []))
         self.exclude: list = _split_plugins(self.config.get("exclude", []))
-        access_token = self.config.get('token', None)
-        user = self.config.get('user', None)
+        access_token = self.config.get("token", None)
+        user = self.config.get("user", None)
         if user and access_token:
             self.auth = (user, access_token)
         if not self.plugin_path.exists():
@@ -124,7 +126,7 @@ class PluginManager:
             resp = requests.get(url, auth=self.auth)
             if not resp.ok:
                 continue
-            path = path[:-3].replace('\\', '.').replace('/', '.')
+            path = path[:-3].replace("\\", ".").replace("/", ".")
             if name in to_import:
                 _, oldurl, _ = to_import[name]
                 to_import.pop(name)
@@ -136,7 +138,7 @@ class PluginManager:
             resp = requests.get(url, auth=self.auth)
             if not resp.ok:
                 continue
-            path = path[:-3].replace('\\', '.').replace('/', '.')
+            path = path[:-3].replace("\\", ".").replace("/", ".")
             self._import_helper(path, url, resp.content)
 
         if self.new_requirements:
@@ -149,14 +151,12 @@ class PluginManager:
             name, path, content = info
             if self.include and not self.exclude:
                 if plugin_name not in self.include:
-                    self.inactive_plugins.append(
-                        Plugin(plugin_name, [], path, None))
+                    self.inactive_plugins.append(Plugin(plugin_name, [], path, None))
                     LOGGER.debug("Skipped importing %s", plugin_name)
                     continue
             elif not self.include and self.exclude:
                 if plugin_name in self.exclude:
-                    self.inactive_plugins.append(
-                        Plugin(plugin_name, [], path, None))
+                    self.inactive_plugins.append(Plugin(plugin_name, [], path, None))
                     LOGGER.debug("Skipped importing %s", plugin_name)
                     continue
             self._import_plugin(name, path, content)
@@ -166,16 +166,16 @@ class PluginManager:
         for plugin in self.active_plugins:
             for callback in plugin.callbacks:
                 self.client.add_event_handler(callback.callback)
-                LOGGER.debug("Added event handler for %s.",
-                             callback.callback.__name__)
+                LOGGER.debug("Added event handler for %s.", callback.callback.__name__)
 
     def remove_handlers(self) -> None:
         """Remove event handlers to all the found callbacks."""
         for plugin in self.active_plugins:
             for callback in plugin.callbacks:
                 self.client.remove_event_handler(callback.callback)
-                LOGGER.debug("Removed event handlers for %s.",
-                             callback.callback.__name__)
+                LOGGER.debug(
+                    "Removed event handlers for %s.", callback.callback.__name__
+                )
 
     def _list_plugins(self) -> List[Union[Tuple[str, str], None]]:
         """Get all the files from the local plugins dir."""
@@ -183,11 +183,14 @@ class PluginManager:
         plugins: List[Tuple[str, str]] = []
         if self.config.getboolean("enabled", True):
             for f in pathlib.Path(self.plugin_path).glob("**/*.py"):
-                if (f.name != "__init__.py" and not f.name.startswith('_')
-                        and f.name.endswith('.py')):
+                if (
+                    f.name != "__init__.py"
+                    and not f.name.startswith("_")
+                    and f.name.endswith(".py")
+                ):
                     name = f.name[:-3]
                     path = os.path.relpath(f)[:-3]
-                    path = path.replace('\\', '.').replace('/', '.')
+                    path = path.replace("\\", ".").replace("/", ".")
                     plugins.append((name, path))
         return plugins
 
@@ -197,18 +200,18 @@ class PluginManager:
         plugins: Dict[str, str] = {}
         helpers: Dict[str, str] = {}
         repos: List[str] = []
-        resources = root / 'resources'
-        rconfig_path = resources / 'config.ini'
-        tmp = self.config.get('repos', None)
+        resources = root / "resources"
+        rconfig_path = resources / "config.ini"
+        tmp = self.config.get("repos", None)
 
         rconfig = configparser.ConfigParser()
         resources.mkdir(exist_ok=True)
         rconfig_path.touch()
         rconfig.read(rconfig_path)
         if "sha" not in rconfig:
-            rconfig['sha'] = {}
+            rconfig["sha"] = {}
         if "size" not in rconfig:
-            rconfig['size'] = {}
+            rconfig["size"] = {}
 
         if tmp:
             tmp = _split_plugins(tmp)
@@ -217,87 +220,83 @@ class PluginManager:
                 if match:
                     repos.append(match.group(1))
         for repo in repos:
-            tree = requests.get(trees_pattern.format(repo),
-                                params={"recursive": "True"},
-                                auth=self.auth)
+            tree = requests.get(
+                trees_pattern.format(repo), params={"recursive": "True"}, auth=self.auth
+            )
             if not tree.ok:
                 LOGGER.warning(f"Couldn't fetch plugins from {repo}")
                 continue
 
-            for f in tree.json().get('tree', ()):
-                filen = f.get('path', '_')
-                sha = f.get('sha', None)
-                size = f.get('size', None)
+            for f in tree.json().get("tree", ()):
+                filen = f.get("path", "_")
+                sha = f.get("sha", None)
+                size = f.get("size", None)
                 if not (filen and sha and size):
                     continue
                 size = str(size)
                 if filen == "requirements.txt":
                     try:
-                        resp = requests.get(raw_pattern.format(repo, filen),
-                                            auth=self.auth,
-                                            stream=True)
+                        resp = requests.get(
+                            raw_pattern.format(repo, filen), auth=self.auth, stream=True
+                        )
                     except requests.exceptions.ConnectionError:
-                        LOGGER.error(
-                            f'Failed to open {resp.url}, skipping {repo}')
+                        LOGGER.error(f"Failed to open {resp.url}, skipping {repo}")
                         break  # The plugins wouldn't load without the reqs
                     if resp.ok:
-                        raw = resp.content.decode('utf-8')
+                        raw = resp.content.decode("utf-8")
                         req = run_async(get_pip_packages(raw))
                         self.new_requirements.extend(
-                            [x for x in req if x not in self.requirements])
+                            [x for x in req if x not in self.requirements]
+                        )
                     continue
-                elif filen.startswith('resources/'):
-                    rfilen = filen.rsplit('/', maxsplit=1)[1]
-                    fsize = rconfig['size'].get(rfilen, None)
-                    fsha = rconfig['sha'].get(rfilen, None)
+                elif filen.startswith("resources/"):
+                    rfilen = filen.rsplit("/", maxsplit=1)[1]
+                    fsize = rconfig["size"].get(rfilen, None)
+                    fsha = rconfig["sha"].get(rfilen, None)
                     if size == fsize and sha == fsha:
                         continue
                     url = raw_pattern.format(repo, filen)
-                    LOGGER.info(f'Downloading resource {rfilen} from {repo}')
+                    LOGGER.info(f"Downloading resource {rfilen} from {repo}")
                     resp = requests.get(url, auth=self.auth, stream=True)
                     if resp.ok:
                         resp.raw.decode_content = True
                         newResource = resources / rfilen
-                        with open(newResource, 'wb') as f:
+                        with open(newResource, "wb") as f:
                             shutil.copyfileobj(resp.raw, f)
-                        rconfig['size'][rfilen] = size
-                        rconfig['sha'][rfilen] = sha
+                        rconfig["size"][rfilen] = size
+                        rconfig["sha"][rfilen] = sha
                     else:
-                        LOGGER.warning(f'Failed to download {url}')
+                        LOGGER.warning(f"Failed to download {url}")
                     continue
-                elif filen.startswith('helper_funcs/'):
-                    mod = filen.split('/', maxsplit=1)[1]
-                    if mod[0] not in ('.', '_') and mod[-3:] == '.py':
-                        splat = filen[:-3].rsplit('/', maxsplit=1)
+                elif filen.startswith("helper_funcs/"):
+                    mod = filen.split("/", maxsplit=1)[1]
+                    if mod[0] not in (".", "_") and mod[-3:] == ".py":
+                        splat = filen[:-3].rsplit("/", maxsplit=1)
                         mod_name = splat[0] if len(splat) == 1 else splat[1]
                         if mod_name in helpers:
-                            LOGGER.debug(
-                                f"Overwrote {mod_name} from {repo}/{filen}")
-                        helpers.update({
-                            mod_name: (raw_pattern.format(repo, filen), filen)
-                        })
+                            LOGGER.debug(f"Overwrote {mod_name} from {repo}/{filen}")
+                        helpers.update(
+                            {mod_name: (raw_pattern.format(repo, filen), filen)}
+                        )
                         LOGGER.debug(f"Found {mod_name} in {repo}/{filen}!")
                     continue
 
-                splat = filen.rsplit('/', maxsplit=1)
+                splat = filen.rsplit("/", maxsplit=1)
                 plugin = splat[0] if len(splat) == 1 else splat[1]
-                if plugin[0] not in ('.', '_') and plugin[-3:] == '.py':
-                    splat = filen[:-3].rsplit('/', maxsplit=1)
+                if plugin[0] not in (".", "_") and plugin[-3:] == ".py":
+                    splat = filen[:-3].rsplit("/", maxsplit=1)
                     plugin_name = splat[0] if len(splat) == 1 else splat[1]
-                    if plugin_name == 'builtin':
-                        LOGGER.info(
-                            'Ignoring the builtin plugin, cannot overwrite it.'
-                        )
+                    if plugin_name == "builtin":
+                        LOGGER.info("Ignoring the builtin plugin, cannot overwrite it.")
                         continue
                     elif plugin_name in plugins:
-                        LOGGER.debug(
-                            f"Overwrote {plugin_name} from {repo}/{filen}")
-                    plugins.update({
-                        plugin_name: (raw_pattern.format(repo, filen), filen)
-                    })
+                        LOGGER.debug(f"Overwrote {plugin_name} from {repo}/{filen}")
+                    plugins.update(
+                        {plugin_name: (raw_pattern.format(repo, filen), filen)}
+                    )
                     LOGGER.debug(f"Found {plugin} in {repo}/{filen}!")
 
-        with open(rconfig_path, 'w') as configfile:
+        with open(rconfig_path, "w") as configfile:
             rconfig.write(configfile)
 
         return plugins, helpers
@@ -306,7 +305,7 @@ class PluginManager:
         """Import file and bytecode plugins."""
         to_overwrite: Union[None, str] = None
         callbacks: List[Callback] = []
-        ppath = self.plugin_path.absolute() / name.replace('.', '/') / '.py'
+        ppath = self.plugin_path.absolute() / name.replace(".", "/") / ".py"
         ubotpath = "userbot.plugins." + name
         log = "Successfully imported {}".format(name)
 
@@ -319,11 +318,9 @@ class PluginManager:
 
         try:
             if content:
-                spec = importlib.machinery.ModuleSpec(path,
-                                                      SourcelessPluginLoader(
-                                                          ubotpath, content,
-                                                          path),
-                                                      origin=path)
+                spec = importlib.machinery.ModuleSpec(
+                    path, SourcelessPluginLoader(ubotpath, content, path), origin=path
+                )
                 match = github_raw_pattern.search(path)
                 log += " from {}".format(match.group(1))
             else:
@@ -336,7 +333,7 @@ class PluginManager:
             sys.modules[ubotpath] = module
 
             for n, cb in vars(module).items():
-                if inspect.iscoroutinefunction(cb) and not n.startswith('_'):
+                if inspect.iscoroutinefunction(cb) and not n.startswith("_"):
                     if events._get_handlers(cb):
                         callbacks.append(Callback(n, cb))
 
@@ -344,14 +341,13 @@ class PluginManager:
             LOGGER.info(log)
         except Exception as e:
             self.client.failed_imports.append(path)
-            LOGGER.error("Failed to import %s due to the error(s) below.",
-                         path)
+            LOGGER.error("Failed to import %s due to the error(s) below.", path)
             LOGGER.exception(e)
 
     def _import_helper(self, name: str, path: str, content: str) -> None:
         """Import file and bytecode plugins."""
         ubotpath = "userbot." + name
-        ppath = root / (ubotpath.replace('.', '/') + '.py')
+        ppath = root / (ubotpath.replace(".", "/") + ".py")
         match = github_raw_pattern.search(path).group(1)
         log = "Successfully imported helper {} from {}".format(name, match)
         if ppath.exists():
@@ -359,10 +355,9 @@ class PluginManager:
             return
 
         try:
-            spec = importlib.machinery.ModuleSpec(path,
-                                                  SourcelessPluginLoader(
-                                                      ubotpath, content, path),
-                                                  origin=path)
+            spec = importlib.machinery.ModuleSpec(
+                path, SourcelessPluginLoader(ubotpath, content, path), origin=path
+            )
 
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
@@ -371,8 +366,7 @@ class PluginManager:
             LOGGER.info(log)
         except Exception as e:
             self.client.failed_imports.append(path)
-            LOGGER.error("Failed to import %s due to the error(s) below.",
-                         path)
+            LOGGER.error("Failed to import %s due to the error(s) below.", path)
             LOGGER.exception(e)
 
 
@@ -391,34 +385,36 @@ async def get_pip_packages(requirements: str = None) -> list:
     else:
         python = sys.executable
         cmd = await asyncio.create_subprocess_exec(
-            sys.executable.replace(' ', '\\ '),
-            '-m',
-            'pip',
-            'freeze',
+            sys.executable.replace(" ", "\\ "),
+            "-m",
+            "pip",
+            "freeze",
             stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE)
+            stderr=asyncio.subprocess.PIPE,
+        )
         stdout, _ = await cmd.communicate()
-        packages = stdout.decode('utf-8')
+        packages = stdout.decode("utf-8")
     tmp = package_patern.findall(packages)
     return [package.lower() for package in tmp]
 
 
 async def install_pip_packages(packages: List[str]) -> bool:
     """Install pip packages."""
-    args = args = ['-m', 'pip', 'install', '--upgrade', '--user']
-    cmd = await asyncio.create_subprocess_exec(sys.executable.replace(
-        ' ', '\\ '),
-                                               *args,
-                                               *packages,
-                                               stdout=asyncio.subprocess.PIPE,
-                                               stderr=asyncio.subprocess.PIPE)
+    args = args = ["-m", "pip", "install", "--upgrade", "--user"]
+    cmd = await asyncio.create_subprocess_exec(
+        sys.executable.replace(" ", "\\ "),
+        *args,
+        *packages,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
     await cmd.communicate()
     return True if cmd.returncode == 0 else False
 
 
 def run_async(func: callable):
     """Run async functions with the right event loop."""
-    if sys.platform.startswith('win'):
+    if sys.platform.startswith("win"):
         loop = asyncio.ProactorEventLoop()
     else:
         loop = asyncio.get_event_loop()
@@ -427,9 +423,9 @@ def run_async(func: callable):
 
 def restart_script() -> None:
     """Restart the current script."""
-    executable = sys.executable.replace(' ', '\\ ')
-    args = [executable, '-m', 'userbot']
-    if sys.platform.startswith('win'):
+    executable = sys.executable.replace(" ", "\\ ")
+    args = [executable, "-m", "userbot"]
+    if sys.platform.startswith("win"):
         os.spawnle(os.P_NOWAIT, executable, *args, os.environ)
     else:
         os.execle(executable, *args, os.environ)

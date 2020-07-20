@@ -26,9 +26,9 @@ from userbot.utils.events import NewMessage
 plugin_category = "terminal"
 
 
-@client.onMessage(command=("eval", plugin_category),
-                  outgoing=True,
-                  regex=r"eval(?: |$|\n)([\s\S]*)")
+@client.onMessage(
+    command=("eval", plugin_category), outgoing=True, regex=r"eval(?: |$|\n)([\s\S]*)"
+)
 async def evaluate(event: NewMessage.Event) -> None:
     """Evaluate Python expressions in the running script."""
     expression = event.matches[0].group(1).strip()
@@ -38,19 +38,16 @@ async def evaluate(event: NewMessage.Event) -> None:
         return
 
     try:
-        result = await meval(expression,
-                             globals(),
-                             client=client,
-                             event=event,
-                             reply=reply)
+        result = await meval(
+            expression, globals(), client=client, event=event, reply=reply
+        )
     except Exception as e:
-        await event.answer(f"```{await client.get_traceback(e)}```",
-                           reply=True)
+        await event.answer(f"```{await client.get_traceback(e)}```", reply=True)
         return
 
     extra = await get_chat_link(event, event.id)
     if result:
-        if hasattr(result, 'stringify'):
+        if hasattr(result, "stringify"):
             if inspect.isawaitable(result):
                 result = await result.stringify()
             else:
@@ -59,12 +56,13 @@ async def evaluate(event: NewMessage.Event) -> None:
     await event.answer(
         "```" + result + "```",
         log=("eval", f"Successfully evaluated {expression} in {extra}!"),
-        reply=True)
+        reply=True,
+    )
 
 
-@client.onMessage(command=("exec", plugin_category),
-                  outgoing=True,
-                  regex=r"exec(?: |$|\n)([\s\S]*)")
+@client.onMessage(
+    command=("exec", plugin_category), outgoing=True, regex=r"exec(?: |$|\n)([\s\S]*)"
+)
 async def execute(event: NewMessage.Event) -> None:
     """Execute Python statements in a subprocess."""
     statement = event.matches[0].group(1).strip()
@@ -74,32 +72,27 @@ async def execute(event: NewMessage.Event) -> None:
         return
 
     try:
-        await meval(statement,
-                    globals(),
-                    client=client,
-                    event=event,
-                    reply=reply)
+        await meval(statement, globals(), client=client, event=event, reply=reply)
     except Exception as e:
-        await event.answer(f"```{await client.get_traceback(e)}```",
-                           reply=True)
+        await event.answer(f"```{await client.get_traceback(e)}```", reply=True)
         return
 
     extra = await get_chat_link(event, event.id)
-    await event.answer("`Success?`",
-                       log=("exec",
-                            f"Successfully executed {statement} in {extra}!"),
-                       reply=True)
+    await event.answer(
+        "`Success?`",
+        log=("exec", f"Successfully executed {statement} in {extra}!"),
+        reply=True,
+    )
 
 
-@client.onMessage(command=("term", plugin_category),
-                  outgoing=True,
-                  regex=r"term(?: |$|\n)([\s\S]*)")
+@client.onMessage(
+    command=("term", plugin_category), outgoing=True, regex=r"term(?: |$|\n)([\s\S]*)"
+)
 async def terminal(event: NewMessage.Event) -> None:
     """Execute terminal commands in a subprocess."""
-    message = (str(event.chat_id) + ':' + str(event.message.id))
+    message = str(event.chat_id) + ":" + str(event.message.id)
     if client.running_processes.get(message, False):
-        await event.answer("A process for this event is already running!",
-                           reply=True)
+        await event.answer("A process for this event is already running!", reply=True)
         return
 
     cmd = event.matches[0].group(1).strip()
@@ -108,7 +101,8 @@ async def terminal(event: NewMessage.Event) -> None:
         return
 
     process = await asyncio.create_subprocess_shell(
-        cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+        cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+    )
 
     client.running_processes.update({message: process})
     stdout, stderr = await process.communicate()
@@ -122,14 +116,15 @@ async def terminal(event: NewMessage.Event) -> None:
     if stdout:
         text += "\n[stdout]\n" + stdout.decode("UTF-8").strip() + "\n"
     if stderr:
-        text += "\n[stderr]\n" + stderr.decode('UTF-8').strip() + "\n"
+        text += "\n[stderr]\n" + stderr.decode("UTF-8").strip() + "\n"
 
     extra = await get_chat_link(event, event.id)
     if stdout or stderr:
-        await event.answer("```" + text + "```",
-                           log=("term",
-                                f"Successfully executed {cmd} in {extra}!"),
-                           reply=True)
+        await event.answer(
+            "```" + text + "```",
+            log=("term", f"Successfully executed {cmd} in {extra}!"),
+            reply=True,
+        )
     else:
         await event.answer("Nice, get off the void.\nNo output for you.")
 
@@ -142,12 +137,11 @@ async def terminal(event: NewMessage.Event) -> None:
 async def killandterminate(event: NewMessage.Event) -> None:
     """Kill or terminate a running subprocess."""
     if not event.reply_to_msg_id:
-        await event.answer(
-            "`Reply to a message to kill or terminate the process!`")
+        await event.answer("`Reply to a message to kill or terminate the process!`")
         return
 
     reply = await event.get_reply_message()
-    message = (str(reply.chat_id) + ':' + str(reply.id))
+    message = str(reply.chat_id) + ":" + str(reply.id)
     running_process = client.running_processes.get(message, False)
 
     if running_process:
@@ -167,6 +161,7 @@ async def killandterminate(event: NewMessage.Event) -> None:
             f"`Successfully {option}ed the process.`",
             log=(option, f"Successfully {option}ed a process in {extra}!"),
             self_destruct=2,
-            reply=True)
+            reply=True,
+        )
     else:
         await event.answer("`There is no process running for this message.`")
