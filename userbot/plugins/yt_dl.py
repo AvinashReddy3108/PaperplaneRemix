@@ -47,7 +47,8 @@ ydl_opts = {
     "logtostderr": False,
     "quiet": True,
     "addmetadata": True,
-    "write_all_thumbnails": True,
+    "embedthumbnail": True,
+    "writethumbnail": True,
     "ignoreerrors": False,
     "noplaylist": True,
 }
@@ -167,8 +168,8 @@ async def yt_dl(event):
             await event.answer("`Oh oh, some thing went wrong!`")
             return
         else:
+            path, thumb, info = output
             if upload:
-                path, thumb, info = output
                 title = info.get("title", info.get("id", "Unknown title"))
                 url = info.get("webpage_url", None)
                 href = f"[{title}]({url})"
