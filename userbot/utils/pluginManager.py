@@ -400,7 +400,7 @@ async def get_pip_packages(requirements: str = None) -> list:
 
 async def install_pip_packages(packages: List[str]) -> bool:
     """Install pip packages."""
-    args = args = ["-m", "pip", "install", "--upgrade", "--user"]
+    args = ["-m", "pip", "install", "--upgrade", "--user"]
     cmd = await asyncio.create_subprocess_exec(
         sys.executable.replace(" ", "\\ "),
         *args,

@@ -57,7 +57,7 @@ async def updater(event: NewMessage.Event) -> None:
         )
         repo.__del__()
         return
-    except git.exc.InvalidGitRepositoryError or arg == "force":
+    except git.exc.InvalidGitRepositoryError:
         repo = git.Repo.init(basedir)
         origin = repo.create_remote("origin", main_repo)
         if not origin.exists():
