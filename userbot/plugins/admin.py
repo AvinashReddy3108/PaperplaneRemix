@@ -43,8 +43,7 @@ async def promote(event: NewMessage.Event) -> None:
     args, kwargs = await client.parse_arguments(match)
     reason = kwargs.get("reason", None)
     title = kwargs.get("title", None)
-    skipped = []
-    promoted = []
+    promoted, skipped = [], []
 
     if not args and event.reply_to_msg_id:
         reply = await event.get_reply_message()
@@ -98,8 +97,7 @@ async def demote(event: NewMessage.Event) -> None:
     match = event.matches[0].group(1)
     args, kwargs = await client.parse_arguments(match)
     reason = kwargs.get("reason", None)
-    skipped = []
-    demoted = []
+    demoted, skipped = [], []
 
     if not args and event.reply_to_msg_id:
         reply = await event.get_reply_message()
@@ -149,8 +147,7 @@ async def ban(event: NewMessage.Event) -> None:
     match = event.matches[0].group(1)
     args, kwargs = await client.parse_arguments(match)
     reason = kwargs.get("reason", None)
-    skipped = []
-    banned = []
+    banned, skipped = [], []
 
     if not args and event.reply_to_msg_id:
         reply = await event.get_reply_message()
@@ -200,8 +197,7 @@ async def unban(event: NewMessage.Event) -> None:
     match = event.matches[0].group(1)
     args, kwargs = await client.parse_arguments(match)
     reason = kwargs.get("reason", None)
-    skipped = []
-    unbanned = []
+    unbanned, skipped = [], []
 
     if not args and event.reply_to_msg_id:
         reply = await event.get_reply_message()
@@ -262,8 +258,7 @@ async def kick(event: NewMessage.Event) -> None:
     match = event.matches[0].group(1)
     args, kwargs = await client.parse_arguments(match)
     reason = kwargs.get("reason", None)
-    skipped = []
-    kicked = []
+    kicked, skipped = [], []
 
     if not args and event.reply_to_msg_id:
         reply = await event.get_reply_message()
@@ -313,8 +308,7 @@ async def mute(event: NewMessage.Event) -> None:
     match = event.matches[0].group(1)
     args, kwargs = await client.parse_arguments(match)
     reason = kwargs.get("reason", None)
-    skipped = []
-    muted = []
+    muted, skipped = [], []
 
     if not args and event.reply_to_msg_id:
         reply = await event.get_reply_message()
@@ -364,8 +358,7 @@ async def unmute(event: NewMessage.Event) -> None:
     match = event.matches[0].group(1)
     args, kwargs = await client.parse_arguments(match)
     reason = kwargs.get("reason", None)
-    skipped = []
-    unmuted = []
+    unmuted, skipped = [], []
 
     if not args and event.reply_to_msg_id:
         reply = await event.get_reply_message()
@@ -420,8 +413,7 @@ async def tmute(event: NewMessage.Event) -> None:
         await event.answer("`Specify the time by using time=<n>`")
         return
     period = await string_to_secs(period)
-    skipped = []
-    unmuted = []
+    tmuted, skipped = [], []
 
     if not args and event.reply_to_msg_id:
         reply = await event.get_reply_message()
@@ -444,9 +436,9 @@ async def tmute(event: NewMessage.Event) -> None:
             unmuted.append(user)
         except Exception:
             skipped.append(user)
-    if unmuted:
+    if tmuted:
         text = f"`Successfully tmuted:`\n"
-        text += ", ".join((f"`{x}`" for x in unmuted))
+        text += ", ".join((f"`{x}`" for x in tmuted))
         text += f"\n`Time:` `{await _humanfriendly_seconds(period)}`"
         if reason:
             text += f"\n`Reason:` `{reason}`"
@@ -482,8 +474,7 @@ async def tban(event: NewMessage.Event) -> None:
         await event.answer("`Specify the time by using time=<n>`")
         return
     period = await string_to_secs(period)
-    skipped = []
-    banned = []
+    tbanned, skipped = [], []
 
     if not args and event.reply_to_msg_id:
         reply = await event.get_reply_message()
@@ -506,9 +497,9 @@ async def tban(event: NewMessage.Event) -> None:
             banned.append(user)
         except Exception:
             skipped.append(user)
-    if banned:
+    if tbanned:
         text = f"`Successfully tbanned:`\n"
-        text += ", ".join((f"`{x}`" for x in banned))
+        text += ", ".join((f"`{x}`" for x in tbanned))
         text += f"\n`Time:` `{await _humanfriendly_seconds(period)}`"
         if reason:
             text += f"\n`Reason:` `{reason}`"
@@ -536,7 +527,7 @@ async def pin(event: NewMessage.Event) -> None:
         await event.answer("`You can't pin messages in private chats.`")
         return
 
-    pinned = None
+    pinned = False
     notify = True if event.matches[0].group(1) else False
 
     if not event.reply_to_msg_id:
@@ -572,7 +563,7 @@ async def get_rights(
     pin_messages: bool = False,
     add_admins: bool = False,
 ) -> bool:
-    """Return a bool according the required rights"""
+    """Return a bool according the required admin rights"""
     chat = await event.get_chat()
     if chat.creator:
         return True
