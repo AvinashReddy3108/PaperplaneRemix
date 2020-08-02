@@ -874,19 +874,23 @@ async def mamma_mia(event: NewMessage.Event) -> None:
 @client.onMessage(outgoing=True, regex="^Ooof$", disable_prefix=True)
 async def oof(event: NewMessage.Event) -> None:
     """Big Oooooof."""
-    await event.answer("Oooo" + "o" * random.randint(5, 10) + "f")
+    await event.answer("__Oooo" + "o" * random.randint(5, 10) + "f__")
 
 
 @client.onMessage(outgoing=True, regex="^-__-$", disable_prefix=True)
 async def okay(event: NewMessage.Event) -> None:
     """Ok......"""
-    await event.answer("-___" + "_" * random.randint(5, 10) + "-", parse_mode="html")
+    await event.answer(
+        "<code>-___" + "_" * random.randint(5, 10) + "-</code>", parse_mode="html"
+    )
 
 
 @client.onMessage(outgoing=True, regex="^;__;$", disable_prefix=True)
 async def crai(event: NewMessage.Event) -> None:
     """crai :("""
-    await event.answer(";___" + "_" * random.randint(5, 10) + ";", parse_mode="html")
+    await event.answer(
+        "<code>;___" + "_" * random.randint(5, 10) + ";</code>", parse_mode="html"
+    )
 
 
 def isEmoji(inputString: str) -> bool:

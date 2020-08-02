@@ -135,7 +135,7 @@ async def urban_dict(event: NewMessage.Event) -> None:
     ) as error:
         await event.answer(f"**Error:**\n`{error}`")
         return
-    await event.answer(f"**Text:** `{query}`\n\n**Result:**\n__{result}")
+    await event.answer(f"**Text:** `{query}`\n\n**Result:**\n__{result}__")
 
 
 async def _sub_shell(cmd: str) -> Tuple[str, str]:

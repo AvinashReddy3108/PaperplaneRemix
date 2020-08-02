@@ -34,7 +34,7 @@ async def evaluate(event: NewMessage.Event) -> None:
     expression = event.matches[0].group(1).strip()
     reply = await event.get_reply_message()
     if not expression:
-        await event.answer("__Evaluated the void.__")
+        await event.answer("`Evaluated the void.`")
         return
 
     try:
@@ -68,7 +68,7 @@ async def execute(event: NewMessage.Event) -> None:
     statement = event.matches[0].group(1).strip()
     reply = await event.get_reply_message()
     if not statement:
-        await event.answer("__Executed the void.__")
+        await event.answer("`Executed the void.`")
         return
 
     try:
@@ -97,7 +97,7 @@ async def terminal(event: NewMessage.Event) -> None:
 
     cmd = event.matches[0].group(1).strip()
     if not cmd:
-        await event.answer("Executed the void.")
+        await event.answer("`Executed the void.`")
         return
 
     process = await asyncio.create_subprocess_shell(
@@ -126,7 +126,7 @@ async def terminal(event: NewMessage.Event) -> None:
             reply=True,
         )
     else:
-        await event.answer("Nice, get off the void.\nNo output for you.")
+        await event.answer("`Nice, get off the void.\nNo output for you!`")
 
 
 @client.onMessage(
