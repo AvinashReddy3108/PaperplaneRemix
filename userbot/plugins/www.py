@@ -49,7 +49,12 @@ upload = "`Upload: %0.2f %s%s/s`"
     command=("nearestdc", plugin_category), outgoing=True, regex="nearestdc$"
 )
 async def nearestdc(event: NewMessage.Event) -> None:
-    """Get information of your country and data center information."""
+    """
+    Get information of your country and data center information.
+
+
+    `{prefix}nearestdc`
+    """
     result = await client(functions.help.GetNearestDcRequest())
     text = (
         f"**Country:** `{result.country}`\n"
@@ -63,7 +68,13 @@ async def nearestdc(event: NewMessage.Event) -> None:
     command=("pingdc", plugin_category), outgoing=True, regex=r"pingdc(?: |$)(\d+)?"
 )
 async def pingdc(event: NewMessage.Event) -> None:
-    """Ping your or other data center's IP addresses."""
+    """
+    Ping your or other data center's IP addresses.
+
+
+    `{prefix}pingdc` or **{prefix}pingdc (1|2|3|4|5)**
+        This might not work if your connection blocks the requests
+    """
     if event.matches[0].group(1) in ("1", "2", "3", "4", "5"):
         dc = int(event.matches[0].group(1))
     else:
@@ -95,7 +106,12 @@ async def pingdc(event: NewMessage.Event) -> None:
     regex=r"speedtest(?: |$)(bit|byte)?s?$",
 )
 async def speedtest(event: NewMessage.Event) -> None:
-    """Perform a speedtest with the best available server based on ping."""
+    """
+    Perform a speedtest with the best available server based on ping.
+
+
+    `{prefix}speedtest` of **{prefix}speedtest (bits|bytes)**
+    """
     unit = ("bit", 1)
     arg = event.matches[0].group(1)
     if arg and arg.lower() == "byte":
@@ -125,7 +141,11 @@ async def speedtest(event: NewMessage.Event) -> None:
     command=("wiki", plugin_category), outgoing=True, regex="(wk|wiki)(?: |$|\n)(.*)"
 )
 async def urban_dict(event: NewMessage.Event) -> None:
-    """Searches Wikipedia for the given text."""
+    """
+    Searches Wikipedia for the given text.
+
+
+    `{prefix}wiki Wikipedia`"""
     query = event.matches[0].group(2)
     try:
         result = await _run_sync(functools.partial(wikipedia.summary, query))

@@ -14,9 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
+
 from userbot import client
 from userbot.utils.helpers import get_chat_link
 from userbot.utils.events import NewMessage
+
 
 plugin_category = "user"
 
@@ -28,7 +30,14 @@ plugin_category = "user"
     regex=r"purge(?: |$)(.*)",
 )
 async def purge(event: NewMessage.Event) -> None:
-    """Delete (AKA purge) multiple messages from a chat all together."""
+    """
+    Delete (AKA purge) multiple messages from a chat all together.
+
+
+    `{prefix}purge` or **{prefix}purge [kwargs]**
+        **Arguments:** `amount` and `skip`
+        **Example:** `{prefix}purge amount=10 skip=2`
+    """
     if (event.is_channel or event.is_group) and not (
         event.chat.creator or event.chat.admin_rights.delete_messages
     ):
@@ -53,6 +62,7 @@ async def purge(event: NewMessage.Event) -> None:
         reverse=reverse,
     )
     messages = messages[skip:]
+
     await client.delete_messages(entity, messages)
     extra = await get_chat_link(entity)
     await event.answer(
@@ -66,7 +76,14 @@ async def purge(event: NewMessage.Event) -> None:
     command=("delme", plugin_category), outgoing=True, regex=r"delme(?: |$)(.*)"
 )
 async def delme(event: NewMessage.Event) -> None:
-    """Delete YOUR messages in a chat. Similar to purge's logic."""
+    """
+    Delete YOUR messages in a chat. Similar to purge's logic.
+
+
+    `{prefix}delme` or **{prefix}delme [kwargs]**
+        **Arguments:** `amount` and `skip`
+        **Example:** `{prefix}delme amount=10 skip=2`
+    """
     entity = await event.get_chat()
     _, kwargs = await client.parse_arguments(event.matches[0].group(1) or "")
     amount = kwargs.get("amount", None)
@@ -85,18 +102,21 @@ async def delme(event: NewMessage.Event) -> None:
         from_user="me",
     )
     messages = messages[skip:]
+
     await client.delete_messages(entity, messages)
-    extra = await get_chat_link(entity)
     await event.answer(
-        f"`Successfully deleted {len(messages)} message(s)!`",
-        self_destruct=2,
-        log=("delme", f"Purged {len(messages)} of my message(s) in {extra}"),
+        f"`Successfully deleted {len(messages)} message(s)!`", self_destruct=2,
     )
 
 
 @client.onMessage(command="del", outgoing=True, regex=r"del$")
 async def delete(event: NewMessage.Event) -> None:
-    """Delete your or other's replied to message."""
+    """
+    Delete your or other's replied to message.
+
+
+    `{prefix}del` in reply to your message
+    """
     reply = await event.get_reply_message()
     if not reply:
         await event.answer("`There's nothing for me to delete!`")

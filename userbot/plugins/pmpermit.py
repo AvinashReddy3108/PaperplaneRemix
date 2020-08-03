@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
+
 import datetime
 import dill
 import re
@@ -24,6 +25,7 @@ from telethon.tl import functions, types
 from userbot import client
 from userbot.utils.helpers import get_chat_link
 from userbot.utils.events import NewMessage
+
 
 plugin_category = "pmpermit"
 PM_PERMIT = client.config["userbot"].getboolean("pm_permit", False)
@@ -203,7 +205,12 @@ async def pm_outgoing(event: NewMessage.Event) -> None:
     command=("approve", plugin_category), outgoing=True, regex=r"approve(?: |$)(.+)?$"
 )
 async def approve(event: NewMessage.Event) -> None:
-    """Approve an user for PM-Permit."""
+    """
+    Approve an user for PM-Permit.
+
+
+    **{prefix}approve [user1] .. [user n]** in reply to a user/chat
+    """
     if not PM_PERMIT or not redis:
         await event.answer("PM-Permit is disabled.")
         return
@@ -245,7 +252,12 @@ async def approve(event: NewMessage.Event) -> None:
     regex=r"(?:un|dis)approve(?: |$)(.+)?$",
 )
 async def disapprove(event: NewMessage.Event) -> None:
-    """Disapprove an user for PM-Permit."""
+    """
+    Disapprove an user for PM-Permit.
+
+
+    **{prefix}unapprove [user1] .. [user n]** in reply to a user/chat
+    """
     if not PM_PERMIT or not redis:
         await event.answer("PM-Permit is disabled.")
         return
@@ -274,7 +286,12 @@ async def disapprove(event: NewMessage.Event) -> None:
     command=("block", plugin_category), outgoing=True, regex=r"block(?: |$)(.+)?$"
 )
 async def block(event: NewMessage.Event) -> None:
-    """Block an user and remove them from approved users."""
+    """
+    Block an user and remove them from approved users.
+
+
+    **{prefix}block [user1] .. [user n]** in reply to a user/chat
+    """
     users = await get_users(event)
     blocked = []
     skipped = []
@@ -306,7 +323,12 @@ async def block(event: NewMessage.Event) -> None:
     command=("unblock", plugin_category), outgoing=True, regex=r"unblock(?: |$)(.+)?$"
 )
 async def unblock(event: NewMessage.Event) -> None:
-    """Unblock an user."""
+    """
+    Unblock an user.
+
+
+    **{prefix}unblock [user1] .. [user n]** in reply to a user/chat
+    """
     users = await get_users(event)
     unblocked = []
     skipped = []
@@ -334,7 +356,12 @@ async def unblock(event: NewMessage.Event) -> None:
     command=("approved", plugin_category), outgoing=True, regex=r"approved$"
 )
 async def approved(event: NewMessage.Event) -> None:
-    """Get a list of all the approved users for PM-Permit."""
+    """
+    Get a list of all the approved users for PM-Permit.
+
+
+    `{prefix}approved`
+    """
     if approvedUsers:
         text = "**Approved users:**\n"
         text += ", ".join([f"`{i}`" for i in approvedUsers])
@@ -345,7 +372,7 @@ async def approved(event: NewMessage.Event) -> None:
 
 async def get_users(event: NewMessage.Event) -> types.User or None:
     match = event.matches[0].group(1)
-    user = []
+    users = []
     if match:
         matches, _ = await client.parse_arguments(match)
         for match in matches:
@@ -359,7 +386,7 @@ async def get_users(event: NewMessage.Event) -> types.User or None:
         users = [await event.get_chat()]
     elif event.reply_to_msg_id:
         reply = await event.get_reply_message()
-        user = [await reply.get_sender()]
+        users = [await reply.get_sender()]
     return users
 
 

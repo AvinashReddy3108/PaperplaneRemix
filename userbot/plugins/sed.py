@@ -51,7 +51,15 @@ ninja_sedbots = ["regexbot", "regeexbot"]
     regex=(pattern, re.MULTILINE | re.IGNORECASE | re.DOTALL),
 )
 async def sed_substitute(event: NewMessage.Event) -> None:
-    """Perfom a GNU like SED substitution of the matched text."""
+    """
+    Perfom a GNU like SED substitution of the matched text.
+
+
+    **{prefix}[line]s[ed]/(expression)/(substitution)/[flags][;]**
+        Everything inside the brackets is optional.
+        You can perform case conversions in the substitution as well.
+        The semi-colon is mandatory to perform multiple subs in one go.
+    """
     matches = event.matches
     reply = await event.get_reply_message()
 
@@ -63,7 +71,7 @@ async def sed_substitute(event: NewMessage.Event) -> None:
 
             newStr = await sub_matches(matches, original.text)
             if newStr:
-                await original.reply("**「sed」**\n\n" + newStr)
+                await original.reply("**SED**:\n\n" + newStr)
         else:
             total_messages = []  # Append messages to avoid timeouts
             count = 0  # Don't fetch more than ten texts/captions
@@ -82,7 +90,7 @@ async def sed_substitute(event: NewMessage.Event) -> None:
             for message in total_messages:
                 newStr = await sub_matches(matches, message.text)
                 if newStr:
-                    await message.reply("**「sed」**\n\n" + newStr)
+                    await message.reply("**SED**\n\n" + newStr)
                     break
     except Exception as e:
         await event.answer(
@@ -125,9 +133,9 @@ async def regex_ninja(event: NewMessage.Event) -> None:
     client._updateconfig()
 
     await event.answer(
-        f"`Successfully {value} ninja mode for @regexbot!`",
+        f"`Successfully {value} ninja mode for sed bots!`",
         self_destruct=2,
-        log=("regexninja", f"{value.title()} ninja mode for @regexbot!"),
+        log=("regexninja", f"{value.title()} ninja mode for sed bots!"),
     )
 
 

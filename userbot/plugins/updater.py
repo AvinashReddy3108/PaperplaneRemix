@@ -41,7 +41,13 @@ main_repo = "https://github.com/AvinashReddy3108/PaperplaneRemix.git"
     command="update", outgoing=True, regex="update(?: |$)(reset|add)?$", builtin=True
 )
 async def updater(event: NewMessage.Event) -> None:
-    """Pull newest changes from the official repo and update the script/app."""
+    """
+    Pull newest changes from the official repo and update the script/app.
+
+
+    `{prefix}update` or `{prefix}update reset` or `{prefix}update add`
+        Reset will reset the repository and add will commit your changes.
+    """
     arg = event.matches[0].group(1)
     await event.answer("`Checking for updates!`")
     try:

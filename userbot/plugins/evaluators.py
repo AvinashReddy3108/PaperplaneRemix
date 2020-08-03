@@ -30,7 +30,13 @@ plugin_category = "terminal"
     command=("eval", plugin_category), outgoing=True, regex=r"eval(?: |$|\n)([\s\S]*)"
 )
 async def evaluate(event: NewMessage.Event) -> None:
-    """Evaluate Python expressions in the running script."""
+    """
+    Evaluate Python expressions in the running script.
+
+
+    **{prefix}eval (expression)**
+        **Example:** `{prefix}eval 1+1`
+    """
     expression = event.matches[0].group(1).strip()
     reply = await event.get_reply_message()
     if not expression:
@@ -64,7 +70,13 @@ async def evaluate(event: NewMessage.Event) -> None:
     command=("exec", plugin_category), outgoing=True, regex=r"exec(?: |$|\n)([\s\S]*)"
 )
 async def execute(event: NewMessage.Event) -> None:
-    """Execute Python statements in a subprocess."""
+    """
+    Execute Python statements in a subprocess.
+
+
+    **{prefix}exec (statement)**
+        **Example:** `{prefix}exec import os; os.system('clear')`
+    """
     statement = event.matches[0].group(1).strip()
     reply = await event.get_reply_message()
     if not statement:
@@ -89,7 +101,13 @@ async def execute(event: NewMessage.Event) -> None:
     command=("term", plugin_category), outgoing=True, regex=r"term(?: |$|\n)([\s\S]*)"
 )
 async def terminal(event: NewMessage.Event) -> None:
-    """Execute terminal commands in a subprocess."""
+    """
+    Execute terminal commands in a subprocess.
+
+
+    **{prefix}term (command)**
+        **Example:** `{prefix}term echo 123`
+    """
     message = str(event.chat_id) + ":" + str(event.message.id)
     if client.running_processes.get(message, False):
         await event.answer("A process for this event is already running!", reply=True)
@@ -135,7 +153,12 @@ async def terminal(event: NewMessage.Event) -> None:
     regex=r"(kill|terminate)$",
 )
 async def killandterminate(event: NewMessage.Event) -> None:
-    """Kill or terminate a running subprocess."""
+    """
+    Kill or terminate a running subprocess by replying to the message.
+
+
+    `{prefix}kill` or `{prefix}terminate`
+    """
     if not event.reply_to_msg_id:
         await event.answer("`Reply to a message to kill or terminate the process!`")
         return

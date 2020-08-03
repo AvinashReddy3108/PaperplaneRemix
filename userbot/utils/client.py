@@ -105,7 +105,7 @@ class UserBotClient(TelegramClient):
                     func,
                     handlers,
                     comInfo.format(**doc_args).strip(),
-                    comUsage.strip(),
+                    comUsage.format(**doc_args).strip(),
                     builtin,
                 )
                 category = category.lower()

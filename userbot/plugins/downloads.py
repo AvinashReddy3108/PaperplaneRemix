@@ -35,7 +35,12 @@ NAME = "untitled"
     regex=r"d(own)?l(oad)?(?: |$)(.+)?$",
 )
 async def download(event: NewMessage.Event) -> None:
-    """Download documents from Telegram."""
+    """
+    Download documents from Telegram.
+
+
+    `{prefix}download` or `{prefix}dl` or **{prefix}download (path)**
+    """
     name = NAME
     path = None
     match = event.matches[0].group(3)
@@ -99,7 +104,12 @@ async def download(event: NewMessage.Event) -> None:
     regex=r"u(p)?l(oad)?(?: |$)(.+)?$",
 )
 async def upload(event: NewMessage.Event) -> None:
-    """Upload media to Telegram."""
+    """
+    Upload media to Telegram.
+
+
+    **{prefix}upload (path)** or **{prefix}ul (path)**
+    """
     match = event.matches[0].group(3)
     target_files = []
     if not match:

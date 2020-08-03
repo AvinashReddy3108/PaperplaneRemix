@@ -38,8 +38,8 @@ AFK.groups = plugins_data.load_data("userbot_afk_groups")
 AFK.sent = plugins_data.load_data("userbot_afk_sent")
 
 going_afk = "`AFK AF!`"
-going_afk_reason = going_afk + "\n**Reason:** __{reason}.__"
-not_afk = "`I am no longer AFK!`"
+going_afk_reason = "`Going AFK, BRB!`" + "\n**Reason:** __{reason}.__"
+not_afk = "`I'm back!`"
 currently_afk_reason = "`I am currently AFK!`\
     \n**Last seen:** __{elapsed} ago.__\
     \n**Reason:** __{reason}.__"
@@ -75,7 +75,13 @@ AFKMEMEZ = [
 
 @client.onMessage(command="afk", outgoing=True, regex="afk(?: |$)(.*)?$")
 async def awayfromkeyboard(event: NewMessage.Event) -> None:
-    """Set your status as AFK until you send a message again."""
+    """
+    Set your status as AFK until you send a message again.
+
+
+    **{prefix}afk** or **{prefix}afk (reason)**
+        **Example:** `{prefix}afk` or `{prefix}afk sleeping`
+    """
     arg = event.matches[0].group(1)
     curtime = time.time().__str__()
     os.environ["userbot_afk"] = f"{curtime}/{event.chat_id}/{event.id}"

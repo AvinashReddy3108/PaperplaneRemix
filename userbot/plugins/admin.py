@@ -31,7 +31,13 @@ plugin_category = "admin"
     require_admin=True,
 )
 async def promote(event: NewMessage.Event) -> None:
-    """Promote a user in a group or channel."""
+    """
+    Promote a user in a group or channel.
+
+
+    `{prefix}promote` in reply or **{prefix}promote user1 user2 [kwargs]**
+        **Arguments:** `reason` and `title`
+    """
     if not event.is_private and not await get_rights(event, add_admins=True):
         await event.answer("`You do not have rights to add admins in here!`")
         return
@@ -86,7 +92,13 @@ async def promote(event: NewMessage.Event) -> None:
     require_admin=True,
 )
 async def demote(event: NewMessage.Event) -> None:
-    """Demote a user in a group or channel."""
+    """
+    Demote a user in a group or channel.
+
+
+    `{prefix}demote` in reply or **{prefix}demote user1 user2 [kwargs]**
+        **Arguments:** `reason`
+    """
     if not event.is_private and not await get_rights(event, ban_users=True):
         await event.answer("`You do not have rights to remove admins in here!`")
         return
@@ -136,7 +148,13 @@ async def demote(event: NewMessage.Event) -> None:
     require_admin=True,
 )
 async def ban(event: NewMessage.Event) -> None:
-    """Ban a user in a group or channel."""
+    """
+    Ban a user in a group or channel.
+
+
+    `{prefix}ban` in reply or **{prefix}ban user1 user2 [kwargs]**
+        **Arguments:** `reason`
+    """
     if not event.is_private and not await get_rights(event, ban_users=True):
         await event.answer("`You do not have rights to ban users in here!`")
         return
@@ -186,7 +204,13 @@ async def ban(event: NewMessage.Event) -> None:
     require_admin=True,
 )
 async def unban(event: NewMessage.Event) -> None:
-    """Un-ban a user in a group or channel."""
+    """
+    Un-ban a user in a group or channel.
+
+
+    `{prefix}unban` in reply or **{prefix}unban user1 user2 [kwargs]**
+        **Arguments:** `reason`
+    """
     if not event.is_private and not await get_rights(event, ban_users=True):
         await event.answer("`You do not have rights to un-ban users in here!`")
         return
@@ -247,7 +271,13 @@ async def unban(event: NewMessage.Event) -> None:
     require_admin=True,
 )
 async def kick(event: NewMessage.Event) -> None:
-    """Kick a user in a group or channel."""
+    """
+    Kick a user in a group or channel.
+
+
+    `{prefix}kick` in reply or **{prefix}kick user1 user2 [kwargs]**
+        **Arguments:** `reason`
+    """
     if not event.is_private and not await get_rights(event, ban_users=True):
         await event.answer("`You do not have rights to kick users in here!`")
         return
@@ -297,7 +327,13 @@ async def kick(event: NewMessage.Event) -> None:
     require_admin=True,
 )
 async def mute(event: NewMessage.Event) -> None:
-    """Mute a user in a group or channel."""
+    """
+    Mute a user in a group or channel.
+
+
+    `{prefix}mute` in reply or **{prefix}mute user1 user2 [kwargs]**
+        **Arguments:** `reason`
+    """
     if not event.is_private and not await get_rights(event, ban_users=True):
         await event.answer("`You do not have rights to mute users in here!`")
         return
@@ -347,7 +383,13 @@ async def mute(event: NewMessage.Event) -> None:
     require_admin=True,
 )
 async def unmute(event: NewMessage.Event) -> None:
-    """Un-mute a user in a group or channel."""
+    """
+    Un-mute a user in a group or channel.
+
+
+    `{prefix}unmute` in reply or **{prefix}unmute user1 user2 [kwargs]**
+        **Arguments:** `reason`
+    """
     if not event.is_private and not await get_rights(event, ban_users=True):
         await event.answer("`You do not have rights to un-mute users in here!`")
         return
@@ -397,7 +439,13 @@ async def unmute(event: NewMessage.Event) -> None:
     require_admin=True,
 )
 async def tmute(event: NewMessage.Event) -> None:
-    """Temporary mute a user in a group or channel."""
+    """
+    Temporary mute a user in a group or channel.
+
+
+    `{prefix}tmute` in reply or **{prefix}tmute user1 user2 [kwargs]**
+        **Arguments:** `reason` and `time`
+    """
     if not event.is_private and not await get_rights(event, ban_users=True):
         await event.answer("`You do not have rights to mute users in here!`")
         return
@@ -458,7 +506,13 @@ async def tmute(event: NewMessage.Event) -> None:
     require_admin=True,
 )
 async def tban(event: NewMessage.Event) -> None:
-    """Temporary ban a user in a group or channel."""
+    """
+    Temporary ban a user in a group or channel.
+
+
+    `{prefix}tban` in reply or **{prefix}tban user1 user2 [kwargs]**
+        **Arguments:** `reason` and `time`
+    """
     if not event.is_private and not await get_rights(event, ban_users=True):
         await event.answer("`You do not have rights to t-ban users in here!`")
         return

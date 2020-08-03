@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
+
 import datetime
 
 from userbot import client
@@ -21,16 +22,23 @@ from userbot.helper_funcs.time import string_to_secs
 from userbot.utils.helpers import _humanfriendly_seconds, get_chat_link
 from userbot.utils.events import NewMessage
 
+
 plugin_category = "user"
 
 
 @client.onMessage(
     command=("remindme/remindhere", plugin_category),
     outgoing=True,
-    regex=r"remind(me|here)(?: |$|\n)(\w+)?(?: |$)([\s\S]*)",
+    regex=r"remind(me|here)(?: |$)(\w+)?(?: |$|\n)([\s\S]*)",
 )
 async def remindme(event: NewMessage.Event) -> None:
-    """Set a reminder (scheduled message) to be sent in n amount of time."""
+    """
+    Set a reminder (scheduled message) to be sent in n amount of time.
+
+
+    **{prefix}remindme (time) (text)** or **{prefix}remindhere (time) (text)**
+        **Example:** **{prefix}remindme 2h gts**
+    """
     arg = event.matches[0].group(1)
     time = event.matches[0].group(2)
     text = event.matches[0].group(3)

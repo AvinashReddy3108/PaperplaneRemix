@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
+
 import aiohttp
 import asyncio
 import bs4
@@ -33,6 +34,7 @@ from userbot import client
 from userbot.utils.helpers import get_chat_link, is_ffmpeg_there
 from userbot.utils.events import NewMessage
 
+
 opener = urllib.request.build_opener()
 loop = client.loop
 light_useragent = """Mozilla/5.0 (Linux; Android 6.0.1; SM-G920V Build/\
@@ -47,7 +49,12 @@ AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36"""
 
 @client.onMessage(command="reverse", outgoing=True, regex=r"reverse(?: |$)(\d*)")
 async def reverse(event: NewMessage.Event) -> None:
-    """Reverse search supported media types on Google images."""
+    """
+    Reverse search supported media types on Google images.
+
+
+    `{prefix}reverse` in reply to a media or **{prefix}reverse (images)**
+    """
     reply = await event.get_reply_message()
     if reply and reply.media:
         ffmpeg = await is_ffmpeg_there()
@@ -175,8 +182,11 @@ async def _scrape_url(googleurl):
         "div", {"class": "rg-header V5niGc dPAwzb", "role": "heading"}
     )
     _matching = soup.find("div", {"id": "search"})
+    if _matching:
+        matching = _matching.find_all("div", {"class": "g"})
+    else:
+        matching = None
 
-    matching = _matching.find_all("div", {"class": "g"}) if _matching else None
     if best_guess:
         result["best_guess"] = best_guess.a.get_text()
 
