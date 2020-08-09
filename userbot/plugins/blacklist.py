@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
+
 import dill
 import io
 import re
@@ -26,6 +27,7 @@ from telethon.utils import get_display_name, resolve_invite_link
 from userbot import client, LOGGER
 from userbot.utils.events import NewMessage
 from userbot.plugins.plugins_data import Blacklist, GlobalBlacklist
+
 
 plugin_category = "blacklisting"
 redis = client.database
@@ -340,6 +342,8 @@ async def unblacklister(event: NewMessage.Event) -> None:
     args, kwargs = await client.parse_arguments(match)
     parsed = await get_values(args, kwargs)
     reason = kwargs.get("reason", None)
+    index = kwargs.get("index", None)
+    bltype = kwargs.get("type", None)
 
     if index and bltype:
         if glb:
@@ -774,7 +778,7 @@ async def listwls(event: NewMessage.Event) -> None:
         await event.answer(
             "`Invalid argument. Available options:`\n"
             "__user(s) or chat(s)__\n"
-            "ex: `.wls user=<123>` or `.wls chat=<456>`"
+            "ex: `.wls user=kandnub` or `.wls chat=tg_userbot_support`"
         )
         return
 
@@ -862,7 +866,7 @@ async def listbld(event: NewMessage.Event) -> None:
     doc = kwargs.get("file", None)
     option = args[0] if len(args) == 1 and isinstance(args[0], str) else None
 
-    if option and option.lower() not in ["txt", "tgid", "url"]:
+    if option and option.lower() not in ("txt", "tgid", "url", "bio"):
         await event.answer(
             "`Invalid argument. Available options:`\n" "__txt or tgid or url__"
         )
@@ -950,7 +954,7 @@ async def inc_listener(event: NewMessage.Event) -> None:
         return
 
     invite = False
-    invite_match = invite_pattern.search(event.text)
+    invite_match = invite_pattern.search(event.text) if event.text else None
     tgid_check = False
     localbl = localBlacklists.get(event.chat_id, False)
 
@@ -1037,7 +1041,6 @@ async def inc_listener(event: NewMessage.Event) -> None:
                     if await ban_user(event, "tgid", value, index, g):
                         return
                     break
-
             if not isinstance(value, int):
                 continue
             if value in globalid:
