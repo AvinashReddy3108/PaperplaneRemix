@@ -141,9 +141,12 @@ async def logsDump(event: NewMessage.Event) -> None:
                 await event.answer("**Invalid log level specified!**")
                 return
     dump = loggingHandler.dumps(level)
-    output = io.BytesIO("\n".join(dump).encode())
-    output.name = "logs.txt"
-    await event.answer(file=output)
+    if dump:
+        output = io.BytesIO("\n".join(dump).encode())
+        output.name = "logs.txt"
+        await event.answer(file=output)
+    else:
+        await event.answer("`No logs found`")
 
 
 @client.onMessage(

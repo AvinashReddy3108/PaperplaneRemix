@@ -35,6 +35,8 @@ async def get_user_from_msg(event: NewMessage.Event) -> Union[int, str, None]:
 
     if match == "me":
         return (await event.client.get_me()).id
+    if match == "this":
+        match = str(event.chat.id)
 
     if event.entities:
         for entity in event.entities:

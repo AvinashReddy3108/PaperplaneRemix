@@ -383,7 +383,6 @@ async def get_pip_packages(requirements: str = None) -> list:
     if requirements:
         packages = requirements
     else:
-        python = sys.executable
         cmd = await asyncio.create_subprocess_exec(
             sys.executable.replace(" ", "\\ "),
             "-m",
