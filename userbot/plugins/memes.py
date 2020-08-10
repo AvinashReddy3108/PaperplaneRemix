@@ -999,9 +999,7 @@ async def okay(event: NewMessage.Event) -> None:
     """
     Ok......
     """
-    await event.answer(
-        "<code>-___" + "_" * random.randint(5, 10) + "-</code>", parse_mode="html"
-    )
+    await event.answer("-___" + "_" * random.randint(5, 10) + "-", parse_mode="html")
 
 
 @client.onMessage(outgoing=True, regex="^;__;$", disable_prefix=True)
@@ -1009,9 +1007,7 @@ async def crai(event: NewMessage.Event) -> None:
     """
     crai :(
     """
-    await event.answer(
-        "<code>;___" + "_" * random.randint(5, 10) + ";</code>", parse_mode="html"
-    )
+    await event.answer(";___" + "_" * random.randint(5, 10) + ";", parse_mode="html")
 
 
 def isEmoji(inputString: str) -> bool:

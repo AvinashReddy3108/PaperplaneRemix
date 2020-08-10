@@ -177,7 +177,7 @@ async def get_chat_link(
 
     if isinstance(entity, types.User):
         if entity.is_self:
-            name = "yourself"
+            name = 'your "Saved Messages"'
         else:
             name = get_display_name(entity) or "Deleted Account?"
         extra = f"[{name}](tg://user?id={entity.id})"
