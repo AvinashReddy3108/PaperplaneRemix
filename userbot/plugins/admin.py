@@ -581,8 +581,7 @@ async def pin(event: NewMessage.Event) -> None:
         await event.answer("`You can't pin messages in private chats.`")
         return
 
-    pinned = False
-    notify = True if event.matches[0].group(1) else False
+    notify = bool(event.matches[0].group(1))
 
     if not event.reply_to_msg_id:
         await event.answer("`I can't pin the void!`")
@@ -593,16 +592,12 @@ async def pin(event: NewMessage.Event) -> None:
         await client.pin_message(
             entity=entity, message=event.reply_to_msg_id, notify=notify
         )
-        pinned = True
-    except Exception:
-        pinned = False
-    if pinned:
         text = f"`Successfully pinned!`\n"
-        text += f"`Loud-Pin:` `{'Yes' if notify else 'No'}`"
-    else:
+        text += f"`Loud-Pin:` `{'Yes' if notify else 'No'}`\n"
+    except Exception:
         text = f"`Failed to pin the message!`\n"
     e2 = await get_chat_link(event, event.reply_to_msg_id)
-    log_msg = text + f"\n`Chat:` {e2}"
+    log_msg = text + f"`Chat:` {e2}"
     await event.answer(text, log=("pin", log_msg))
 
 
