@@ -74,9 +74,8 @@ DEFAULT_UNMUTE_SETTINGS = types.InputPeerNotifySettings(
     show_previews=True, silent=False
 )
 
-if redis:
-    if redis.exists("approved:users"):
-        approvedUsers = dill.loads(redis.get("approved:users"))
+if redis and redis.exists("approved:users"):
+    approvedUsers = dill.loads(redis.get("approved:users"))
 
 
 @client.onMessage(incoming=True, edited=False)
@@ -93,15 +92,14 @@ async def pm_incoming(event: NewMessage.Event) -> None:
     if entity.verified or entity.support or entity.bot or sender in approvedUsers:
         return
     elif entity.mutual_contact:
-        if sender not in approvedUsers:
-            approvedUsers.append(sender)
-            await update_db()
-            user = await get_chat_link(entity)
-            text = autoapprove.format(user=user)
-            text += " `for being a mutual contact.`"
-            await event.answer(
-                text, reply=True, self_destruct=2, log=("pmpermit", text)
-            )
+        approvedUsers.append(sender)
+        await update_db()
+        user = await get_chat_link(entity)
+        text = autoapprove.format(user=user)
+        text += " `for being a mutual contact.`"
+        await event.answer(
+            text, reply=True, self_destruct=2, log=("pmpermit", text)
+        )
         return
     elif sender not in spammers:
         await client(
@@ -185,20 +183,19 @@ async def pm_outgoing(event: NewMessage.Event) -> None:
     result = await client.get_messages(
         await event.get_input_chat(), reverse=True, limit=1
     )
-    if result[0].out:
-        if chat.id not in approvedUsers:
-            approvedUsers.append(chat.id)
-            await update_db()
-            user = await get_chat_link(chat)
-            await event.resanswer(
-                autoapprove,
-                plugin="pmpermit",
-                name="autoapprove",
-                formats={"user": user},
-                reply=True,
-                self_destruct=2,
-                log=("pmpermit", autoapprove.format(user=user)),
-            )
+    if result[0].out and chat.id not in approvedUsers:
+        approvedUsers.append(chat.id)
+        await update_db()
+        user = await get_chat_link(chat)
+        await event.resanswer(
+            autoapprove,
+            plugin="pmpermit",
+            name="autoapprove",
+            formats={"user": user},
+            reply=True,
+            self_destruct=2,
+            log=("pmpermit", autoapprove.format(user=user)),
+        )
 
 
 @client.onMessage(

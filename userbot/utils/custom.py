@@ -90,20 +90,23 @@ async def answer(
     is_forward = event.fwd_from if event else False
     parser = html if parse_mode in ("html", "HTML") else markdown
     if event is not None:
-        is_media = any([k for k in file_kwargs if getattr(event, k, False)])
+        is_media = any(k for k in file_kwargs if getattr(event, k, False))
     else:
-        is_media = any([k for k in file_kwargs if kwargs.get(k, False)])
-    if _reply_to and not isinstance(_reply_to, int):
-        if isinstance(_reply_to, events.ChatAction.Event):
-            action = _reply_to.action_message
-            kwargs2["reply_to"] = action.reply_to_msg_id or action.id
+        is_media = any(k for k in file_kwargs if kwargs.get(k, False))
+    if (
+        _reply_to
+        and not isinstance(_reply_to, int)
+        and isinstance(_reply_to, events.ChatAction.Event)
+    ):
+        action = _reply_to.action_message
+        kwargs2["reply_to"] = action.reply_to_msg_id or action.id
     if kwargs2["reply_to"] is None:
         kwargs2["reply_to"] = reply_to
 
     if message and isinstance(message, str) and not is_media:
-        is_reply = reply or kwargs2.get("reply_to", False)
         msg, msg_entities = parser.parse(message)
         if len(msg) <= MAXLIM:
+            is_reply = reply or kwargs2.get("reply_to", False)
             if is_reply or not is_outgoing or is_forward:
                 try:
                     message_out = await self.send_message(
@@ -363,9 +366,7 @@ async def _self_destructor(
 ) -> typing.Union[custom.Message, typing.Sequence[custom.Message]]:
     await asyncio.sleep(timeout)
     if isinstance(event, list):
-        deleted = []
-        for e in event:
-            deleted.append(await e.delete())
+        deleted = [await e.delete() for e in event]
     else:
         deleted = await event.delete()
     return deleted

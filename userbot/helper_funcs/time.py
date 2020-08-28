@@ -43,14 +43,14 @@ async def amount_to_secs(amount: tuple) -> int:
     if not unit:
         unit = "s"
 
-    if unit == "s":
-        return num
-    elif unit == "m":
-        return num * 60
+    if unit == "d":
+        return num * 60 * 60 * 24
     elif unit == "h":
         return num * 60 * 60
-    elif unit == "d":
-        return num * 60 * 60 * 24
+    elif unit == "m":
+        return num * 60
+    elif unit == "s":
+        return num
     elif unit == "w":
         return num * 60 * 60 * 24 * 7
     else:

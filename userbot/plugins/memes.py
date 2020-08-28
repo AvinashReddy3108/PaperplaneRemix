@@ -610,7 +610,7 @@ async def vapor(event: NewMessage.Event) -> None:
         else:
             await event.answer("`Ｖａｐｏｒｉｚｅｄ ｔｈｅ ｖｏｉｄ．`")
             return
-    reply_text = list()
+    reply_text = []
     for charac in text:
         if 0x21 <= ord(charac) <= 0x7F:
             reply_text.append(chr(ord(charac) + 0xFEE0))
@@ -643,12 +643,12 @@ async def zalgofy(event: NewMessage.Event) -> None:
                 "`I̺͑ c̴̎a̩͘n͉͐'tͪͬ i̡͙n̺ͦṽ̘o̎͘k͇̃e̮͊ c̜̾h̩͋ä͒o̺͝s̗͟ į̶n̵ͭ t̵̙h̛ ̝e͊̀ v̗͛o̯͡i̋ͦd̙ͤ.`"
             )
             return
-    reply_text = list()
+    reply_text = []
     for charac in text:
         if not charac.isalpha():
             reply_text.append(charac)
             continue
-        for _ in range(0, 3):
+        for _ in range(3):
             zalgint = random.randint(0, 2)
             if zalgint == 0:
                 charac = charac.strip() + random.choice(ZALG_LIST[0]).strip()
@@ -742,10 +742,7 @@ async def copypasta(event: NewMessage.Event) -> None:
         elif owo.lower() == b_char:
             reply_text += "🅱️"
         else:
-            if bool(random.getrandbits(1)):
-                reply_text += owo.upper()
-            else:
-                reply_text += owo.lower()
+            reply_text += owo.upper() if bool(random.getrandbits(1)) else owo.lower()
     reply_text += random.choice(PASTAMOJIS)
     await event.answer(f"__{reply_text}__")
 
@@ -767,7 +764,7 @@ async def spongemock(event: NewMessage.Event) -> None:
         else:
             await event.answer("`I cAnT MoCk tHe vOId!`")
             return
-    reply_text = list()
+    reply_text = []
     for charac in text:
         if charac.isalpha() and random.randint(0, 1):
             to_app = charac.upper() if charac.islower() else charac.lower()
@@ -1011,12 +1008,12 @@ def isEmoji(inputString: str) -> bool:
 async def _is_fryable_event(event: NewMessage.Event) -> bool:
     """Checks if the given image/sticker is worthy of the fry or not!"""
     if (
-        event.sticker and not event.sticker.mime_type == "application/x-tgsticker"
-    ) or event.photo:
+        event.sticker
+        and event.sticker.mime_type != "application/x-tgsticker"
+        or event.photo
+    ):
         return True
-    if event.document and "image" in event.document.mime_type:
-        return True
-    return False
+    return bool(event.document and "image" in event.document.mime_type)
 
 
 # Copyright (c) 2017 Ovyerus; License: MIT

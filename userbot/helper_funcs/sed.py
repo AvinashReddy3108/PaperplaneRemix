@@ -287,8 +287,7 @@ async def sub_matches(matches: list, original: str) -> Union[str, None]:
         try:
             count, flags = await resolve_flags(fl)
         except UnknownFlagError as f:
-            exc = f"`Unknown flag:` `{f}`"
-            return exc
+            return f"`Unknown flag:` `{f}`"
 
         newStr = await substitute(fr, to, string, line=line, count=count, flags=flags)
         if newStr:

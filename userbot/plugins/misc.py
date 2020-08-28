@@ -42,17 +42,16 @@ nameexp = re.compile(r"\[([\w\S]+)\]\(tg://user\?id=(\d+)\)\[(.+?)\]")
 
 def removebg_post(API_KEY: str, media: bytes or str):
     image_parameter = "image_url" if isinstance(media, str) else "image_file"
-    response = requests.post(
+    return requests.post(
         "https://api.remove.bg/v1.0/removebg",
         files={image_parameter: media},
         data={"size": "auto"},
         headers={"X-Api-Key": API_KEY},
     )
-    return response
 
 
 def dogbin_post(text: str):
-    response = requests.post(
+    return requests.post(
         "https://del.dog/documents",
         data=text.encode("UTF-8") if isinstance(text, str) else text,
         headers={
@@ -61,7 +60,6 @@ def dogbin_post(text: str):
             "charset": "utf-8",
         },
     )
-    return response
 
 
 @client.onMessage(

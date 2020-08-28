@@ -64,10 +64,9 @@ async def reverse(event: NewMessage.Event) -> None:
                 await event.answer("`Install FFMPEG to reverse search GIFs.`")
                 return
             ext = ".gif"
-        if reply.video:
-            if not ffmpeg:
-                await event.answer("`Install FFMPEG to reverse search videos.`")
-                return
+        if reply.video and not ffmpeg:
+            await event.answer("`Install FFMPEG to reverse search videos.`")
+            return
         acceptable = [".jpg", ".gif", ".png", ".bmp", ".tif", ".webp", ".mp4"]
         if ext not in acceptable:
             await event.answer("`Nice try, fool!`")
@@ -152,10 +151,9 @@ def _post(name: str, media: io.BytesIO):
     multipart = {"encoded_image": (name, media), "image_content": ""}
     headers = {"User-Agent": heavy_ua1}
 
-    response = requests.post(
+    return requests.post(
         searchUrl, files=multipart, allow_redirects=False, headers=headers
     )
-    return response
 
 
 async def _scrape_url(googleurl):
@@ -182,11 +180,7 @@ async def _scrape_url(googleurl):
         "div", {"class": "rg-header V5niGc dPAwzb", "role": "heading"}
     )
     _matching = soup.find("div", {"id": "search"})
-    if _matching:
-        matching = _matching.find_all("div", {"class": "g"})
-    else:
-        matching = None
-
+    matching = _matching.find_all("div", {"class": "g"}) if _matching else None
     if best_guess:
         result["best_guess"] = best_guess.a.get_text()
 
@@ -221,8 +215,6 @@ async def _get_similar_links(link: str, lim: int = 2):
 
     links = []
     gifs = []
-    counter = 0
-
     pattern = (
         r",\[\""
         r"(.*\.(?:png|jpg|jpeg|bmp|svg\+xml|webp|gif))"  # link
@@ -232,6 +224,8 @@ async def _get_similar_links(link: str, lim: int = 2):
     matches = re.findall(pattern, source.read().decode("utf-8"), re.I)
 
     async with aiohttp.ClientSession() as session:
+        counter = 0
+
         for link in matches:
             async with session.get(link) as response:
                 if response.status == 200 and response.content_type.startswith(

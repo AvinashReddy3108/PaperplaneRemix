@@ -77,9 +77,10 @@ class NewMessage(events.NewMessage):
         if not _event:
             return
 
-        if self.inline is not None:
-            if bool(self.inline) != bool(event.message.via_bot_id):
-                return
+        if self.inline is not None and bool(self.inline) != bool(
+            event.message.via_bot_id
+        ):
+            return
 
         if event._client.prefix:
             prefix = re.escape(event._client.prefix)
@@ -131,15 +132,14 @@ class NewMessage(events.NewMessage):
                     is_creator = event.chat.creator
                     is_admin = event.chat.admin_rights
 
-                if not is_creator:
-                    if not is_admin:
-                        if self.outgoing and event.message.out:
-                            event._client.loop.create_task(event.answer(text))
-                        elif self.incoming and not event.message.out:
-                            event._client.loop.create_task(
-                                event.answer(text, reply=True)
-                            )
-                        return
+                if not is_creator and not is_admin:
+                    if self.outgoing and event.message.out:
+                        event._client.loop.create_task(event.answer(text))
+                    elif self.incoming and not event.message.out:
+                        event._client.loop.create_task(
+                            event.answer(text, reply=True)
+                        )
+                    return
         return event
 
 

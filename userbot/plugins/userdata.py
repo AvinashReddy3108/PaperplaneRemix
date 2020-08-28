@@ -53,9 +53,8 @@ async def whois(event: NewMessage.Event) -> None:
         if not entities:
             reply = await event.get_reply_message()
             user = reply.sender_id
-            if reply.fwd_from:
-                if reply.fwd_from.from_id:
-                    user = reply.fwd_from.from_id
+            if reply.fwd_from and reply.fwd_from.from_id:
+                user = reply.fwd_from.from_id
             entities.append(user)
     else:
         entities.append("self")
@@ -243,7 +242,7 @@ async def pfp(event: NewMessage.Event) -> None:
         or reply.photo
         or reply.sticker
     ):
-        if reply.sticker and not reply.sticker.mime_type == "image/webp":
+        if reply.sticker and reply.sticker.mime_type != "image/webp":
             await event.answer("`Invalid sticker type.`")
             return
         try:
@@ -335,9 +334,8 @@ async def whichid(event: NewMessage.Event) -> None:
     elif event.reply_to_msg_id:
         reply = await event.get_reply_message()
         user = reply.sender_id
-        if reply.fwd_from:
-            if reply.fwd_from.from_id:
-                user = reply.fwd_from.from_id
+        if reply.fwd_from and reply.fwd_from.from_id:
+            user = reply.fwd_from.from_id
         peer = get_peer_id(user)
         text = f"[{peer}](tg://user?id={peer}): `{peer}`"
     else:

@@ -163,11 +163,10 @@ async def list_formats(info_dict: dict) -> str:
         table[-1][-1] += (" " if table[-1][-1] else "") + "(best)"
 
     header_line = ["format code", "extension", "resolution"]
-    fmtStr = "Available formats for %s:\n%s" % (
+    return "Available formats for %s:\n%s" % (
         info_dict["title"],
         youtube_dl.render_table(header_line, table),
     )
-    return fmtStr
 
 
 async def extract_info(
