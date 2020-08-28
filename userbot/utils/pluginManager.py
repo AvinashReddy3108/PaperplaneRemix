@@ -333,9 +333,12 @@ class PluginManager:
             sys.modules[ubotpath] = module
 
             for n, cb in vars(module).items():
-                if inspect.iscoroutinefunction(cb) and not n.startswith("_"):
-                    if events._get_handlers(cb):
-                        callbacks.append(Callback(n, cb))
+                if (
+                    inspect.iscoroutinefunction(cb)
+                    and not n.startswith("_")
+                    and events._get_handlers(cb)
+                ):
+                    callbacks.append(Callback(n, cb))
 
             self.active_plugins.append(Plugin(name, callbacks, ppath, module))
             LOGGER.info(log)

@@ -112,11 +112,7 @@ async def enable(event: NewMessage.Event) -> None:
     if command:
         for handler in command.handlers:
             client.add_event_handler(command.func, handler)
-        if arg in command_list:
-            enabled_coms = ", ".join(split_exp.split(arg))
-        else:
-            enabled_coms = arg
-
+        enabled_coms = ", ".join(split_exp.split(arg)) if arg in command_list else arg
         client.commands[arg] = command
         client.disabled_commands.pop(arg)
         await event.answer(
@@ -154,11 +150,7 @@ async def disable(event: NewMessage.Event) -> None:
             await event.answer("`Cannot disable a builtin command.`")
         else:
             client.remove_event_handler(command.func)
-            if arg in command_list:
-                disabled_coms = ", ".join(split_exp.split(arg))
-            else:
-                disabled_coms = arg
-
+            disabled_coms = ", ".join(split_exp.split(arg)) if arg in command_list else arg
             client.disabled_commands[arg] = command
             client.commands.pop(arg)
             await event.answer(

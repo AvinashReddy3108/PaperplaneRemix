@@ -241,7 +241,6 @@ async def fix_attributes(
     video = False
     audio = False
 
-    title = str(info_dict.get("title", info_dict.get("id", "Unknown title")))
     uploader = info_dict.get("uploader", "Unknown artist")
     duration = int(info_dict.get("duration", 0))
     suffix = path.suffix[1:]
@@ -250,6 +249,7 @@ async def fix_attributes(
 
     attributes, mime_type = get_attributes(path)
     if suffix in audioFormats:
+        title = str(info_dict.get("title", info_dict.get("id", "Unknown title")))
         audio = types.DocumentAttributeAudio(duration, None, title, uploader)
     elif suffix in videoFormats:
         width = int(info_dict.get("width", 0))

@@ -212,10 +212,7 @@ async def delsticker(event: NewMessage.Event) -> None:
         await reply.forward_to("@Stickers")
         r2 = await conv.get_response()
         LOGGER.debug("Stickers:" + r2.text)
-        if "I have deleted that sticker for you" in r2.text:
-            status = True
-        else:
-            status = r2.text
+        status = True if "I have deleted that sticker for you" in r2.text else r2.text
         await conv.send_message("/cancel")
         await conv.get_response()
 
@@ -701,9 +698,9 @@ async def _get_default_packs() -> Tuple[str, str]:
     basic = config.get("default_sticker_pack", basic_default)
     animated = config.get("default_animated_sticker_pack", animated_default)
 
-    if basic.strip().lower() == "auto" or basic.strip().lower() == "none":
+    if basic.strip().lower() in ["auto", "none"]:
         basic = basic_default
-    if animated.strip().lower() == "auto" or animated.strip().lower() == "none":
+    if animated.strip().lower() in ["auto", "none"]:
         animated = animated_default
 
     return basic, animated
@@ -712,10 +709,7 @@ async def _get_default_packs() -> Tuple[str, str]:
 async def _is_sticker_event(event: NewMessage.Event) -> bool:
     if event.sticker or event.photo:
         return True
-    if event.document and "image" in event.document.mime_type:
-        return True
-
-    return False
+    return bool(event.document and "image" in event.document.mime_type)
 
 
 async def _update_stickers_notif(notif: types.PeerNotifySettings) -> None:

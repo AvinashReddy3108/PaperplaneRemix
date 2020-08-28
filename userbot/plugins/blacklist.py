@@ -279,12 +279,13 @@ async def blacklister(event: NewMessage.Event) -> None:
 
     if not glb:
         chat = await event.get_chat()
-        if not chat.creator:
-            if not getattr(chat.admin_rights, "ban_users", False):
-                await event.edit(
-                    "`You need to have ban rights to set a blacklist in here.`"
-                )
-                return
+        if not chat.creator and not getattr(
+            chat.admin_rights, "ban_users", False
+        ):
+            await event.edit(
+                "`You need to have ban rights to set a blacklist in here.`"
+            )
+            return
 
     for option, values in parsed.items():
         if values:
@@ -689,22 +690,16 @@ async def listbls(event: NewMessage.Event) -> None:
             if values:
                 if glb:
                     attr = getattr(GlobalBlacklist, option, None)
-                    if attr:
-                        for v in values:
-                            if v in attr:
-                                blacklisted.append(v)
-                            else:
-                                not_blacklisted.append(v)
                 else:
                     if event.chat_id not in localBlacklists:
                         break
                     attr = getattr(localBlacklists[event.chat_id], option, None)
-                    if attr:
-                        for v in values:
-                            if v in attr:
-                                blacklisted.append(v)
-                            else:
-                                not_blacklisted.append(v)
+                if attr:
+                    for v in values:
+                        if v in attr:
+                            blacklisted.append(v)
+                        else:
+                            not_blacklisted.append(v)
         if blacklisted:
             text = "**Already blacklisted values:**\n"
             text += ", ".join(f"`{b}`" for b in blacklisted)
@@ -744,10 +739,7 @@ async def listbls(event: NewMessage.Event) -> None:
                 await event.answer("__There are no blacklists set here.__")
                 return
             bls = await blattributes(localBlacklists[event.chat_id])
-            if bls:
-                text = f"**Blacklists:**\n{bls}"
-            else:
-                text = "__There are no blacklists.__"
+            text = f"**Blacklists:**\n{bls}" if bls else "__There are no blacklists.__"
         await event.answer(text)
 
 
@@ -800,8 +792,8 @@ async def listwls(event: NewMessage.Event) -> None:
             text = "__There are no whitelisted users or chats.__"
             await event.answer(text)
             return
+        text = ""
         if user or chat:
-            text = ""
             if user:
                 if isinstance(user, str):
                     user = await get_peer_id(user)
@@ -828,7 +820,6 @@ async def listwls(event: NewMessage.Event) -> None:
                     text += f"`{chat} is not whitelisted!`"
             await event.answer(text)
         else:
-            text = ""
             if whitelistedUsers:
                 text += "**Whitelisted users:**\n"
                 text += ", ".join([f"`{x}`" for x in whitelistedUsers])
@@ -904,14 +895,14 @@ async def listbld(event: NewMessage.Event) -> None:
                 continue
             try:
                 entity = await client.get_entity(user)
-                if isinstance(entity, types.User):
-                    if not entity.is_self:
-                        if user in blacklistedUsers:
-                            t, v = blacklistedUsers[entity.id]
-                            users.append(f"[{user}](tg://user?id={user}): `{t}`, `{v}`")
-                        else:
-                            skipped.append(f"`{entity.id}`")
-                else:
+                if (
+                    isinstance(entity, types.User)
+                    and not entity.is_self
+                    and user in blacklistedUsers
+                ):
+                    t, v = blacklistedUsers[entity.id]
+                    users.append(f"[{user}](tg://user?id={user}): `{t}`, `{v}`")
+                elif not entity.is_self or not isinstance(entity, types.User):
                     skipped.append(f"`{entity.id}`")
             except Exception:
                 skipped.append(f"`{user}`")
@@ -1000,14 +991,16 @@ async def inc_listener(event: NewMessage.Event) -> None:
         localid = getattr(localbl, "tgid", []) or []
         if event.sender_id in globalid:
             index = globalid.index(event.sender_id)
-            if isinstance(globalid[index], int):
-                if await ban_user(event, "tgid", value.sender_id, index, True):
-                    return
+            if isinstance(globalid[index], int) and await ban_user(
+                event, "tgid", value.sender_id, index, True
+            ):
+                return
         elif event.sender_id in localid:
             index = localid.index(event.sender_id)
-            if isinstance(globalid[index], int):
-                if await ban_user(event, "tgid", value.sender_id, index):
-                    return
+            if isinstance(globalid[index], int) and await ban_user(
+                event, "tgid", value.sender_id, index
+            ):
+                return
         entities = getattr(event, "entities", None) or []
         counter = 0
         for entity in entities:
@@ -1020,27 +1013,26 @@ async def inc_listener(event: NewMessage.Event) -> None:
                 )
                 entity = entity.group("e") if entity else entity
                 value = await get_peer_id(entity) if entity else None
-                counter = counter + 1
+                counter += 1
             elif isinstance(entity, types.MessageEntityMentionName):
                 value = entity.user_id
             else:
                 continue
 
-            if value and invite:
-                if invite == value:
-                    g = False
-                    if value in globalid:
-                        g = True
-                        index = globalid.index(value)
-                    elif value in localid:
-                        index = localid.index(value)
-                    else:
-                        index = 0
-                    if not isinstance(value, int):
-                        continue
-                    if await ban_user(event, "tgid", value, index, g):
-                        return
-                    break
+            if value and invite and invite == value:
+                g = False
+                if value in globalid:
+                    g = True
+                    index = globalid.index(value)
+                elif value in localid:
+                    index = localid.index(value)
+                else:
+                    index = 0
+                if not isinstance(value, int):
+                    continue
+                if await ban_user(event, "tgid", value, index, g):
+                    return
+                break
             if not isinstance(value, int):
                 continue
             if value in globalid:
@@ -1302,10 +1294,7 @@ async def append_args_to_list(
     if isinstance(args_list, list):
         for i in args_list:
             if tg_id:
-                if isinstance(i, int):
-                    value = i
-                else:
-                    value = await get_peer_id(i)
+                value = i if isinstance(i, int) else await get_peer_id(i)
                 if value and value not in option:
                     option.append(value)
             else:
@@ -1316,12 +1305,10 @@ async def append_args_to_list(
         if tg_id:
             if not isinstance(args_list, int):
                 args_list = await get_peer_id(args_list)
-            if args_list not in option:
-                option.append(args_list)
         else:
             args_list = str(args_list)
-            if args_list not in option:
-                option.append(args_list)
+        if args_list not in option:
+            option.append(args_list)
     return option
 
 
@@ -1339,10 +1326,7 @@ async def values_to_str(values_dict: dict) -> str:
     id_str = "[{0}](tg://user?id={0})"
     for key, values in values_dict.items():
         title = full_key_names.get(key, key)
-        if len(text) == 0:
-            text += f"**{title}:**\n  "
-        else:
-            text += f"\n\n**{title}**\n"
+        text += f"**{title}:**\n  " if len(text) == 0 else f"\n\n**{title}**\n"
         if key == "tgid":
             text += ", ".join(id_str.format(x) for x in values)
         else:

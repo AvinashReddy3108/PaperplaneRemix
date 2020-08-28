@@ -105,8 +105,7 @@ async def updater(event: NewMessage.Event) -> None:
     try:
         config = repo.config_reader()
         try:
-            if config.get_value("user", "name") and config.get_value("user", "email"):
-                pass
+            pass
         except (NoSectionError, NoOptionError):
             LOGGER.warning(
                 "No 'git' credentials found, falling back to generic data for the git pull."

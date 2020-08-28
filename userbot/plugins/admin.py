@@ -626,9 +626,10 @@ async def get_rights(
         "pin_messages": pin_messages,
         "add_admins": add_admins,
     }
-    required_rights = []
-    for right, required in rights.items():
-        if required:
-            required_rights.append(getattr(chat.admin_rights, right, False))
+    required_rights = [
+        getattr(chat.admin_rights, right, False)
+        for right, required in rights.items()
+        if required
+    ]
 
     return all(required_rights)

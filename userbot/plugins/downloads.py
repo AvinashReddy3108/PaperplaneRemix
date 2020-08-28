@@ -165,8 +165,4 @@ async def upload(event: NewMessage.Event) -> None:
 
 
 async def _get_file_name(path: pathlib.Path, full: bool = True) -> str:
-    if full:
-        path = str(path.absolute())
-    else:
-        path = path.stem + path.suffix
-    return path
+    return str(path.absolute()) if full else path.stem + path.suffix

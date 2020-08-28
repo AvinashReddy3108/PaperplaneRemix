@@ -52,12 +52,11 @@ async def evaluate(event: NewMessage.Event) -> None:
         return
 
     extra = await get_chat_link(event, event.id)
-    if result:
-        if hasattr(result, "stringify"):
-            if inspect.isawaitable(result):
-                result = await result.stringify()
-            else:
-                result = result.stringify()
+    if result and hasattr(result, "stringify"):
+        if inspect.isawaitable(result):
+            result = await result.stringify()
+        else:
+            result = result.stringify()
     result = str(result) if result else "Success?"
     await event.answer(
         "```" + result + "```",

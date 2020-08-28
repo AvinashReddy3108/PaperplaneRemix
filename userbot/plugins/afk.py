@@ -132,7 +132,7 @@ async def out_listner(event: NewMessage.Event) -> None:
         pr_text = "`Received {} message{} from {} private chat{}.`".format(
             *(await _correct_grammer(total_mentions, len(AFK.privates)))
         )
-        pr_log = pr_log + "\n\n".join("  " + t for t in to_log)
+        pr_log += "\n\n".join("  " + t for t in to_log)
     if AFK.groups:
         total_mentions = 0
         to_log = []
@@ -153,7 +153,7 @@ async def out_listner(event: NewMessage.Event) -> None:
         gr_text = "`Received {} mention{} from {} group{}.`".format(
             *(await _correct_grammer(total_mentions, len(AFK.groups)))
         )
-        gr_log = gr_log + "\n\n".join("  " + t for t in to_log)
+        gr_log += "\n\n".join("  " + t for t in to_log)
 
     main_text = "\n\n".join([pr_text, gr_text]).strip()
     if not client.logger:
@@ -245,7 +245,7 @@ async def _append_msg(variable: dict, chat: int, event: int) -> None:
                     messages.append(message.id)
                 break
             if not message.out:
-                x = x + 1
+                x += 1
                 messages.append(message.id)
         variable[chat] = {
             "title": title,
