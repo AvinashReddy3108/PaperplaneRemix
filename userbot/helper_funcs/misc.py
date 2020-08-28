@@ -136,8 +136,8 @@ async def unparse_info(
 
 async def unparse_rights(title: str, rights: str) -> str:
     text = f"**{title}**"
-    for l in rights.split("\n"):
-        splat = l.split(":")
+    for right in rights.split("\n"):
+        splat = right.split(":")
         text += f"\n  **{splat[0]}:** `{':'.join(splat[1:])}`"
     return text
 

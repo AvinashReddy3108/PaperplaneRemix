@@ -73,7 +73,7 @@ AFKMEMEZ = [
 ]
 
 
-@client.onMessage(command="afk", outgoing=True, regex="afk(?: |$)(.*)?$")
+@client.onMessage(command="afk", outgoing=True, regex=r"afk(?: |$)(.*)?$")
 async def awayfromkeyboard(event: NewMessage.Event) -> None:
     """
     Set your status as AFK until you send a message again.

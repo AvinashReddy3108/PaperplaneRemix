@@ -39,7 +39,6 @@ LOGGER = logging.getLogger("userbot")
 def printUser(entity: types.User) -> None:
     """Print the user's first name + last name upon start"""
     user = get_display_name(entity)
-    print()
     LOGGER.warning("Successfully logged in as {0}".format(user))
 
 
@@ -51,7 +50,6 @@ def printVersion(version: int, prefix: str) -> None:
         "UserBot v{0} is running, test it by sending {1}ping in"
         " any chat.".format(version, prefix)
     )
-    print()
 
 
 async def isRestart(client: UserBotClient) -> None:

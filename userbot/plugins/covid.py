@@ -30,7 +30,7 @@ critical_str = f"\n`{'Critical':<9}:`  **%(critical)s**"
 @client.onMessage(
     command=("covid", plugin_category),
     outgoing=True,
-    regex="(?:covid|corona)(?: |$)(.*)",
+    regex=r"(?:covid|corona)(?: |$)(.*)",
 )
 async def covid19(event: NewMessage.Event) -> None:
     """
@@ -70,7 +70,7 @@ async def covid19(event: NewMessage.Event) -> None:
         confirmed = covid.get_total_confirmed_cases()
         recovered = covid.get_total_recovered()
         deaths = covid.get_total_deaths()
-        string = f"**COVID-19** __(Worldwide)__\n"
+        string = "**COVID-19** __(Worldwide)__\n"
         string += covid_str % {
             "active": active,
             "confirmed": confirmed,

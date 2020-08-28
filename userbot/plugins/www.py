@@ -46,7 +46,7 @@ upload = "`Upload: %0.2f %s%s/s`"
 
 
 @client.onMessage(
-    command=("nearestdc", plugin_category), outgoing=True, regex="nearestdc$"
+    command=("nearestdc", plugin_category), outgoing=True, regex=r"nearestdc$"
 )
 async def nearestdc(event: NewMessage.Event) -> None:
     """
@@ -138,7 +138,7 @@ async def speedtest(event: NewMessage.Event) -> None:
 
 
 @client.onMessage(
-    command=("wiki", plugin_category), outgoing=True, regex="(wk|wiki)(?: |$|\n)(.*)"
+    command=("wiki", plugin_category), outgoing=True, regex=r"(wk|wiki)(?: |$|\n)(.*)"
 )
 async def urban_dict(event: NewMessage.Event) -> None:
     """

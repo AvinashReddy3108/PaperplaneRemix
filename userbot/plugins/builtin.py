@@ -25,7 +25,7 @@ from userbot.utils.events import NewMessage
 from userbot.utils.helpers import restart
 
 
-@client.onMessage(command=("ping", "www"), outgoing=True, regex="ping$", builtin=True)
+@client.onMessage(command=("ping", "www"), outgoing=True, regex=r"ping$", builtin=True)
 async def ping(event: NewMessage.Event) -> None:
     """
     Check how long it takes to get an update and respond to it.
@@ -41,7 +41,7 @@ async def ping(event: NewMessage.Event) -> None:
 
 
 @client.onMessage(
-    command=("shutdown", "misc"), outgoing=True, regex="shutdown$", builtin=True
+    command=("shutdown", "misc"), outgoing=True, regex=r"shutdown$", builtin=True
 )
 async def shutdown(event: NewMessage.Event) -> None:
     """
@@ -52,13 +52,12 @@ async def shutdown(event: NewMessage.Event) -> None:
     """
     await event.answer("`Disconnecting the client and exiting. Ciao!`")
     client.reconnect = False
-    print()
     LOGGER.info("Disconnecting the client and exiting the main script.")
     await client.disconnect()
 
 
 @client.onMessage(
-    command=("restart", "misc"), outgoing=True, regex="restart$", builtin=True
+    command=("restart", "misc"), outgoing=True, regex=r"restart$", builtin=True
 )
 async def restarter(event: NewMessage.Event) -> None:
     """

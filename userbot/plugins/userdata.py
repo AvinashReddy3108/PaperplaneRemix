@@ -105,7 +105,7 @@ async def whois(event: NewMessage.Event) -> None:
 
 
 @client.onMessage(
-    command=("name", plugin_category), outgoing=True, regex="name(?: |$)(.*)$"
+    command=("name", plugin_category), outgoing=True, regex=r"name(?: |$)(.*)$"
 )
 async def name(event: NewMessage.Event) -> None:
     """
@@ -154,7 +154,7 @@ async def name(event: NewMessage.Event) -> None:
 
 
 @client.onMessage(
-    command=("bio", plugin_category), outgoing=True, regex="bio(?: |$)(.*)$"
+    command=("bio", plugin_category), outgoing=True, regex=r"bio(?: |$)(.*)$"
 )
 async def bio(event: NewMessage.Event) -> None:
     """
@@ -183,7 +183,7 @@ async def bio(event: NewMessage.Event) -> None:
 
 
 @client.onMessage(
-    command=("username", plugin_category), outgoing=True, regex="username(?: |$)(.*)$"
+    command=("username", plugin_category), outgoing=True, regex=r"username(?: |$)(.*)$"
 )
 async def username(event: NewMessage.Event) -> None:
     """
@@ -215,7 +215,7 @@ async def username(event: NewMessage.Event) -> None:
         await event.answer("`The username is invalid.`")
 
 
-@client.onMessage(command=("pfp", plugin_category), outgoing=True, regex="pfp$")
+@client.onMessage(command=("pfp", plugin_category), outgoing=True, regex=r"pfp$")
 async def pfp(event: NewMessage.Event) -> None:
     """
     Get your current profile picture or update it.

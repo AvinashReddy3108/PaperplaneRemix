@@ -1,5 +1,5 @@
 # TG-UserBot - A modular Telegram UserBot script for Python.
-# Copyright (C) 2019  Kandarp <https://github.com/kandnub>
+# Copyright (C) 2019 Kandarp <https://github.com/kandnub>
 #
 # TG-UserBot is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -170,7 +170,7 @@ async def disable(event: NewMessage.Event) -> None:
 
 
 @client.onMessage(
-    command=("enabled", plugin_category), outgoing=True, regex="enabled$", builtin=True
+    command=("enabled", plugin_category), outgoing=True, regex=r"enabled$", builtin=True
 )
 async def commands(event: NewMessage.Event) -> None:
     """
@@ -191,7 +191,7 @@ async def commands(event: NewMessage.Event) -> None:
 @client.onMessage(
     command=("disabled", plugin_category),
     outgoing=True,
-    regex="disabled$",
+    regex=r"disabled$",
     builtin=True,
 )
 async def disabled(event: NewMessage.Event) -> None:

@@ -65,7 +65,7 @@ def dogbin_post(text: str):
 
 
 @client.onMessage(
-    command=("rmbg", plugin_category), outgoing=True, regex="r(m)?bg(?: |$)(.*)$"
+    command=("rmbg", plugin_category), outgoing=True, regex=r"r(m)?bg(?: |$)(.*)$"
 )
 async def rmbg(event: NewMessage.Event) -> None:
     """
@@ -146,7 +146,7 @@ async def rmbg(event: NewMessage.Event) -> None:
 
 
 @client.onMessage(
-    command=("resolve", plugin_category), outgoing=True, regex="resolve(?: |$)(.*)$"
+    command=("resolve", plugin_category), outgoing=True, regex=r"resolve(?: |$)(.*)$"
 )
 async def resolver(event: NewMessage.Event) -> None:
     """
@@ -302,7 +302,7 @@ async def deldog(event: NewMessage.Event) -> None:
     await event.answer(f"`Successfully pasted on` [DelDog](https://del.dog/{key})")
 
 
-@client.onMessage(command=("repo", plugin_category), outgoing=True, regex="repo$")
+@client.onMessage(command=("repo", plugin_category), outgoing=True, regex=r"repo$")
 async def git_repo(event: NewMessage.Event) -> None:
     """
     Get the repo url.

@@ -15,9 +15,6 @@
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
 import aiohttp
-import asyncio
-from urllib import parse
-import bs4
 import io
 import PIL
 from typing import Tuple, Union, BinaryIO
@@ -29,11 +26,9 @@ import re
 from PIL import ImageEnhance, ImageOps
 
 from telethon.errors import rpcerrorlist
-from telethon.tl import types
 
 from userbot import client
 from userbot.utils.events import NewMessage
-from userbot.helper_funcs.ids import get_user_from_msg
 
 plugin_category = "memes"
 
@@ -358,7 +353,7 @@ HIT = [
 WHERE = ["in the chest", "on the head", "on the butt", "on the crotch"]
 
 
-@client.onMessage(command=("shibe", plugin_category), outgoing=True, regex="shibe$")
+@client.onMessage(command=("shibe", plugin_category), outgoing=True, regex=r"shibe$")
 async def shibes(event: NewMessage.Event) -> None:
     """
     Get random pictures of Shiba Inu (a.k.a the Internet Meme Doggo).
@@ -525,7 +520,7 @@ async def redpandas(event: NewMessage.Event) -> None:
 @client.onMessage(
     command=("cowsay", plugin_category),
     outgoing=True,
-    regex="(\w+)say(?: |$|\n)([\s\S]*)",
+    regex=r"(\w+)say(?: |$|\n)([\s\S]*)",
 )
 async def cowsay(event: NewMessage.Event) -> None:
     """
@@ -548,7 +543,7 @@ async def cowsay(event: NewMessage.Event) -> None:
 
 
 @client.onMessage(
-    command=("decide", plugin_category), outgoing=True, regex="(yes|no|maybe|decide)$"
+    command=("decide", plugin_category), outgoing=True, regex=r"(yes|no|maybe|decide)$"
 )
 async def decide(event: NewMessage.Event) -> None:
     """
@@ -559,7 +554,7 @@ async def decide(event: NewMessage.Event) -> None:
     """
     decision = event.matches[0].group(1)
     if decision.lower() != "decide":
-        decide_data = await _request(f"https://yesno.wtf/api", {"force": decision})
+        decide_data = await _request("https://yesno.wtf/api", {"force": decision})
     else:
         decide_data = await _request("https://yesno.wtf/api")
 
@@ -572,7 +567,7 @@ async def decide(event: NewMessage.Event) -> None:
 
 
 @client.onMessage(
-    command=("lmgtfy", plugin_category), outgoing=True, regex="lmg(tfy)?(?: |$|\n)(.*)"
+    command=("lmgtfy", plugin_category), outgoing=True, regex=r"lmg(tfy)?(?: |$|\n)(.*)"
 )
 async def lmgtfy(event: NewMessage.Event) -> None:
     """
@@ -585,7 +580,7 @@ async def lmgtfy(event: NewMessage.Event) -> None:
     query_encoded = query.replace(" ", "+")
     lmgtfy_url = f"http://letmegooglethat.com/?q={query_encoded}"
     short_url = await _request(
-        f"http://is.gd/create.php",
+        "http://is.gd/create.php",
         {"format": "simple", "url": lmgtfy_url},
         data_type="text",
     )
@@ -599,7 +594,7 @@ async def lmgtfy(event: NewMessage.Event) -> None:
 @client.onMessage(
     command=("vapor", plugin_category),
     outgoing=True,
-    regex="(vpr|vapor)(?: |$|\n)([\s\S]*)",
+    regex=r"(vpr|vapor)(?: |$|\n)([\s\S]*)",
 )
 async def vapor(event: NewMessage.Event) -> None:
     """
@@ -630,7 +625,7 @@ async def vapor(event: NewMessage.Event) -> None:
 @client.onMessage(
     command=("zalgo", plugin_category),
     outgoing=True,
-    regex="(zlg|zalgo)(?: |$|\n)([\s\S]*)",
+    regex=r"(zlg|zalgo)(?: |$|\n)([\s\S]*)",
 )
 async def zalgofy(event: NewMessage.Event) -> None:
     """
@@ -669,7 +664,7 @@ async def zalgofy(event: NewMessage.Event) -> None:
 @client.onMessage(
     command=("stretch", plugin_category),
     outgoing=True,
-    regex="str(etch)?(?: |$|\n)([\s\S]*)",
+    regex=r"str(etch)?(?: |$|\n)([\s\S]*)",
 )
 async def slinky(event: NewMessage.Event) -> None:
     """
@@ -693,7 +688,7 @@ async def slinky(event: NewMessage.Event) -> None:
 @client.onMessage(
     command=("uwu", plugin_category),
     outgoing=True,
-    regex="(owo|uwu)(?: |$|\n)([\s\S]*)",
+    regex=r"(owo|uwu)(?: |$|\n)([\s\S]*)",
 )
 async def nekofy(event: NewMessage.Event) -> None:
     """
@@ -720,7 +715,7 @@ async def nekofy(event: NewMessage.Event) -> None:
 @client.onMessage(
     command=("pasta", plugin_category),
     outgoing=True,
-    regex="(cp|pasta)(?: |$|\n)([\s\S]*)",
+    regex=r"(cp|pasta)(?: |$|\n)([\s\S]*)",
 )
 async def copypasta(event: NewMessage.Event) -> None:
     """
@@ -756,7 +751,7 @@ async def copypasta(event: NewMessage.Event) -> None:
 
 
 @client.onMessage(
-    command=("mock", plugin_category), outgoing=True, regex="mock(?: |$|\n)([\s\S]*)"
+    command=("mock", plugin_category), outgoing=True, regex=r"mock(?: |$|\n)([\s\S]*)"
 )
 async def spongemock(event: NewMessage.Event) -> None:
     """
@@ -783,7 +778,7 @@ async def spongemock(event: NewMessage.Event) -> None:
     await event.answer(f"__{mocked_text}__")
 
 
-@client.onMessage(command=("insult", plugin_category), outgoing=True, regex="insult$")
+@client.onMessage(command=("insult", plugin_category), outgoing=True, regex=r"insult$")
 async def insults(event: NewMessage.Event) -> None:
     """
     Insult people.
@@ -795,7 +790,7 @@ async def insults(event: NewMessage.Event) -> None:
 
 
 @client.onMessage(
-    command=("clap", plugin_category), outgoing=True, regex="clap(?: |$|\n)([\s\S]*)"
+    command=("clap", plugin_category), outgoing=True, regex=r"clap(?: |$|\n)([\s\S]*)"
 )
 async def clapz(event: NewMessage.Event) -> None:
     """
@@ -817,7 +812,7 @@ async def clapz(event: NewMessage.Event) -> None:
 
 
 @client.onMessage(
-    command=("urban", plugin_category), outgoing=True, regex="(ud|urban)(?: |$|\n)(.*)"
+    command=("urban", plugin_category), outgoing=True, regex=r"(ud|urban)(?: |$|\n)(.*)"
 )
 async def urban_dict(event: NewMessage.Event) -> None:
     """
@@ -860,7 +855,7 @@ async def slap(event: NewMessage.Event) -> None:
     for target in args:
         try:
             retard = await event.client.get_entity(target)
-        except:
+        except Exception:
             escaped.append(target)
             continue
         slapped = (
@@ -966,7 +961,6 @@ async def boiltheoil(event: NewMessage.Event) -> None:
 
     # download photo as byte array.
     await event.answer("`Firing up the deep-fryer!`")
-    data = potato.photo if potato.photo else potato.media.document
     image = io.BytesIO()
     await potato.download_media(file=image)
     image = PIL.Image.open(image)
@@ -986,7 +980,7 @@ async def boiltheoil(event: NewMessage.Event) -> None:
         await event.answer("`Ran out of oil to fry this pic :P`")
 
 
-@client.onMessage(outgoing=True, regex="^Ooof$", disable_prefix=True)
+@client.onMessage(outgoing=True, regex=r"^Ooof$", disable_prefix=True)
 async def oof(event: NewMessage.Event) -> None:
     """
     Big OOF!
@@ -994,7 +988,7 @@ async def oof(event: NewMessage.Event) -> None:
     await event.answer("__Oooo" + "o" * random.randint(5, 10) + "f__")
 
 
-@client.onMessage(outgoing=True, regex="^-__-$", disable_prefix=True)
+@client.onMessage(outgoing=True, regex=r"^-__-$", disable_prefix=True)
 async def okay(event: NewMessage.Event) -> None:
     """
     Ok......
@@ -1002,7 +996,7 @@ async def okay(event: NewMessage.Event) -> None:
     await event.answer("-___" + "_" * random.randint(5, 10) + "-", parse_mode="html")
 
 
-@client.onMessage(outgoing=True, regex="^;__;$", disable_prefix=True)
+@client.onMessage(outgoing=True, regex=r"^;__;$", disable_prefix=True)
 async def crai(event: NewMessage.Event) -> None:
     """
     crai :(

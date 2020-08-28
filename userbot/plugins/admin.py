@@ -70,7 +70,7 @@ async def promote(event: NewMessage.Event) -> None:
         except Exception:
             skipped.append(user)
     if promoted:
-        text = f"`Successfully promoted:`\n"
+        text = "`Successfully promoted:`\n"
         text += ", ".join((f"`{x}`" for x in promoted))
         if title:
             text += f"\n`Title:` `{title}`"
@@ -128,7 +128,7 @@ async def demote(event: NewMessage.Event) -> None:
         except Exception:
             skipped.append(user)
     if demoted:
-        text = f"`Successfully demoted:`\n"
+        text = "`Successfully demoted:`\n"
         text += ", ".join((f"`{x}`" for x in demoted))
         if reason:
             text += f"\n`Reason:` `{reason}`"
@@ -184,7 +184,7 @@ async def ban(event: NewMessage.Event) -> None:
         except Exception:
             skipped.append(user)
     if banned:
-        text = f"`Successfully banned:`\n"
+        text = "`Successfully banned:`\n"
         text += ", ".join((f"`{x}`" for x in banned))
         if reason:
             text += f"\n`Reason:` `{reason}`"
@@ -251,7 +251,7 @@ async def unban(event: NewMessage.Event) -> None:
         except Exception:
             skipped.append(user)
     if unbanned:
-        text = f"`Successfully unbanned:`\n"
+        text = "`Successfully unbanned:`\n"
         text += ", ".join((f"`{x}`" for x in unbanned))
         if reason:
             text += f"\n`Reason:` `{reason}`"
@@ -307,7 +307,7 @@ async def kick(event: NewMessage.Event) -> None:
         except Exception:
             skipped.append(user)
     if kicked:
-        text = f"`Successfully kicked:`\n"
+        text = "`Successfully kicked:`\n"
         text += ", ".join((f"`{x}`" for x in kicked))
         if reason:
             text += f"\n`Reason:` `{reason}`"
@@ -363,7 +363,7 @@ async def mute(event: NewMessage.Event) -> None:
         except Exception:
             skipped.append(user)
     if muted:
-        text = f"`Successfully muted:`\n"
+        text = "`Successfully muted:`\n"
         text += ", ".join((f"`{x}`" for x in muted))
         if reason:
             text += f"\n`Reason:` `{reason}`"
@@ -419,7 +419,7 @@ async def unmute(event: NewMessage.Event) -> None:
         except Exception:
             skipped.append(user)
     if unmuted:
-        text = f"`Successfully unmuted:`\n"
+        text = "`Successfully unmuted:`\n"
         text += ", ".join((f"`{x}`" for x in unmuted))
         if reason:
             text += f"\n`Reason:` `{reason}`"
@@ -481,11 +481,11 @@ async def tmute(event: NewMessage.Event) -> None:
                 until_date=timedelta(seconds=period),
                 send_messages=False,
             )
-            unmuted.append(user)
+            tmuted.append(user)
         except Exception:
             skipped.append(user)
     if tmuted:
-        text = f"`Successfully tmuted:`\n"
+        text = "`Successfully tmuted:`\n"
         text += ", ".join((f"`{x}`" for x in tmuted))
         text += f"\n`Time:` `{await _humanfriendly_seconds(period)}`"
         if reason:
@@ -548,11 +548,11 @@ async def tban(event: NewMessage.Event) -> None:
                 until_date=timedelta(seconds=period),
                 view_messages=False,
             )
-            banned.append(user)
+            tbanned.append(user)
         except Exception:
             skipped.append(user)
     if tbanned:
-        text = f"`Successfully tbanned:`\n"
+        text = "`Successfully tbanned:`\n"
         text += ", ".join((f"`{x}`" for x in tbanned))
         text += f"\n`Time:` `{await _humanfriendly_seconds(period)}`"
         if reason:
@@ -592,10 +592,10 @@ async def pin(event: NewMessage.Event) -> None:
         await client.pin_message(
             entity=entity, message=event.reply_to_msg_id, notify=notify
         )
-        text = f"`Successfully pinned!`\n"
+        text = "`Successfully pinned!`\n"
         text += f"`Loud-Pin:` `{'Yes' if notify else 'No'}`\n"
     except Exception:
-        text = f"`Failed to pin the message!`\n"
+        text = "`Failed to pin the message!`\n"
     e2 = await get_chat_link(event, event.reply_to_msg_id)
     log_msg = text + f"`Chat:` {e2}"
     await event.answer(text, log=("pin", log_msg))

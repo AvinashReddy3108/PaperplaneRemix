@@ -38,7 +38,7 @@ main_repo = "https://github.com/AvinashReddy3108/PaperplaneRemix.git"
 
 
 @client.onMessage(
-    command="update", outgoing=True, regex="update(?: |$)(reset|add)?$", builtin=True
+    command="update", outgoing=True, regex=r"update(?: |$)(reset|add)?$", builtin=True
 )
 async def updater(event: NewMessage.Event) -> None:
     """
@@ -229,7 +229,7 @@ async def updater(event: NewMessage.Event) -> None:
                 repo.index.commit("[PaperplaneRemix] Updater: Untracked files")
             app.enable_feature("runtime-dyno-metadata")
             await event.answer(
-                f"`Pushing all the changes to Heroku. This might take a while.`"
+                "`Pushing all the changes to Heroku. This might take a while.`"
             )
             remote = repo.remotes["heroku"]
             try:

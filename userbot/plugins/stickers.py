@@ -67,7 +67,7 @@ KANGING_STR = [
 @client.onMessage(
     command=("getsticker", plugin_category),
     outgoing=True,
-    regex="getsticker(?: |$)(file|document)?$",
+    regex=r"getsticker(?: |$)(file|document)?$",
 )
 async def getsticker(event: NewMessage.Event) -> None:
     """
@@ -141,7 +141,7 @@ async def stickerpack(event: NewMessage.Event) -> None:
     args, kwargs = await client.parse_arguments(match)
     if kwargs:
         texts = []
-        for x, y in kwargs.itmes():
+        for x, y in kwargs.items():
             texts.append(await _set_default_packs(x, y))
         text = "\n".join(texts)
     elif "reset" in args:
@@ -149,12 +149,12 @@ async def stickerpack(event: NewMessage.Event) -> None:
         await _set_default_packs("animated", "reset")
         text = "`Successfully reset both of your packs.`"
     else:
-        text = await _set_default_packs(f"basic", args[0])
+        text = await _set_default_packs("basic", args[0])
     await event.answer(text, log=("stickerpack", text))
 
 
 @client.onMessage(
-    command=("delsticker", plugin_category), outgoing=True, regex="delsticker$"
+    command=("delsticker", plugin_category), outgoing=True, regex=r"delsticker$"
 )
 async def delsticker(event: NewMessage.Event) -> None:
     """
@@ -229,7 +229,7 @@ async def delsticker(event: NewMessage.Event) -> None:
         await _delete_sticker_messages(first_msg)
     else:
         await event.answer(
-            f"**Couldn't delete the sticker. Perhaps it's not in your pack.**"
+            "**Couldn't delete the sticker. Perhaps it's not in your pack.**"
             "\n`Check the chat with @Stickers for more information.`"
         )
         await client.send_read_acknowledge("@Stickers")
@@ -398,11 +398,11 @@ async def kang(event: NewMessage.Event) -> None:
                         packtype = "/newanimated" if is_animated else "/newpack"
                         await conv.send_message(packtype)
                         r13 = await conv.get_response()
-                        LOGGER.debug("Stickers:" + r12.text)
+                        LOGGER.debug("Stickers:" + r13.text)
                         await client.send_read_acknowledge(conv.chat_id)
                         await conv.send_message(packnick)
                         r14 = await conv.get_response()
-                        LOGGER.debug("Stickers:" + r13.text)
+                        LOGGER.debug("Stickers:" + r14.text)
                         await client.send_read_acknowledge(conv.chat_id)
                 else:
                     await event.answer(f"`{pack} has reached it's limit!`")
@@ -520,7 +520,7 @@ async def _set_default_packs(pack_type: str, name: str) -> str:
                 "default_animated_sticker_pack", None
             )
             if is_pack:
-                text = f"`Successfully reset your default animated pack!`"
+                text = "`Successfully reset your default animated pack!`"
                 del client.config["userbot"]["default_animated_sticker_pack"]
             else:
                 text = "`You had no default animated pack to reset!`"
@@ -531,7 +531,7 @@ async def _set_default_packs(pack_type: str, name: str) -> str:
         if name.lower() in ["reset", "none"]:
             is_pack = client.config["userbot"].get("default_sticker_pack", None)
             if is_pack:
-                text = f"`Successfully reset your default pack!`"
+                text = "`Successfully reset your default pack!`"
                 del client.config["userbot"]["default_sticker_pack"]
             else:
                 text = "`You had no default pack to reset!`"
