@@ -29,7 +29,7 @@ from userbot.utils.events import NewMessage
 from userbot.plugins.plugins_data import Blacklist, GlobalBlacklist
 
 
-plugin_category = "blacklisting"
+plugin_category = "blacklists"
 redis = client.database
 
 blacklisted_text = (
@@ -257,7 +257,7 @@ async def blacklister(event: NewMessage.Event) -> None:
             `url` or `domain` (Same as str but you can use * and ?)
     """
     if not redis:
-        await event.answer("`You need to use a Redis session to use blacklists.`")
+        await event.answer("`I need to set up a Redis session to use this.`")
         return
 
     glb = event.matches[0].group("global")
@@ -279,12 +279,8 @@ async def blacklister(event: NewMessage.Event) -> None:
 
     if not glb:
         chat = await event.get_chat()
-        if not chat.creator and not getattr(
-            chat.admin_rights, "ban_users", False
-        ):
-            await event.edit(
-                "`You need to have ban rights to set a blacklist in here.`"
-            )
+        if not chat.creator and not getattr(chat.admin_rights, "ban_users", False):
+            await event.edit("`I need to have ban rights to set a blacklist in here.`")
             return
 
     for option, values in parsed.items():
@@ -324,7 +320,7 @@ async def unblacklister(event: NewMessage.Event) -> None:
             `url` or `domain` (Same as str but you can use * and ?)
     """
     if not redis:
-        await event.answer("`You need to use a Redis session to use blacklists.`")
+        await event.answer("`I need to set up a Redis session to use this.`")
         return
 
     glb = event.matches[0].group("global")
@@ -398,7 +394,7 @@ async def whitelister(event: NewMessage.Event) -> None:
     `{prefix}whitelist` or **{prefix}whitelist (users/chats)**
     """
     if not redis:
-        await event.answer("`You need to use a Redis session to use blacklists.`")
+        await event.answer("`I need to set up a Redis session to use this.`")
         return
 
     match = event.matches[0].group("match") or ""
@@ -489,7 +485,7 @@ async def unwhitelister(event: NewMessage.Event) -> None:
     `{prefix}removewhitelist` or **{prefix}removewhitelist (users/chats)**
     """
     if not redis:
-        await event.answer("`You need to use a Redis session to use blacklists.`")
+        await event.answer("`I need to set up a Redis session to use this.`")
         return
 
     match = event.matches[0].group("match") or ""
@@ -583,7 +579,7 @@ async def unblacklistuser(event: NewMessage.Event) -> None:
     `{prefix}unblacklist` or **{prefix}unblacklist (users)**
     """
     if not redis:
-        await event.answer("`You need to use a Redis session to use blacklists.`")
+        await event.answer("`I need to set up a Redis session to use this.`")
         return
 
     match = event.matches[0].group("match") or ""
@@ -647,7 +643,7 @@ async def listbls(event: NewMessage.Event) -> None:
             `index`: The index of the blacklist for the specified type
     """
     if not redis:
-        await event.answer("`You need to use a Redis session to use blacklists.`")
+        await event.answer("`I need to set up a Redis session to use this.`")
         return
 
     glb = event.matches[0].group("global")
@@ -757,7 +753,7 @@ async def listwls(event: NewMessage.Event) -> None:
         **Arguments:** `user` and `chat`
     """
     if not redis:
-        await event.answer("`You need to use a Redis session to use blacklists.`")
+        await event.answer("`I need to set up a Redis session to use this.`")
         return
 
     match = event.matches[0].group("match") or ""
@@ -846,7 +842,7 @@ async def listbld(event: NewMessage.Event) -> None:
             `file` Whether to send the final text as a text file or not
     """
     if not redis:
-        await event.answer("`You need to use a Redis session to use blacklists.`")
+        await event.answer("`I need to set up a Redis session to use this.`")
         return
 
     match = event.matches[0].group("match") or ""

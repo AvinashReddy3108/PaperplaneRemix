@@ -169,7 +169,7 @@ async def delsticker(event: NewMessage.Event) -> None:
 
     reply = await event.get_reply_message()
     if not reply.sticker:
-        await event.answer("`Replied to message isn't a sticker.`")
+        await event.answer("`Wait a minute, this isn't a sticker!`")
         return
 
     stickerset = None
@@ -365,20 +365,16 @@ async def kang(event: NewMessage.Event) -> None:
             new_first_msg = await conv.send_message(packtype)
             r1 = await conv.get_response()
             LOGGER.debug("Stickers:" + r1.text)
-            await client.send_read_acknowledge(conv.chat_id)
             await conv.send_message(packnick)
             r2 = await conv.get_response()
             LOGGER.debug("Stickers:" + r2.text)
-            await client.send_read_acknowledge(conv.chat_id)
         else:
             await conv.send_message("/addsticker")
             r1 = await conv.get_response()
             LOGGER.debug("Stickers:" + r1.text)
-            await client.send_read_acknowledge(conv.chat_id)
             await conv.send_message(pack)
             r2 = await conv.get_response()
             LOGGER.debug("Stickers:" + r2.text)
-            await client.send_read_acknowledge(conv.chat_id)
             if "120 stickers" in r2.text:
                 if "_kang_pack" in pack:
                     pack, packnick, new_pack = await _get_new_ub_pack(
@@ -391,16 +387,13 @@ async def kang(event: NewMessage.Event) -> None:
                         await conv.send_message("/cancel")
                         r12 = await conv.get_response()
                         LOGGER.debug("Stickers:" + r12.text)
-                        await client.send_read_acknowledge(conv.chat_id)
                         packtype = "/newanimated" if is_animated else "/newpack"
                         await conv.send_message(packtype)
                         r13 = await conv.get_response()
                         LOGGER.debug("Stickers:" + r13.text)
-                        await client.send_read_acknowledge(conv.chat_id)
                         await conv.send_message(packnick)
                         r14 = await conv.get_response()
                         LOGGER.debug("Stickers:" + r14.text)
-                        await client.send_read_acknowledge(conv.chat_id)
                 else:
                     await event.answer(f"`{pack} has reached it's limit!`")
                     await _delete_sticker_messages(first_msg or new_first_msg)
@@ -408,16 +401,14 @@ async def kang(event: NewMessage.Event) -> None:
                     return
             elif ".TGS" in r2.text and not is_animated:
                 await event.answer(
-                    "`You're trying to kang a normal sticker "
-                    "to an animated pack. Choose the correct pack!`"
+                    "`I can't kang a normal sticker" " to an animated pack!`"
                 )
                 await _delete_sticker_messages(first_msg or new_first_msg)
                 await _update_stickers_notif(notif)
                 return
             elif ".PSD" in r2.text and is_animated:
                 await event.answer(
-                    "`You're trying to kang an animated sticker "
-                    "to a normal pack. Choose the correct pack!`"
+                    "`I can't kang an animated sticker" "to a normal pack!`"
                 )
                 await _delete_sticker_messages(first_msg or new_first_msg)
                 await _update_stickers_notif(notif)
@@ -447,25 +438,21 @@ async def kang(event: NewMessage.Event) -> None:
         sticker.close()
         r3 = await conv.get_response()
         LOGGER.debug("Stickers:" + r3.text)
-        await client.send_read_acknowledge(conv.chat_id)
 
         await conv.send_message(emojis)
         r4 = await conv.get_response()
         LOGGER.debug("Stickers:" + r4.text)
-        await client.send_read_acknowledge(conv.chat_id)
         if new_pack:
             await conv.send_message("/publish")
             r5 = await conv.get_response()
             LOGGER.debug("Stickers:" + r5.text)
-            await client.send_read_acknowledge(conv.chat_id)
             if is_animated:
                 await conv.send_message("<" + packnick + ">")
                 r41 = await conv.get_response()
                 LOGGER.debug("Stickers:" + r41.text)
-                await client.send_read_acknowledge(conv.chat_id)
 
                 if r41.text == "Invalid pack selected.":
-                    await event.answer("`You tried to kang to an invalid pack.`")
+                    await event.answer("`Invalid pack selected.`")
                     await conv.send_message("/cancel")
                     await conv.get_response()
                     await client.send_read_acknowledge(conv.chat_id)
@@ -475,17 +462,14 @@ async def kang(event: NewMessage.Event) -> None:
             await conv.send_message("/skip")
             r6 = await conv.get_response()
             LOGGER.debug("Stickers:" + r6.text)
-            await client.send_read_acknowledge(conv.chat_id)
 
             await conv.send_message(pack)
             r7 = await conv.get_response()
             LOGGER.debug("Stickers:" + r7.text)
-            await client.send_read_acknowledge(conv.chat_id)
             if "Sorry" in r7.text:
                 await conv.send_message("/cancel")
                 r61 = await conv.get_response()
                 LOGGER.debug("Stickers:" + r61.text)
-                await client.send_read_acknowledge(conv.chat_id)
                 await event.answer(
                     "`Pack's short name is unacceptable or already taken. "
                     "Try thinking of a better short name.`"
@@ -497,7 +481,6 @@ async def kang(event: NewMessage.Event) -> None:
             await conv.send_message("/done")
             r5 = await conv.get_response()
             LOGGER.debug("Stickers:" + r5.text)
-            await client.send_read_acknowledge(conv.chat_id)
 
     pack = f"[{pack}](https://t.me/addstickers/{pack})"
     extra = await get_chat_link(event, sticker_event.id)
@@ -506,6 +489,7 @@ async def kang(event: NewMessage.Event) -> None:
         self_destruct=4,
         log=("kang", f"Successfully kanged a sticker from {extra} to {pack}"),
     )
+    await client.send_read_acknowledge(conv.chat_id)
     await _delete_sticker_messages(first_msg or new_first_msg)
     await _update_stickers_notif(notif)
 
@@ -517,10 +501,10 @@ async def _set_default_packs(pack_type: str, name: str) -> str:
                 "default_animated_sticker_pack", None
             )
             if is_pack:
-                text = "`Successfully reset your default animated pack!`"
+                text = "`Successfully reset the default animated pack!`"
                 del client.config["userbot"]["default_animated_sticker_pack"]
             else:
-                text = "`You had no default animated pack to reset!`"
+                text = "`I have no default animated pack to reset to!`"
         else:
             client.config["userbot"]["default_animated_sticker_pack"] = name
             text = f"`Successfully changed your default animated pack to {name}!`"
@@ -531,7 +515,7 @@ async def _set_default_packs(pack_type: str, name: str) -> str:
                 text = "`Successfully reset your default pack!`"
                 del client.config["userbot"]["default_sticker_pack"]
             else:
-                text = "`You had no default pack to reset!`"
+                text = "`I have no default pack to reset to!`"
         else:
             client.config["userbot"]["default_sticker_pack"] = name
             text = f"`Successfully changed your default pack to {name}!`"
@@ -573,7 +557,6 @@ async def _get_new_ub_pack(
     await conv.send_message(pack)
     r11 = await conv.get_response()
     LOGGER.debug("Stickers:" + r11.text)
-    await client.send_read_acknowledge(conv.chat_id)
     if "120 stickers" in r11.text:
         l_char = pack[-1:]  # Check if the suffix is a digit
         if l_char.isdigit():
@@ -586,7 +569,7 @@ async def _get_new_ub_pack(
         packnick = f"{tag}'s animated kang pack {pack[-1:]}"
     else:
         packnick = f"{tag}'s kang pack {pack[-1:]}"
-
+    await client.send_read_acknowledge(conv.chat_id)
     return pack, packnick, new_pack
 
 
@@ -641,13 +624,11 @@ async def _list_packs() -> Tuple[List[str], types.Message]:
         first = await conv.send_message("/cancel")
         r1 = await conv.get_response()
         LOGGER.debug("Stickers:" + r1.text)
-        await client.send_read_acknowledge(conv.chat_id)
         await conv.send_message("/packstats")
         r2 = await conv.get_response()
         LOGGER.debug("Stickers:" + r2.text)
         if r2.text.startswith("You don't have any sticker packs yet."):
             return [], first
-        await client.send_read_acknowledge(conv.chat_id)
         buttons = list(itertools.chain.from_iterable(r2.buttons or []))
         await conv.send_message("/cancel")
         r3 = await conv.get_response()

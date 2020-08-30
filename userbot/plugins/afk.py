@@ -38,9 +38,9 @@ AFK.groups = plugins_data.load_data("userbot_afk_groups")
 AFK.sent = plugins_data.load_data("userbot_afk_sent")
 
 going_afk = "`AFK AF!`"
-going_afk_reason = "`Going AFK, BRB!`" + "\n**Reason:** __{reason}.__"
+going_afk_reason = "`Going AFK!`" + "\n**Reason:** __{reason}.__"
 not_afk = "`I'm back!`"
-currently_afk_reason = "`I am currently AFK!`\
+currently_afk_reason = "`I'm currently AFK!`\
     \n**Last seen:** __{elapsed} ago.__\
     \n**Reason:** __{reason}.__"
 
@@ -113,7 +113,7 @@ async def out_listner(event: NewMessage.Event) -> None:
     _, chat, msg = userbot_afk.split("/")
     await client.delete_messages(int(chat), int(msg))
 
-    def_text = "`You received no messages nor were tagged at any time.`"
+    def_text = "`I received no messages nor was tagged while I was away.`"
     pr_text = ""
     pr_log = ""
     gr_text = ""
@@ -122,7 +122,7 @@ async def out_listner(event: NewMessage.Event) -> None:
     if AFK.privates:
         total_mentions = 0
         to_log = []
-        pr_log = "**Mentions received from private chats:**\n"
+        pr_log = "**[Private] Pings/PMs:**\n"
         for key, value in AFK.privates.items():
             await _update_notif_settings(key, value["PeerNotifySettings"])
             total_mentions += len(value["mentions"])
@@ -136,7 +136,7 @@ async def out_listner(event: NewMessage.Event) -> None:
     if AFK.groups:
         total_mentions = 0
         to_log = []
-        gr_log = "\n**Mentions Received from groups:**\n"
+        gr_log = "\n**[Groups] Tags/Mentions:**\n"
         for key, value in AFK.groups.items():
             await _update_notif_settings(key, value["PeerNotifySettings"])
             total_mentions += len(value["mentions"])

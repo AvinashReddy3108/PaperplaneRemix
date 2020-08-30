@@ -105,6 +105,9 @@ async def updater(event: NewMessage.Event) -> None:
     try:
         config = repo.config_reader()
         try:
+            LOGGER.debug(
+                f"Found Git user: {config.get_value('user', 'name')} <{config.get_value('user', 'email')}>"
+            )
             pass
         except (NoSectionError, NoOptionError):
             LOGGER.warning(
@@ -118,8 +121,8 @@ async def updater(event: NewMessage.Event) -> None:
     except git.exc.GitCommandError as command:
         text = (
             "`An error occured trying to Git pull:`\n`{0}`\n\n"
-            "`You may use` **{1}update reset** `or` **{1}update add** "
-            "`to reset your repo or add and commit your changes as well.`"
+            "`Use` **{1}update reset** to reset the repo `or` **{1}update add** "
+            "`to add and commit the changes as well.`"
         )
         prefix = client.prefix if client.prefix is not None else "."
         await event.answer(text.format(command, prefix))
@@ -177,7 +180,7 @@ async def updater(event: NewMessage.Event) -> None:
                 break
         if app is None:
             await event.answer(
-                "`You seem to be running on Heroku "
+                "`I seem to be running the userbot on Heroku "
                 "with an invalid environment. Couldn't update the app.`\n"
                 "`The changes will be reverted upon dyno restart.`"
             )

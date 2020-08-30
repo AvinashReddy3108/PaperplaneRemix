@@ -150,7 +150,9 @@ async def disable(event: NewMessage.Event) -> None:
             await event.answer("`Cannot disable a builtin command.`")
         else:
             client.remove_event_handler(command.func)
-            disabled_coms = ", ".join(split_exp.split(arg)) if arg in command_list else arg
+            disabled_coms = (
+                ", ".join(split_exp.split(arg)) if arg in command_list else arg
+            )
             client.disabled_commands[arg] = command
             client.commands.pop(arg)
             await event.answer(
@@ -229,23 +231,7 @@ async def helper(event: NewMessage.Event) -> None:
     prefix = client.prefix or "."
     if arg:
         arg = arg.lower()
-        if arg == "all":
-            text = "**Enabled commands:**\n"
-            if arg1:
-                text += "\n\n".join(
-                    [f"`{n}`: `{i.info}`" for n, i in sorted(enabled.items())]
-                )
-            else:
-                text += ",\t\t".join([f"`{name}`" for name in sorted(enabled)])
-            if disabled:
-                text += "\n**Disabled commands:**"
-                if arg1:
-                    text += "\n\n".join(
-                        [f"`{n}`: `{i.info}`" for n, i in sorted(disabled.items())]
-                    )
-                else:
-                    text += ",\t\t".join([f"`{name}`" for name in sorted(disabled)])
-        elif arg in (*enabled, *disabled, *senabled, *sdisabled):
+        if arg in (*enabled, *disabled, *senabled, *sdisabled):
             command = None
             for i in (enabled, disabled, senabled, sdisabled):
                 if arg in i:
@@ -260,7 +246,7 @@ async def helper(event: NewMessage.Event) -> None:
                 if not filename.startswith("http"):
                     filename = f"`{os.path.relpath(filename)}`"
                 text += (
-                    "\n• **Developer/Debug Info:**\n"
+                    "\n• **Dev/Debug Info:**\n"
                     f"   - **File:** {filename}\n"
                     f"      - **Registered function:** `{command.func.__name__}`\n"
                     f"      - **Line:** `{command.func.__code__.co_firstlineno}`\n"
@@ -284,8 +270,7 @@ async def helper(event: NewMessage.Event) -> None:
             f"Documented commands can be found [HERE!]({link})\n"
             f"**Usage:**\n"
             f"  __{client.prefix or '.'}help <category>__\n"
-            f"  __{client.prefix or '.'}help <command>__\n"
-            f"  __{client.prefix or '.'}help all__\n\n"
+            f"  __{client.prefix or '.'}help <command>__\n\n"
             "**Available command categories:**"
         )
         for category in sorted(categories.keys()):

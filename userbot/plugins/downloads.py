@@ -48,12 +48,12 @@ async def download(event: NewMessage.Event) -> None:
         path = pathlib.Path(match.strip())
 
     if not event.reply_to_msg_id:
-        await event.answer("__Downloaded the void?__")
+        await event.answer("`Downloaded the void.`")
         return
 
     reply = await event.get_reply_message()
     if not (reply.document or reply.media):
-        await event.answer("__There is no document to download.__")
+        await event.answer("`There is no document/media in here to download!`")
         return
 
     for attr in getattr(reply.document, "attributes", []):
@@ -113,7 +113,7 @@ async def upload(event: NewMessage.Event) -> None:
     match = event.matches[0].group(3)
     target_files = []
     if not match:
-        await event.answer("__Uploaded the void?__")
+        await event.answer("`Uploaded the void.`")
         return
 
     match = match.strip().replace("\\", "/") if match else ""
@@ -137,7 +137,7 @@ async def upload(event: NewMessage.Event) -> None:
             target_files.append(f)"""
 
     if not target_files:
-        await event.answer("__Couldn't find what you were looking for.__")
+        await event.answer("`Couldn't find what you were looking for.`")
         return
 
     files = "\n".join([f"`{await _get_file_name(f)}`" for f in target_files])
@@ -161,7 +161,7 @@ async def upload(event: NewMessage.Event) -> None:
             event.chat_id, file=media, force_document=True, reply_to=event
         )
 
-    await event.answer(f"__Successfully uploaded {files}.__")
+    await event.answer(f"`Successfully uploaded {files}.`")
 
 
 async def _get_file_name(path: pathlib.Path, full: bool = True) -> str:

@@ -41,7 +41,7 @@ async def purge(event: NewMessage.Event) -> None:
     if (event.is_channel or event.is_group) and not (
         event.chat.creator or event.chat.admin_rights.delete_messages
     ):
-        await event.answer("`You do not have message deleting rights in here!`")
+        await event.answer("`I don't have rights to delete messages in here!`")
         return
 
     entity = await event.get_chat()
@@ -50,7 +50,7 @@ async def purge(event: NewMessage.Event) -> None:
     skip = kwargs.get("skip", 0)
 
     if not event.reply_to_msg_id and not amount:
-        await event.answer("`Purge yourself!`", self_destruct=2)
+        await event.answer("`Purged the void.`", self_destruct=2)
         return
 
     reverse = True if event.reply_to_msg_id else False
@@ -128,7 +128,7 @@ async def delete(event: NewMessage.Event) -> None:
         ):
             await reply.delete()
         else:
-            await event.answer("`You don't have enough rights in here fool!`")
+            await event.answer("`I don't have enough rights in here!`")
             return
     else:
         await reply.delete()

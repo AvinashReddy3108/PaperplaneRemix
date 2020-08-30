@@ -23,7 +23,7 @@ from userbot.utils.helpers import _humanfriendly_seconds, get_chat_link
 from userbot.utils.events import NewMessage
 
 
-plugin_category = "user"
+plugin_category = "reminder"
 
 
 @client.onMessage(

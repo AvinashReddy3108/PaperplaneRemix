@@ -257,13 +257,12 @@ class ParallelTransferrer:
         if self.dc_id == self.client.session.dc_id:
             return self.client._sender
         dc = await self.client._get_dc(self.dc_id)
-        sender = MTProtoSender(self.auth_key, self.loop, loggers=self.client._log)
+        sender = MTProtoSender(self.auth_key, loggers=self.client._log)
         await sender.connect(
             self.client._connection(
                 dc.ip_address,
                 dc.port,
                 dc.id,
-                loop=self.loop,
                 loggers=self.client._log,
                 proxy=self.client._proxy,
             )

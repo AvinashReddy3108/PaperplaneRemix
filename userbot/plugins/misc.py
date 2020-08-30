@@ -74,7 +74,7 @@ async def rmbg(event: NewMessage.Event) -> None:
     """
     API_KEY = client.config["api_keys"].get("api_key_removebg", False)
     if not API_KEY:
-        await event.answer("`You don't have an API key set for remove.bg!`")
+        await event.answer("`I don't have an API key set for remove.bg!`")
         return
 
     match = event.matches[0].group(2)
@@ -271,7 +271,7 @@ async def bot_mention(event: NewMessage.Event) -> None:
 )
 async def deldog(event: NewMessage.Event) -> None:
     """
-    Paste the content to DelDog.
+    Paste the content to [DelDog](https://del.dog/).
 
 
     `{prefix}paste` in reply to a document/message or **{prefix}paste (text)**
@@ -286,7 +286,7 @@ async def deldog(event: NewMessage.Event) -> None:
         else:
             text = reply.raw_text
     else:
-        await event.answer("`Provide something to paste on` https://del.dog")
+        await event.answer("`Pasted the void.`")
         return
     response = await client.loop.run_in_executor(
         None, functools.partial(dogbin_post, text)

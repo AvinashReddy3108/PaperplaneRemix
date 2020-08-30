@@ -23,7 +23,7 @@ from userbot import client
 from userbot.utils.helpers import get_chat_link
 from userbot.utils.events import NewMessage
 
-plugin_category = "terminal"
+plugin_category = "scripting"
 
 
 @client.onMessage(

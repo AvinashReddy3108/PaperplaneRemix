@@ -103,7 +103,7 @@ class NewMessage(events.NewMessage):
             event.matches = matches
 
         if self.require_admin:
-            text = "`You need to be an admin to use this command!`"
+            text = "`I need admin rights to be able to use this command!`"
             if not isinstance(event._chat_peer, types.PeerUser):
                 is_creator = False
                 is_admin = False
@@ -136,9 +136,7 @@ class NewMessage(events.NewMessage):
                     if self.outgoing and event.message.out:
                         event._client.loop.create_task(event.answer(text))
                     elif self.incoming and not event.message.out:
-                        event._client.loop.create_task(
-                            event.answer(text, reply=True)
-                        )
+                        event._client.loop.create_task(event.answer(text, reply=True))
                     return
         return event
 

@@ -39,10 +39,10 @@ async def promote(event: NewMessage.Event) -> None:
         **Arguments:** `reason` and `title`
     """
     if not event.is_private and not await get_rights(event, add_admins=True):
-        await event.answer("`You do not have rights to add admins in here!`")
+        await event.answer("`I don't have rights to add admins in here!`")
         return
     elif event.is_private:
-        await event.answer("`You can't promote users in private chats.`")
+        await event.answer("`I can't promote users in private chats.`")
         return
 
     match = event.matches[0].group(1)
@@ -100,10 +100,10 @@ async def demote(event: NewMessage.Event) -> None:
         **Arguments:** `reason`
     """
     if not event.is_private and not await get_rights(event, ban_users=True):
-        await event.answer("`You do not have rights to remove admins in here!`")
+        await event.answer("`I don't have rights to remove admins in here!`")
         return
     elif event.is_private:
-        await event.answer("`You can't demote users in private chats.`")
+        await event.answer("`I can't demote users in private chats.`")
         return
 
     match = event.matches[0].group(1)
@@ -156,10 +156,10 @@ async def ban(event: NewMessage.Event) -> None:
         **Arguments:** `reason`
     """
     if not event.is_private and not await get_rights(event, ban_users=True):
-        await event.answer("`You do not have rights to ban users in here!`")
+        await event.answer("`I don't have rights to ban users in here!`")
         return
     elif event.is_private:
-        await event.answer("`You can't ban users in private chats.`")
+        await event.answer("`I can't ban users in private chats.`")
         return
 
     match = event.matches[0].group(1)
@@ -212,10 +212,10 @@ async def unban(event: NewMessage.Event) -> None:
         **Arguments:** `reason`
     """
     if not event.is_private and not await get_rights(event, ban_users=True):
-        await event.answer("`You do not have rights to un-ban users in here!`")
+        await event.answer("`I don't have rights to un-ban users in here!`")
         return
     elif event.is_private:
-        await event.answer("`You can't un-ban users in private chats.`")
+        await event.answer("`I can't un-ban users in private chats.`")
         return
 
     match = event.matches[0].group(1)
@@ -279,10 +279,10 @@ async def kick(event: NewMessage.Event) -> None:
         **Arguments:** `reason`
     """
     if not event.is_private and not await get_rights(event, ban_users=True):
-        await event.answer("`You do not have rights to kick users in here!`")
+        await event.answer("`I don't have rights to kick users in here!`")
         return
     elif event.is_private:
-        await event.answer("`You can't kick users in private chats.`")
+        await event.answer("`I can't kick users in private chats.`")
         return
 
     match = event.matches[0].group(1)
@@ -335,10 +335,10 @@ async def mute(event: NewMessage.Event) -> None:
         **Arguments:** `reason`
     """
     if not event.is_private and not await get_rights(event, ban_users=True):
-        await event.answer("`You do not have rights to mute users in here!`")
+        await event.answer("`I don't have rights to mute users in here!`")
         return
     elif event.is_private:
-        await event.answer("`You can't mute users in private chats.`")
+        await event.answer("`I can't mute users in private chats.`")
         return
 
     match = event.matches[0].group(1)
@@ -391,10 +391,10 @@ async def unmute(event: NewMessage.Event) -> None:
         **Arguments:** `reason`
     """
     if not event.is_private and not await get_rights(event, ban_users=True):
-        await event.answer("`You do not have rights to un-mute users in here!`")
+        await event.answer("`I don't have rights to un-mute users in here!`")
         return
     elif event.is_private:
-        await event.answer("`You can't un-mute users in private chats.`")
+        await event.answer("`I can't un-mute users in private chats.`")
         return
 
     match = event.matches[0].group(1)
@@ -447,10 +447,10 @@ async def tmute(event: NewMessage.Event) -> None:
         **Arguments:** `reason` and `time`
     """
     if not event.is_private and not await get_rights(event, ban_users=True):
-        await event.answer("`You do not have rights to mute users in here!`")
+        await event.answer("`I don't have rights to mute users in here!`")
         return
     elif event.is_private:
-        await event.answer("`You can't t-mute users in private chats.`")
+        await event.answer("`I can't t-mute users in private chats.`")
         return
 
     match = event.matches[0].group(1)
@@ -514,10 +514,10 @@ async def tban(event: NewMessage.Event) -> None:
         **Arguments:** `reason` and `time`
     """
     if not event.is_private and not await get_rights(event, ban_users=True):
-        await event.answer("`You do not have rights to t-ban users in here!`")
+        await event.answer("`I don't have rights to t-ban users in here!`")
         return
     elif event.is_private:
-        await event.answer("`You can't t-ban users in private chats.`")
+        await event.answer("`I can't t-ban users in private chats.`")
         return
 
     match = event.matches[0].group(1)
@@ -575,10 +575,10 @@ async def tban(event: NewMessage.Event) -> None:
 async def pin(event: NewMessage.Event) -> None:
     """Pin the message at the top of the group or channel."""
     if not event.is_private and not await get_rights(event, pin_messages=True):
-        await event.answer("`You do not have rights to pin messages in here!`")
+        await event.answer("`I don't have rights to pin messages in here!`")
         return
     elif event.is_private:
-        await event.answer("`You can't pin messages in private chats.`")
+        await event.answer("`I can't pin messages in private chats.`")
         return
 
     notify = bool(event.matches[0].group(1))

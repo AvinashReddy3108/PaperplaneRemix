@@ -168,7 +168,7 @@ async def bio(event: NewMessage.Event) -> None:
         if about:
             await event.answer(f"**{about}**")
         else:
-            await event.answer("`You currently have no bio.`")
+            await event.answer("`I currently have no bio.`")
         return
 
     try:
@@ -178,7 +178,7 @@ async def bio(event: NewMessage.Event) -> None:
             log=("bio", f"Bio changed from {about} to {match}"),
         )
     except errors.AboutTooLongError:
-        await event.answer("`The about text is too long.`")
+        await event.answer("`The bio is too long.`")
 
 
 @client.onMessage(
@@ -197,7 +197,7 @@ async def username(event: NewMessage.Event) -> None:
         if u1:
             await event.answer(f"**{u1}**")
         else:
-            await event.answer("`You currently have no username.`")
+            await event.answer("`I currently have no username.`")
         return
 
     try:
@@ -230,7 +230,7 @@ async def pfp(event: NewMessage.Event) -> None:
             await event.delete()
             await event.answer(file=photo)
         else:
-            await event.answer("`You currently have no profile picture.`")
+            await event.answer("`I currently have no profile picture.`")
         return
 
     if not reply.media:
@@ -300,7 +300,7 @@ async def delpfp(event: NewMessage.Event) -> None:
     if not match:
         count = (await client.get_profile_photos("self")).total
         amount = "one profile picture." if count == 1 else f"{count} profile pictures."
-        await event.answer(f"`You currently have {amount}`")
+        await event.answer(f"`I currently have {amount}`")
         return
 
     await event.answer("`Processing all the profile pictures...`")

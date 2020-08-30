@@ -34,18 +34,6 @@ redis = client.database
 approvedUsers: List[int] = []
 spammers: Dict[int, tuple] = {}
 
-PP_UNAPPROVED_MSG = (
-    "`Bleep blop! This is a bot. Don't fret.\n\n`"
-    "`My master hasn't approved you to PM.`"
-    "`Please wait for my master to look in, he mostly approves PMs.\n\n`"
-    "`As far as I know, he doesn't usually approve retards though.`"
-)
-FTG_UNAPPROVED_MSG = (
-    "Hey there! Unfortunately, I don't accept private messages from "
-    "strangers.\n\nPlease contact me in a group, or **wait** "
-    "for me to approve you."
-)
-
 warning = (
     "`You have only` **1** `message left, if you send the next one "
     "you will be blocked and reported!`"
@@ -56,8 +44,8 @@ default = (
 )
 samedefault = "`Messages Remaining:` **{remaining}**"
 newdefault = (
-    "**This is an automated message, kindly wait until you've been approved "
-    "otherwise you'll be blocked and reported for spamming.**\n\n"
+    "**This is an automated message, kindly wait until you've been approved. "
+    "Otherwise, you'll be blocked and reported for spamming.**\n\n"
     "`Messages Remaining:` **{remaining}**"
 )
 esc_default = re.escape(default.format(remaining=r"\d")).replace(r"\\d", r"\d")
@@ -97,9 +85,7 @@ async def pm_incoming(event: NewMessage.Event) -> None:
         user = await get_chat_link(entity)
         text = autoapprove.format(user=user)
         text += " `for being a mutual contact.`"
-        await event.answer(
-            text, reply=True, self_destruct=2, log=("pmpermit", text)
-        )
+        await event.answer(text, reply=True, self_destruct=2, log=("pmpermit", text))
         return
     elif sender not in spammers:
         await client(
@@ -142,13 +128,14 @@ async def pm_incoming(event: NewMessage.Event) -> None:
         if count == 1:
             out = await event.resanswer(warning, plugin="pmpermit", name="warning")
         elif (
-            event.text in [PP_UNAPPROVED_MSG, FTG_UNAPPROVED_MSG]
+            lastmsg
+            and event.text == lastmsg
             or re.search(esc_newdefault, event.text)
             or re.search(esc_default, event.text)
             or re.search(esc_samedefault, event.text)
         ):
             pass
-        elif lastmsg and event.text == lastmsg:
+        elif lastmsg and event.text != lastmsg:
             out = await event.resanswer(
                 samedefault,
                 plugin="pmpermit",
@@ -177,7 +164,7 @@ async def pm_outgoing(event: NewMessage.Event) -> None:
     ):
         return
     chat = await event.get_chat()
-    if chat.verified or chat.support or chat.bot:
+    if chat.verified or chat.support or chat.bot or chat.is_self:
         return
 
     result = await client.get_messages(
@@ -364,7 +351,7 @@ async def approved(event: NewMessage.Event) -> None:
         text += ", ".join([f"`{i}`" for i in approvedUsers])
         await event.answer(text)
     else:
-        await event.answer("`You haven't approved anyone yet.`")
+        await event.answer("`I haven't approved anyone to PM me yet.`")
 
 
 async def get_users(event: NewMessage.Event) -> types.User or None:

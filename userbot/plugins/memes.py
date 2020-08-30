@@ -272,6 +272,7 @@ SLAP_TEMPLATES = [
     "starts slapping {victim} silly with a {item}.",
     "pins {victim} down and repeatedly {hits} them with a {item}.",
     "grabs up a {item} and {hits} {victim} with it.",
+    "opens up a can of whoop-ass on {victim}"
     "starts slapping {victim} silly with a {item}.",
     "holds {victim} down and repeatedly {hits} them with a {item}.",
     "prods {victim} with a {item}.",
