@@ -29,7 +29,7 @@ from userbot.utils.events import NewMessage
 from telethon.tl.types import ChannelParticipantsBots
 
 pattern = (
-    r"(?:^\{prefix}|;.+?)"  # Ensure that the expression doesn't go blatant
+    r"(?:^{prefix}|;\s)"  # Ensure that the expression doesn't go blatant
     r"([1-9]+?)?"  # line: Don't match a 0, sed counts lines from 1
     r"(?:sed|s)"  # The s command (as in substitute)
     r"(?:(?P<d>[^\n\\]))"  # Unknown delimiter with a named group d
@@ -48,7 +48,7 @@ ninja_sedbots = ["regexbot", "regeexbot"]
     command="sed",
     outgoing=True,
     disable_prefix=True,
-    regex=(pattern, re.MULTILINE | re.IGNORECASE | re.DOTALL),
+    regex=(pattern, re.MULTILINE | re.IGNORECASE | re.DOTALL | re.UNICODE),
 )
 async def sed_substitute(event: NewMessage.Event) -> None:
     """

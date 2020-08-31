@@ -29,7 +29,7 @@ from userbot.utils.events import NewMessage
 from userbot.plugins.plugins_data import Blacklist, GlobalBlacklist
 
 
-plugin_category = "blacklists"
+plugin_category = "blacklisting"
 redis = client.database
 
 blacklisted_text = (
