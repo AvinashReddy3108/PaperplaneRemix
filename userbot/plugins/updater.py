@@ -108,7 +108,6 @@ async def updater(event: NewMessage.Event) -> None:
             LOGGER.debug(
                 f"Found Git user: {config.get_value('user', 'name')} <{config.get_value('user', 'email')}>"
             )
-            pass
         except (NoSectionError, NoOptionError):
             LOGGER.warning(
                 "No 'git' credentials found, falling back to generic data for the git pull."

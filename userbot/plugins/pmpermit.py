@@ -135,7 +135,7 @@ async def pm_incoming(event: NewMessage.Event) -> None:
             or re.search(esc_samedefault, event.text)
         ):
             pass
-        elif lastmsg and event.text != lastmsg:
+        elif lastmsg:
             out = await event.resanswer(
                 samedefault,
                 plugin="pmpermit",
