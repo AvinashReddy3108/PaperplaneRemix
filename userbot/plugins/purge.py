@@ -105,7 +105,8 @@ async def delme(event: NewMessage.Event) -> None:
 
     await client.delete_messages(entity, messages)
     await event.answer(
-        f"`Successfully deleted {len(messages)} message(s)!`", self_destruct=2,
+        f"`Successfully deleted {len(messages)} message(s)!`",
+        self_destruct=2,
     )
 
 

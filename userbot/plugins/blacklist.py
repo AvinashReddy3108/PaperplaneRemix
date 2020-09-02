@@ -74,14 +74,6 @@ id_pattern = re.compile(
     r"(?:https?:\/\/)?(?:www\.)?(?:t\.me\/)?@?(?P<e>\w{5,35}|-?\d{6,16})\/?"
 )
 invite_pattern = re.compile(r"(?:https?:\/\/)?(?:www\.)?t\.me\/(?P<hash>\w{22})\/?")
-acceptable_options = {
-    "id": "tgid",
-    "bio": "bio",
-    "string": "txt",
-    "str": "txt",
-    "domian": "url",
-    "url": "url",
-}
 full_key_names = {
     "tgid": "Telegram IDs",
     "bio": "User Bios",
@@ -1049,8 +1041,8 @@ async def inc_listener(event: NewMessage.Event) -> None:
 
 
 @client.on(ChatAction)
-async def bio_filter(event: ChatAction.Event) -> None:
-    """Filter incoming messages for blacklisting."""
+async def joined_listener(event: ChatAction.Event) -> None:
+    """Checks new members of a group for blacklisted items."""
     broadcast = getattr(event.chat, "broadcast", False)
 
     if not redis or event.is_private or broadcast:
@@ -1058,47 +1050,52 @@ async def bio_filter(event: ChatAction.Event) -> None:
 
     if event.user_added or event.user_joined:
         try:
-            sender = await event.get_input_user()
+            senders = await event.get_input_users()
             chat = await event.get_chat()
-            sender_id = sender.user_id
+            sender_ids = [sender.user_id for sender in senders]
             chat_id = chat.id
             localbl = localBlacklists.get(chat_id, False)
         except (ValueError, TypeError, AttributeError):
             return
-        if (
-            chat_id in whitelistedChats
-            or sender_id in whitelistedUsers
-            or await is_admin(chat_id, sender_id)
-        ):
-            return
-        elif sender_id in blacklistedUsers:
-            if sender_id not in temp_banlist:
-                await ban_user(event, "blacklisted", blacklisted_text)
-            return
-        elif GlobalBlacklist.tgid and sender_id in GlobalBlacklist.tgid:
-            index = GlobalBlacklist.tgid.index(sender_id)
-            if await ban_user(event, "tgid", sender_id, index, True):
+        for sender_id in sender_ids:
+            if (
+                chat_id in whitelistedChats
+                or sender_id in whitelistedUsers
+                or await is_admin(chat_id, sender_id)
+            ):
                 return
-        elif localbl and localbl.tgid and sender_id in localbl.tgid:
-            index = localbl.tgid.index(sender_id)
-            if await ban_user(event, "tgid", sender_id, index):
+            elif sender_id in blacklistedUsers:
+                if sender_id not in temp_banlist:
+                    await ban_user(event, "blacklisted", blacklisted_text)
                 return
+            elif GlobalBlacklist.tgid and sender_id in GlobalBlacklist.tgid:
+                index = GlobalBlacklist.tgid.index(sender_id)
+                if await ban_user(event, "tgid", sender_id, index, True):
+                    return
+            elif localbl and localbl.tgid and sender_id in localbl.tgid:
+                index = localbl.tgid.index(sender_id)
+                if await ban_user(event, "tgid", sender_id, index):
+                    return
 
-        user = await client(functions.users.GetFullUserRequest(id=sender))
-        if not user.about:
-            return
-        if GlobalBlacklist.bio:
-            for index, value in enumerate(GlobalBlacklist.bio):
-                bio = await escape_string(value)
-                if re.search(bio, user.about, flags=re.I):
-                    await ban_user(event, "bio", value, index, True)
-                    break
-        elif localbl and hasattr(localbl, "bio") and localBlacklists[event.chat_id].bio:
-            for index, value in enumerate(localBlacklists[chat_id].bio):
-                bio = await escape_string(value)
-                if re.search(bio, user.about, flags=re.I):
-                    await ban_user(event, "bio", value, index)
-                    break
+            user = await client(functions.users.GetFullUserRequest(id=sender_id))
+            if not user.about:
+                return
+            if GlobalBlacklist.bio:
+                for index, value in enumerate(GlobalBlacklist.bio):
+                    bio = await escape_string(value)
+                    if re.search(bio, user.about, flags=re.I):
+                        await ban_user(event, "bio", value, index, True)
+                        break
+            elif (
+                localbl
+                and hasattr(localbl, "bio")
+                and localBlacklists[event.chat_id].bio
+            ):
+                for index, value in enumerate(localBlacklists[chat_id].bio):
+                    bio = await escape_string(value)
+                    if re.search(bio, user.about, flags=re.I):
+                        await ban_user(event, "bio", value, index)
+                        break
 
 
 async def escape_string(string: str) -> str:
@@ -1109,14 +1106,18 @@ async def escape_string(string: str) -> str:
 
 
 async def is_admin(chat_id, sender_id) -> bool:
-    """Check if the sender is an admin or bot"""
+    """Check if the sender is an admin, owner or bot"""
     try:
         result = await client(
             functions.channels.GetParticipantRequest(channel=chat_id, user_id=sender_id)
         )
         if isinstance(
             result.participant,
-            (types.ChannelParticipantAdmin, types.ChannelParticipantCreator),
+            (
+                types.ChannelParticipantAdmin,
+                types.ChannelParticipantCreator,
+                types.ChannelParticipantBots,
+            ),
         ):
             return True
     except Exception:
@@ -1224,8 +1225,8 @@ async def blattributes(blacklist) -> str:
 
 async def get_values(args: list, kwargs: dict) -> Dict[str, List]:
     """
-        Iter through the parsed arguments and
-        return a list of the proper options.
+    Iter through the parsed arguments and
+    return a list of the proper options.
     """
     txt: List[str] = []
     tgid: List[int] = []

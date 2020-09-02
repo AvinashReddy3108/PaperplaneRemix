@@ -88,7 +88,7 @@ class ProgressHook:
 
     def hook(self, d: dict) -> None:
         """
-            YoutubeDL's hook which logs progress and errors to UserBot logger.
+        YoutubeDL's hook which logs progress and errors to UserBot logger.
         """
         if d["status"] == "downloading":
             filen = d.get("filename", "Unknown filename")
