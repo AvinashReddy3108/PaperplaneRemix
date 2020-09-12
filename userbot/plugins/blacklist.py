@@ -985,7 +985,7 @@ async def inc_listener(event: NewMessage.Event) -> None:
                 return
         elif event.sender_id in localid:
             index = localid.index(event.sender_id)
-            if isinstance(globalid[index], int) and await ban_user(
+            if isinstance(localid[index], int) and await ban_user(
                 event, "tgid", value.sender_id, index
             ):
                 return
