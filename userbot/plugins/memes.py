@@ -978,12 +978,14 @@ async def boiltheoil(event: NewMessage.Event) -> None:
         await event.answer("`Ran out of oil to fry this pic :P`")
 
 
-@client.onMessage(outgoing=True, regex=r"^Ooof$", disable_prefix=True)
+@client.onMessage(outgoing=True, regex=r"^Oo(o{{1,3}})f$", disable_prefix=True)
 async def oof(event: NewMessage.Event) -> None:
     """
     Big OOF!
     """
-    await event.answer("__Oooo" + "o" * random.randint(5, 10) + "f__")
+    await event.answer(
+        "__Oo" + event.matches[0].group(1) * random.randint(5, 10) + "f__"
+    )
 
 
 @client.onMessage(outgoing=True, regex=r"^-__-$", disable_prefix=True)
