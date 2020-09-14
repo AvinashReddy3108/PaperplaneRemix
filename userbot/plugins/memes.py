@@ -16,14 +16,13 @@
 
 import aiohttp
 import io
-import PIL
 from typing import Tuple, Union, BinaryIO
 
 import asyncurban
 from cowpy import cow
 import random
 import re
-from PIL import ImageEnhance, ImageOps
+from PIL import Image, ImageEnhance, ImageOps
 
 from telethon.errors import rpcerrorlist
 
@@ -681,8 +680,9 @@ async def slinky(event: NewMessage.Event) -> None:
         else:
             await event.answer("`GiiiiiiiB sooooooomeeeeeee teeeeeeext!`")
             return
-    count = random.randint(3, 10)
-    reply_text = re.sub(r"([aeiouAEIOUａｅｉｏｕＡＥＩＯＵаеиоуюяыэё])", (r"\1" * count), text)
+    reply_text = re.sub(
+        r"([aeiouAEIOUａｅｉｏｕＡＥＩＯＵаеиоуюяыэё])", (r"\1" * random.randint(3, 10)), text
+    )
     await event.answer(f"__{reply_text}__")
 
 
@@ -878,7 +878,7 @@ async def slap(event: NewMessage.Event) -> None:
         await event.answer(string, reply=True)
 
 
-@client.onMessage(command=("f", plugin_category), outgoing=True, regex=r"f(?: |$)(.)")
+@client.onMessage(command=("f", plugin_category), outgoing=True, regex=r"f(?: |$)(.+)")
 async def respecc(event: NewMessage.Event) -> None:
     """
     Pay your respects, with custom/random emojis
@@ -924,7 +924,9 @@ async def bt(event: NewMessage.Event) -> None:
 
 
 @client.onMessage(
-    command=("deepfry", plugin_category), outgoing=True, regex=r"(deep)?fry(?: |$)(\d*)"
+    command=("deepfry", plugin_category),
+    outgoing=True,
+    regex=r"(deep)?fry(?: |$)(\d+)?",
 )
 async def boiltheoil(event: NewMessage.Event) -> None:
     """
@@ -935,7 +937,7 @@ async def boiltheoil(event: NewMessage.Event) -> None:
     """
     frycount = (
         int(event.matches[0].group(2))
-        if event.matches[0].group(2) != ""
+        if event.matches[0].group(2)
         else random.randint(1, 3)
     )
     if event.reply_to_msg_id:
@@ -961,7 +963,7 @@ async def boiltheoil(event: NewMessage.Event) -> None:
     await event.answer("`Firing up the deep-fryer!`")
     image = io.BytesIO()
     await potato.download_media(file=image)
-    image = PIL.Image.open(image)
+    image = Image.open(image)
 
     # fry the image
     for _ in range(frycount):
@@ -972,13 +974,18 @@ async def boiltheoil(event: NewMessage.Event) -> None:
     image.save(fried_io, "JPEG")
     fried_io.seek(0)
     try:
-        await event.answer(file=fried_io)
+        await event.answer(file=fried_io, reply_to=event.reply_to_msg_id)
         await event.delete()
     except rpcerrorlist.TimeoutError:
         await event.answer("`Ran out of oil to fry this pic :P`")
 
 
-@client.onMessage(outgoing=True, regex=r"^Oo(o{{1,3}})f$", disable_prefix=True)
+@client.onMessage(
+    command=("oof", plugin_category),
+    outgoing=True,
+    regex=r"^Oo(o{{1,3}})f$",
+    disable_prefix=True,
+)
 async def oof(event: NewMessage.Event) -> None:
     """
     Big OOF!
@@ -988,20 +995,36 @@ async def oof(event: NewMessage.Event) -> None:
     )
 
 
-@client.onMessage(outgoing=True, regex=r"^-__-$", disable_prefix=True)
+@client.onMessage(
+    command=("ok", plugin_category),
+    outgoing=True,
+    regex=r"^-_(_{{1,3}})-$",
+    disable_prefix=True,
+)
 async def okay(event: NewMessage.Event) -> None:
     """
     Ok......
     """
-    await event.answer("-___" + "_" * random.randint(5, 10) + "-", parse_mode="html")
+    await event.answer(
+        "-___" + event.matches[0].group(1) * random.randint(5, 10) + "-",
+        parse_mode="html",
+    )
 
 
-@client.onMessage(outgoing=True, regex=r"^;__;$", disable_prefix=True)
+@client.onMessage(
+    command=("crai", plugin_category),
+    outgoing=True,
+    regex=r"^;_(_{{1,3}});$",
+    disable_prefix=True,
+)
 async def crai(event: NewMessage.Event) -> None:
     """
     crai :(
     """
-    await event.answer(";___" + "_" * random.randint(5, 10) + ";", parse_mode="html")
+    await event.answer(
+        ";___" + event.matches[0].group(1) * random.randint(5, 10) + ";",
+        parse_mode="html",
+    )
 
 
 def isEmoji(inputString: str) -> bool:
@@ -1023,47 +1046,29 @@ async def _is_fryable_event(event: NewMessage.Event) -> bool:
 async def deepfry(img: BinaryIO) -> BinaryIO:
     """Deepfry logic!"""
     colours = (
-        (random.randint(50, 200), random.randint(40, 170), random.randint(40, 190)),
-        (random.randint(190, 255), random.randint(170, 240), random.randint(180, 250)),
+        ((254, 0, 2), (255, 255, 15)),
+        ((36, 113, 229), (255,) * 3),
     )
 
     # Crush image to hell and back
     img = img.convert("RGB")
     width, height = img.width, img.height
-    img = img.resize(
-        (
-            int(width ** random.uniform(0.8, 0.9)),
-            int(height ** random.uniform(0.8, 0.9)),
-        ),
-        resample=PIL.Image.LANCZOS,
-    )
-    img = img.resize(
-        (
-            int(width ** random.uniform(0.85, 0.95)),
-            int(height ** random.uniform(0.85, 0.95)),
-        ),
-        resample=PIL.Image.BILINEAR,
-    )
-    img = img.resize(
-        (
-            int(width ** random.uniform(0.89, 0.98)),
-            int(height ** random.uniform(0.89, 0.98)),
-        ),
-        resample=PIL.Image.BICUBIC,
-    )
-    img = img.resize((width, height), resample=PIL.Image.BICUBIC)
-    img = ImageOps.posterize(img, random.randint(3, 7))
+    img = img.resize((int(width ** 0.75), int(height ** 0.75)), resample=Image.LANCZOS)
+    img = img.resize((int(width ** 0.88), int(height ** 0.88)), resample=Image.BILINEAR)
+    img = img.resize((int(width ** 0.9), int(height ** 0.9)), resample=Image.BICUBIC)
+    img = img.resize((width, height), resample=Image.BICUBIC)
 
     # Generate colour overlay
     overlay = img.split()[0]
-    overlay = ImageEnhance.Contrast(overlay).enhance(random.uniform(1.0, 2.0))
-    overlay = ImageEnhance.Brightness(overlay).enhance(random.uniform(1.0, 2.0))
-
-    overlay = ImageOps.colorize(overlay, colours[0], colours[1])
+    overlay = ImageEnhance.Contrast(overlay).enhance(2.0)
+    overlay = ImageEnhance.Color(overlay).enhance(1.75)
+    overlay = ImageEnhance.Brightness(overlay).enhance(1.5)
+    color = random.choice([colours[0], colours[1]])
+    overlay = ImageOps.colorize(overlay, color[0], color[1])
 
     # Overlay red and yellow onto main image and sharpen the hell out of it
-    img = PIL.Image.blend(img, overlay, random.uniform(0.1, 0.4))
-    img = ImageEnhance.Sharpness(img).enhance(random.randint(5, 300))
+    img = Image.blend(img, overlay, 0.75)
+    img = ImageEnhance.Sharpness(img).enhance(150)
 
     return img
 
