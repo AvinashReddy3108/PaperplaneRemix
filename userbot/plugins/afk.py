@@ -122,7 +122,7 @@ async def out_listner(event: NewMessage.Event) -> None:
     if AFK.privates:
         total_mentions = 0
         to_log = []
-        pr_log = "**[Private] Pings/PMs:**\n"
+        pr_log = "**Pings/PMs:**\n"
         for key, value in AFK.privates.items():
             await _update_notif_settings(key, value["PeerNotifySettings"])
             total_mentions += len(value["mentions"])
@@ -136,7 +136,7 @@ async def out_listner(event: NewMessage.Event) -> None:
     if AFK.groups:
         total_mentions = 0
         to_log = []
-        gr_log = "\n**[Groups] Tags/Mentions:**\n"
+        gr_log = "\n**Tags/Mentions:**\n"
         for key, value in AFK.groups.items():
             await _update_notif_settings(key, value["PeerNotifySettings"])
             total_mentions += len(value["mentions"])
