@@ -211,7 +211,7 @@ async def inc_listner(event: NewMessage.Event) -> None:
             plugin="afk",
             name="currently_afk_reason",
             formats={"elapsed": elapsed, "reason": reason},
-            reply_to=None,
+            reply_to=event if not event.is_private else None,
         )
     else:
         result = await event.resanswer(
@@ -219,7 +219,7 @@ async def inc_listner(event: NewMessage.Event) -> None:
             plugin="afk",
             name="currently_afk",
             formats={"elapsed": elapsed},
-            reply_to=None,
+            reply_to=event if not event.is_private else None,
         )
     AFK.sent.setdefault(chat.id, []).append((result.id, result.date))
 

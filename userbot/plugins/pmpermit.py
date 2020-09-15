@@ -122,7 +122,7 @@ async def pm_incoming(event: NewMessage.Event) -> None:
             newdefault,
             plugin="pmpermit",
             name="newdefault",
-            fromats={"remaining": count},
+            formats={"remaining": count},
         )
     else:
         if count == 1:
