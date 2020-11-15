@@ -31,7 +31,7 @@ async def get_user_from_msg(event: NewMessage.Event) -> Union[int, str, None]:
     match = event.matches[0].group(1)
 
     if event.reply_to_msg_id and not match:
-        return (await event.get_reply_message()).from_id
+        return (await event.get_reply_message()).sender_id
 
     if match == "me":
         return (await event.client.get_me()).id
@@ -72,7 +72,7 @@ async def get_entity_from_msg(
     reply = await event.get_reply_message()
 
     if reply and not (user and extra):
-        user = reply.from_id
+        user = reply.sender_id
         extra = match.strip()
 
     user = int(user) if isinstance(user, str) and user.isdigit() else user

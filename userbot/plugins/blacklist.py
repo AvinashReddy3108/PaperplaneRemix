@@ -413,7 +413,7 @@ async def whitelister(event: NewMessage.Event) -> None:
                 skipped.append(f"`{user}`")
     else:
         if event.reply_to_msg_id:
-            wl = (await event.get_reply_message()).from_id
+            wl = (await event.get_reply_message()).sender_id
             users.append(await client.get_entity(wl))
         else:
             entity = await event.get_chat()
@@ -507,7 +507,7 @@ async def unwhitelister(event: NewMessage.Event) -> None:
                 skipped.append(f"`{user}`")
     else:
         if event.reply_to_msg_id:
-            entity = (await event.get_reply_message()).from_id
+            entity = (await event.get_reply_message()).sender_id
             users.append(entity)
         else:
             entity = await event.get_chat()
@@ -595,7 +595,7 @@ async def unblacklistuser(event: NewMessage.Event) -> None:
                 skipped.append(f"`{user}`")
     else:
         if event.reply_to_msg_id:
-            entity = (await event.get_reply_message()).from_id
+            entity = (await event.get_reply_message()).sender_id
             users.append(entity)
         else:
             entity = await event.get_chat()
@@ -923,12 +923,12 @@ async def inc_listener(event: NewMessage.Event) -> None:
         return
     if (
         event.chat_id in whitelistedChats
-        or event.from_id in whitelistedUsers
+        or event.sender_id in whitelistedUsers
         or await is_admin(event.chat_id, event.sender_id)
     ):
         return
-    elif event.from_id in blacklistedUsers:
-        if event.from_id not in temp_banlist:
+    elif event.sender_id in blacklistedUsers:
+        if event.sender_id not in temp_banlist:
             await ban_user(event, "blacklisted", blacklisted_text)
         return
 

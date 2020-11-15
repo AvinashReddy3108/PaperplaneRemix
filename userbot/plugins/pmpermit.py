@@ -75,7 +75,7 @@ async def pm_incoming(event: NewMessage.Event) -> None:
     new_pm = False
     entity = await event.get_sender()
     input_entity = await event.get_input_sender()
-    sender = getattr(event, "from_id", entity.id)
+    sender = getattr(event, "sender_id", entity.id)
 
     if entity.verified or entity.support or entity.bot or sender in approvedUsers:
         return

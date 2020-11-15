@@ -53,8 +53,8 @@ async def whois(event: NewMessage.Event) -> None:
         if not entities:
             reply = await event.get_reply_message()
             user = reply.sender_id
-            if reply.fwd_from and reply.fwd_from.from_id:
-                user = reply.fwd_from.from_id
+            if reply.fwd_from and reply.fwd_from.sender_id:
+                user = reply.fwd_from.sender_id
             entities.append(user)
     else:
         entities.append("self")
@@ -334,8 +334,8 @@ async def whichid(event: NewMessage.Event) -> None:
     elif event.reply_to_msg_id:
         reply = await event.get_reply_message()
         user = reply.sender_id
-        if reply.fwd_from and reply.fwd_from.from_id:
-            user = reply.fwd_from.from_id
+        if reply.fwd_from and reply.fwd_from.sender_id:
+            user = reply.fwd_from.sender_id
         peer = get_peer_id(user)
         text = f"[{peer}](tg://user?id={peer}): `{peer}`"
     else:
