@@ -39,7 +39,7 @@ ydl_opts = {
     "logger": YTdlLogger(),
     "progress_hooks": [],
     "postprocessors": [],
-    "restrictfilenames": False,
+    "restrictfilenames": True,
     "outtmpl": "YT_DL/%(title)s_{time}.%(ext)s",
     "prefer_ffmpeg": True,
     "geo_bypass": True,

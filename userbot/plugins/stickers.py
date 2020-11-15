@@ -690,7 +690,10 @@ async def _get_default_packs() -> Tuple[str, str]:
 async def _is_sticker_event(event: NewMessage.Event) -> bool:
     if event.sticker or event.photo:
         return True
-    return bool(event.document and "image" in event.document.mime_type)
+    return bool(
+        event.document
+        and any(x in event.document.mime_type for x in ("image", "x-tgsticker"))
+    )
 
 
 async def _update_stickers_notif(notif: types.PeerNotifySettings) -> None:
