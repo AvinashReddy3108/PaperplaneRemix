@@ -366,10 +366,9 @@ async def _self_destructor(
 ) -> typing.Union[custom.Message, typing.Sequence[custom.Message]]:
     await asyncio.sleep(timeout)
     if isinstance(event, list):
-        deleted = [await e.delete() for e in event]
+        return [await e.delete() for e in event]
     else:
-        deleted = await event.delete()
-    return deleted
+        return await event.delete()
 
 
 async def resolve_strings(strings: str or None or list) -> list:

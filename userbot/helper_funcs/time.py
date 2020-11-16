@@ -79,11 +79,7 @@ async def string_to_secs(string: str) -> int:
 
     if totalValues == 1:
         return await amount_to_secs(values[0])
-    else:
-        total = 0
-        for amount in values:
-            total += await amount_to_secs(amount)
-        return total
+    return sum(await amount_to_secs(amount) for amount in values)
 
 
 async def split_extra_string(string: str) -> Tuple[Union[str, None], Union[int, None]]:

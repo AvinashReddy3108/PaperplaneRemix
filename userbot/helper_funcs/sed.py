@@ -45,7 +45,7 @@ async def match_splitter(match: re.Match) -> Tuple[str, str, str, str]:
     """
     li = match.group(1)
     fr = match.group(3)
-    to = match.group(4) if match.group(4) else ""
+    to = match.group(4) or ""
     to = re.sub(r"\\/", "/", to)
     for c in caseConversions:
         case = re.escape(c)
@@ -61,7 +61,7 @@ async def match_splitter(match: re.Match) -> Tuple[str, str, str, str]:
                 group += endCaseConversions.get(c, "")
             to = to.replace(to[start:end], case + group)
     to = re.sub(r"(?<!\\)\\0", r"\g<0>", to)
-    fl = match.group(5) if match.group(5) else ""
+    fl = match.group(5) or ""
 
     return li, fr, to, fl
 

@@ -62,16 +62,14 @@ async def parse_arguments(
     arguments: str,
 ) -> Tuple[List[Value], Dict[str, KeywordArgument]]:
     keyword_args = {}
-    args = []
-
     for match in KWARGS.finditer(arguments):
         key = match.group("key")
         val = await _parse_arg(re.sub(r"[\'\"]", "", match.group("val")))
         keyword_args.update({key: val})
     arguments = KWARGS.sub("", arguments)
 
-    for val in ARGS.finditer(arguments):
-        args.append(await _parse_arg(val.group(2)))
+    args = [await _parse_arg(val.group(2)) for val in ARGS.finditer(arguments)]
+
     arguments = ARGS.sub("", arguments)
 
     for val in re.findall(r"([^\r\n\t\f\v ,]+|\[.*\])", arguments):

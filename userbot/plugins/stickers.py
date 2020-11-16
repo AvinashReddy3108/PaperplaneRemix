@@ -140,9 +140,7 @@ async def stickerpack(event: NewMessage.Event) -> None:
 
     args, kwargs = await client.parse_arguments(match)
     if kwargs:
-        texts = []
-        for x, y in kwargs.items():
-            texts.append(await _set_default_packs(x, y))
+        texts = [await _set_default_packs(x, y) for x, y in kwargs.items()]
         text = "\n".join(texts)
     elif "reset" in args:
         await _set_default_packs("basic", "reset")

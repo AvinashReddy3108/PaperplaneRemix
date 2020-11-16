@@ -53,7 +53,7 @@ async def purge(event: NewMessage.Event) -> None:
         await event.answer("`Purged the void.`", self_destruct=2)
         return
 
-    reverse = True if event.reply_to_msg_id else False
+    reverse = bool(event.reply_to_msg_id)
     messages = await client.get_messages(
         entity,
         limit=int(amount) + skip if amount else None,
@@ -92,7 +92,7 @@ async def delme(event: NewMessage.Event) -> None:
     if not amount:
         amount = 1 if not event.reply_to_msg_id else None
 
-    reverse = True if event.reply_to_msg_id else False
+    reverse = bool(event.reply_to_msg_id)
     messages = await client.get_messages(
         entity,
         limit=int(amount) + skip if amount else None,

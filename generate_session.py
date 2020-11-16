@@ -28,7 +28,7 @@ async def install_pip_package(package: str) -> bool:
         stderr=asyncio.subprocess.PIPE,
     )
     await process.communicate()
-    return True if process.returncode == 0 else False
+    return process.returncode == 0
 
 
 try:

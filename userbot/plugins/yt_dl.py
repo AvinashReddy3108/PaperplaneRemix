@@ -153,7 +153,7 @@ async def yt_dl(event):
         if warnings:
             text = "**Warnings:**\n"
             text += ",\n\n".join(f"```{w}```" for w in warnings)
-            reply = True if fmts else False
+            reply = bool(fmts)
             await event.answer(text, reply=reply)
         return
 
@@ -270,13 +270,13 @@ async def fix_attributes(
         new_attributes.append(video)
 
     for attr in attributes:
-        if isinstance(attr, types.DocumentAttributeAudio):
-            if not audio:
-                new_attributes.append(attr)
-        elif isinstance(attr, types.DocumentAttributeVideo):
-            if not video:
-                new_attributes.append(attr)
-        else:
+        if (
+            isinstance(attr, types.DocumentAttributeAudio)
+            and not audio
+            or not isinstance(attr, types.DocumentAttributeAudio)
+            and not video
+            or not isinstance(attr, types.DocumentAttributeAudio)
+            and not isinstance(attr, types.DocumentAttributeVideo)
+        ):
             new_attributes.append(attr)
-
     return new_attributes, mime_type

@@ -178,27 +178,25 @@ async def unappend(
     removed = []
     skipped = []
     empty = False
-    if redis.exists(key):
-        data = dill.loads(redis.get(key))
-        if option in data:
-            for value in values:
-                if value in data[option]:
-                    data[option].remove(value)
-                    removed.append(value)
-                else:
-                    skipped.append(value)
-            for x, y in data.copy().items():
-                if len(y) == 0:
-                    del data[x]
-            if len(data) == 0:
-                empty = True
-            else:
-                data = dill.dumps(data)
-        else:
-            return removed, skipped
-    else:
+    if not redis.exists(key):
         return removed, skipped
 
+    data = dill.loads(redis.get(key))
+    if option not in data:
+        return removed, skipped
+    for value in values:
+        if value in data[option]:
+            data[option].remove(value)
+            removed.append(value)
+        else:
+            skipped.append(value)
+    for x, y in data.copy().items():
+        if len(y) == 0:
+            del data[x]
+    if len(data) == 0:
+        empty = True
+    else:
+        data = dill.dumps(data)
     if empty:
         redis.delete(key)
     else:
@@ -1139,7 +1137,7 @@ async def ban_user(
     chat = await event.get_chat()
     ban_right = getattr(chat.admin_rights, "ban_users", False)
     delete_messages = getattr(chat.admin_rights, "delete_messages", False)
-    exc_logger = client.logger if client.logger else "self"
+    exc_logger = client.logger or "self"
 
     if not (ban_right or chat.creator):
         return False

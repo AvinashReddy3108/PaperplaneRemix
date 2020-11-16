@@ -111,8 +111,8 @@ class CustomMemoryHandler(logging.handlers.MemoryHandler):
             _format = self.target.formatter.logFormat
         return [
             _format(record)
-            for record in (self.handledbuffer + self.buffer)
-            if record.levelno >= (level if level else self.flushLevel or 0)
+            for record in self.handledbuffer + self.buffer
+            if record.levelno >= (level or self.flushLevel or 0)
         ]
 
     def emit(self, record):

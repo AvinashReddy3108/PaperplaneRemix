@@ -584,7 +584,7 @@ async def lmgtfy(event: NewMessage.Event) -> None:
         {"format": "simple", "url": lmgtfy_url},
         data_type="text",
     )
-    clickbait = short_url if short_url else lmgtfy_url
+    clickbait = short_url or lmgtfy_url
     await event.answer(
         f"__Here you go, help yourself.__\
         \n[{query}]({clickbait})"
