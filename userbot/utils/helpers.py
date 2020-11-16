@@ -217,7 +217,7 @@ async def is_ffmpeg_there():
         stderr=asyncio.subprocess.PIPE,
     )
     await cmd.communicate()
-    return True if cmd.returncode == 0 else False
+    return cmd.returncode == 0
 
 
 async def format_speed(speed_per_second, unit):
@@ -302,7 +302,7 @@ async def calc_eta(elp: float, speed: int, current: int, total: int) -> int:
         return 0
     if current == 0 or elp < 0.001:
         return 0
-    speed = speed if speed else 1
+    speed = speed or 1
     return int((float(total) - float(current)) / speed)
 
 

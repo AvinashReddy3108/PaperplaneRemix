@@ -74,10 +74,9 @@ class ProgressHook:
         """Cancel pending tasks else skip them if completed."""
         if task.cancelled():
             return
-        else:
-            new = task.result().date
-            if new > self.last_edit:
-                self.last_edit = new
+        new = task.result().date
+        if new > self.last_edit:
+            self.last_edit = new
 
     def edit(self, *args, **kwargs):
         """Create a Task of the progress edit."""
@@ -224,33 +223,33 @@ async def extract_info(
         if eStr:
             return eStr
 
-        if download:
-            filen = ytdl.prepare_filename(info_dict)
-            opath = downloads.pop(filen.rsplit(".", maxsplit=1)[0], filen)
-            downloaded = pathlib.Path(opath)
-            if not downloaded.exists():
-                pattern = f"*{info_dict['title']}*"
-                for f in pathlib.Path(downloaded.parent).glob(pattern):
-                    if f.suffix != ".jpg":
-                        opath = f"YT_DL/{f.name}{f.suffix}"
-                        break
-            npath = re.sub(r"_\d+(\.\w+)$", r"\1", opath)
-            thumb = pathlib.Path(re.sub(r"\.\w+$", r".jpg", opath))
-
-            old_f = pathlib.Path(npath)
-            new_f = pathlib.Path(opath)
-            if old_f.exists():
-                if old_f.samefile(new_f):
-                    os.remove(str(new_f.absolute()))
-                else:
-                    newname = str(old_f.stem) + "_OLD"
-                    old_f.replace(old_f.with_name(newname).with_suffix(old_f.suffix))
-            path = new_f.parent.parent / npath
-            new_f.rename(new_f.parent.parent / npath)
-            thumb = str(thumb.absolute()) if thumb.exists() else None
-            return path.absolute(), thumb, info_dict
-        else:
+        if not download:
             return info_dict
+
+        filen = ytdl.prepare_filename(info_dict)
+        opath = downloads.pop(filen.rsplit(".", maxsplit=1)[0], filen)
+        downloaded = pathlib.Path(opath)
+        if not downloaded.exists():
+            pattern = f"*{info_dict['title']}*"
+            for f in pathlib.Path(downloaded.parent).glob(pattern):
+                if f.suffix != ".jpg":
+                    opath = f"YT_DL/{f.name}{f.suffix}"
+                    break
+        npath = re.sub(r"_\d+(\.\w+)$", r"\1", opath)
+        thumb = pathlib.Path(re.sub(r"\.\w+$", r".jpg", opath))
+
+        old_f = pathlib.Path(npath)
+        new_f = pathlib.Path(opath)
+        if old_f.exists():
+            if old_f.samefile(new_f):
+                os.remove(str(new_f.absolute()))
+            else:
+                newname = str(old_f.stem) + "_OLD"
+                old_f.replace(old_f.with_name(newname).with_suffix(old_f.suffix))
+        path = new_f.parent.parent / npath
+        new_f.rename(new_f.parent.parent / npath)
+        thumb = str(thumb.absolute()) if thumb.exists() else None
+        return path.absolute(), thumb, info_dict
 
     # Future blocks the running event loop
     # fut = executor.submit(downloader, url, download)

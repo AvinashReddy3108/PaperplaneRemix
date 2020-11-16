@@ -149,16 +149,17 @@ class PluginManager:
 
         for _, info in to_import.items():
             name, path, content = info
-            if self.include and not self.exclude:
-                if plugin_name not in self.include:
-                    self.inactive_plugins.append(Plugin(plugin_name, [], path, None))
-                    LOGGER.debug("Skipped importing %s", plugin_name)
-                    continue
-            elif not self.include and self.exclude:
-                if plugin_name in self.exclude:
-                    self.inactive_plugins.append(Plugin(plugin_name, [], path, None))
-                    LOGGER.debug("Skipped importing %s", plugin_name)
-                    continue
+            if (
+                self.include
+                and not self.exclude
+                and plugin_name not in self.include
+                or not self.include
+                and self.exclude
+                and plugin_name in self.exclude
+            ):
+                self.inactive_plugins.append(Plugin(plugin_name, [], path, None))
+                LOGGER.debug("Skipped importing %s", plugin_name)
+                continue
             self._import_plugin(name, path, content)
 
     def add_handlers(self) -> None:
