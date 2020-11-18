@@ -5,14 +5,17 @@ RUN apt update && apt upgrade -y && \
         bash \
         curl \
         ffmpeg \
+        gcc \
         git \
         libjpeg-dev \
         libjpeg62-turbo-dev \
         libwebp-dev \
-        linux-headers-amd64 \
+        musl \
         musl-dev \
         atomicparsley \
         neofetch \
+        zlib1g \
+        zlib1g-dev \
         && rm -rf /var/lib/apt/lists /var/cache/apt/archives /tmp
 
 COPY . /usr/src/app/PaperplaneRemix/
