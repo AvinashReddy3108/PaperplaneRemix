@@ -412,7 +412,7 @@ async def install_pip_packages(packages: List[str]) -> bool:
         stderr=asyncio.subprocess.PIPE,
     )
     await cmd.communicate()
-    return True if cmd.returncode == 0 else False
+    return cmd.returncode == 0
 
 
 def run_async(func: callable):

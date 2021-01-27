@@ -63,7 +63,7 @@ async def covid19(event: NewMessage.Event) -> None:
             await event.answer("\n\n".join(strings))
         if failed:
             string = "`Couldn't find the following countries:` "
-            string += ", ".join([f"`{x}`" for x in failed])
+            string += ", ".join(f"`{x}`" for x in failed)
             await event.answer(string, reply=True)
     else:
         active = covid.get_total_active_cases()
