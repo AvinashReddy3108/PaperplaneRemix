@@ -874,7 +874,7 @@ async def slap(event: NewMessage.Event) -> None:
         await event.answer("\n".join(slapz))
     if escaped:
         string = "`Unfortunately, these guys escaped the beating:` "
-        string += ", ".join([f"`{x}`" for x in escaped])
+        string += ", ".join(f"`{x}`" for x in escaped)
         await event.answer(string, reply=True)
 
 

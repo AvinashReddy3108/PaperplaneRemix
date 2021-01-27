@@ -140,7 +140,7 @@ async def upload(event: NewMessage.Event) -> None:
         await event.answer("`Couldn't find what you were looking for.`")
         return
 
-    files = "\n".join([f"`{await _get_file_name(f)}`" for f in target_files])
+    files = "\n".join(f"`{await _get_file_name(f)}`" for f in target_files)
     if len(target_files) > 1:
         await event.answer(f"**Found multiple files for {match}:**\n{files}")
         return

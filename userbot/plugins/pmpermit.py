@@ -348,7 +348,7 @@ async def approved(event: NewMessage.Event) -> None:
     """
     if approvedUsers:
         text = "**Approved users:**\n"
-        text += ", ".join([f"`{i}`" for i in approvedUsers])
+        text += ", ".join(f"`{i}`" for i in approvedUsers)
         await event.answer(text)
     else:
         await event.answer("`I haven't approved anyone to PM me yet.`")

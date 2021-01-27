@@ -808,10 +808,10 @@ async def listwls(event: NewMessage.Event) -> None:
         else:
             if whitelistedUsers:
                 text += "**Whitelisted users:**\n"
-                text += ", ".join([f"`{x}`" for x in whitelistedUsers])
+                text += ", ".join(f"`{x}`" for x in whitelistedUsers)
             if whitelistedChats:
                 text += "\n**Whitelisted chats:**\n"
-                text += ", ".join([f"`{x}`" for x in whitelistedChats])
+                text += ", ".join(f"`{x}`" for x in whitelistedChats)
             if text:
                 await event.answer(text)
 
@@ -868,8 +868,10 @@ async def listbld(event: NewMessage.Event) -> None:
         if matches:
             text = "**Blacklisted users:**\n"
             text += ",\n".join(
-                [f"[{user}](tg://user?id={user}): `{y}`" for x, y in matches.items()]
+                f"[{user}](tg://user?id={user}): `{y}`"
+                for x, y in matches.items()
             )
+
         else:
             text = f"__There are no {option} blacklisted users.__"
     elif args and blacklistedUsers:
@@ -898,7 +900,7 @@ async def listbld(event: NewMessage.Event) -> None:
             text = "__There are no blacklisted users.__"
         else:
             text = "**Blacklisted users:**\n"
-            text += ", ".join([f"`{user}`" for user in blacklistedUsers])
+            text += ", ".join(f"`{user}`" for user in blacklistedUsers)
 
     if doc:
         message, _ = await client._parse_message_text(text, client.parse_mode or "md")
@@ -1208,16 +1210,16 @@ async def blattributes(blacklist) -> str:
     url = getattr(blacklist, "url", None)
     if strings:
         text += f"\n**{full_key_names['txt']}:** "
-        text += ", ".join([f"`{x}`" for x in strings])
+        text += ", ".join(f"`{x}`" for x in strings)
     if bio:
         text += f"\n\n**{full_key_names['bio']}:** "
-        text += ", ".join([f"`{x}`" for x in bio])
+        text += ", ".join(f"`{x}`" for x in bio)
     if tgid:
         text += f"\n\n**{full_key_names['tgid']}:** "
-        text += ", ".join([f"`{x}`" for x in tgid])
+        text += ", ".join(f"`{x}`" for x in tgid)
     if url:
         text += f"\n\n**{full_key_names['url']}:** "
-        text += ", ".join([f"`{x}`" for x in url])
+        text += ", ".join(f"`{x}`" for x in url)
     return text
 
 
