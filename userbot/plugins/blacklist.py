@@ -868,8 +868,7 @@ async def listbld(event: NewMessage.Event) -> None:
         if matches:
             text = "**Blacklisted users:**\n"
             text += ",\n".join(
-                f"[{user}](tg://user?id={user}): `{y}`"
-                for x, y in matches.items()
+                f"[{user}](tg://user?id={user}): `{y}`" for x, y in matches.items()
             )
 
         else:

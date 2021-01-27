@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with TG-UserBot.  If not, see <https://www.gnu.org/licenses/>.
 
+import asyncio
 import concurrent
 import functools
 import os
@@ -64,6 +65,7 @@ class ProgressHook:
     """Custom hook with the event stored for YTDL."""
 
     def __init__(self, event, update=5):
+        self.loop = asyncio.get_event_loop()
         self.event = event
         self.downloaded = 0
         self.tasks = []
@@ -80,8 +82,7 @@ class ProgressHook:
 
     def edit(self, *args, **kwargs):
         """Create a Task of the progress edit."""
-        task = self.event.client.loop.create_task(self.event.answer(*args, **kwargs))
-        # task.add_done_callback(self.callback)
+        task = self.loop.create_task(self.event.answer(*args, **kwargs))
         self.tasks.append(task)
         return task
 
@@ -128,7 +129,7 @@ class ProgressHook:
 
             finalStr = f"Downloaded {filen}: 100% of {ttlbyt} in {elpstr}"
             LOGGER.warning(finalStr)
-            self.event.client.loop.create_task(
+            self.loop.create_task(
                 self.event.answer(f"`Successfully downloaded {filen1} in {elpstr}!`")
             )
             for task in self.tasks:

@@ -17,3 +17,6 @@ sessions/__pycache__/*
 
 # Visual Studio Code folder for settings, etc
 .vscode/
+
+# KDE's Dolphin created per-directory metadata.
+.directory
