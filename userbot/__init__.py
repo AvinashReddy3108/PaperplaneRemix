@@ -23,6 +23,7 @@ import sys
 
 import redis
 from telethon.tl import types
+from telethon.network.connection.tcpabridged import ConnectionTcpAbridged
 
 from sessions.redis import RedisSession
 from .utils.config_helper import resolve_env
@@ -137,6 +138,7 @@ client = UserBotClient(
     api_hash=API_HASH,
     loop=loop,
     app_version=__version__,
+    connection=ConnectionTcpAbridged,
     auto_reconnect=True,
     connection_retries=None,
 )
