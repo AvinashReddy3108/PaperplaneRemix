@@ -3,7 +3,7 @@ asyncurban>=0.3.3
 beautifulsoup4>=4.8.1
 covid>=2.2.9
 cowpy>=1.1.0
-cryptg>=0.2.post0
+TgCrypto>=1.2.2
 dill>=0.3.1.1
 gitpython>=3.0.3
 hachoir>=3.0a5
@@ -14,6 +14,6 @@ Pillow>=6.0.0
 redis>=3.3.10
 requests>=2.22.0
 speedtest-cli>=2.1.2
-telethon>=1.17.0
+https://github.com/LonamiWebs/Telethon/archive/master.zip
 wikipedia>=1.4.0
 youtube-dl>=2019.9.28
