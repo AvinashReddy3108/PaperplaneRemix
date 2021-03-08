@@ -1,21 +1,17 @@
-FROM python:3.8-slim-buster
+FROM python:3-slim-buster
 
 RUN apt update && apt upgrade -y && \
     apt install --no-install-recommends -y \
         bash \
         curl \
         ffmpeg \
-        gcc \
         git \
-        libjpeg-dev \
+        gcc \
         libjpeg62-turbo-dev \
         libwebp-dev \
-        musl \
         musl-dev \
         atomicparsley \
         neofetch \
-        zlib1g \
-        zlib1g-dev \
         && rm -rf /var/lib/apt/lists /var/cache/apt/archives /tmp
 
 COPY . /usr/src/app/PaperplaneRemix/
