@@ -56,7 +56,7 @@ async def sed_substitute(event: NewMessage.Event) -> None:
 
 
     **{prefix}[line]s[ed]/(expression)/(substitution)/[flags][;]**
-        Everything inside the brackets is optional.
+        Everything inside the [brackets] is optional.
         You can perform case conversions in the substitution as well.
         The semi-colon is mandatory to perform multiple subs in one go.
     """

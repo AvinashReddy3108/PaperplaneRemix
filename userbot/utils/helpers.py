@@ -307,7 +307,7 @@ async def calc_eta(elp: float, speed: int, current: int, total: int) -> int:
 
 
 def ul_prog(d: dict, cb: ProgressCallback) -> Tuple[Union[str, bool], bool]:
-    """ Logs the upload progress """
+    """Logs the upload progress"""
     uploaded = cb._uploaded
     current = d.get("percentage", 0)
     # now = datetime.datetime.now(datetime.timezone.utc)
@@ -332,7 +332,7 @@ def ul_prog(d: dict, cb: ProgressCallback) -> Tuple[Union[str, bool], bool]:
 
 
 def dl_prog(d: dict, cb: ProgressCallback) -> Tuple[Union[str, bool], bool]:
-    """ Logs the download progress """
+    """Logs the download progress"""
     downloaded = cb._downloaded
     current = d.get("percentage", 0)
     # now = datetime.datetime.now(datetime.timezone.utc)
