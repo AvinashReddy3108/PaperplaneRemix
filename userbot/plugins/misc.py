@@ -50,12 +50,11 @@ def removebg_post(API_KEY: str, media: bytes or str):
     )
 
 
-def hastebin_post(text: str):
+def katbin_post(text: str):
     return requests.post(
-        "https://hastebin.com/documents",
-        data=text.encode("UTF-8") if isinstance(text, str) else text,
+        "https://api.katb.in/api/paste",
+        json={"content": text},
         headers={
-            "Content-type": "text/plain",
             "Accept": "application/json",
             "charset": "utf-8",
         },
@@ -269,9 +268,9 @@ async def bot_mention(event: NewMessage.Event) -> None:
 @client.onMessage(
     command=("paste", plugin_category), outgoing=True, regex=r"paste(?: |$|\n)([\s\S]*)"
 )
-async def deldog(event: NewMessage.Event) -> None:
+async def paste_stuff(event: NewMessage.Event) -> None:
     """
-    Paste the content to [hastebin](https://hastebin.com/about.md).
+    Paste the content to [Katbin](https://katb.in/about).
 
 
     `{prefix}paste` in reply to a document/message or **{prefix}paste (text)**
@@ -289,18 +288,16 @@ async def deldog(event: NewMessage.Event) -> None:
         await event.answer("`Pasted the void.`")
         return
     response = await client.loop.run_in_executor(
-        None, functools.partial(hastebin_post, text)
+        None, functools.partial(katbin_post, text)
     )
     if not response.ok:
         await event.answer(
-            "Couldn't post the data to [hastebin](https://hastebin.com/about.md)",
+            "Couldn't post the data to [Katbin](https://katb.in/about)",
             reply=True,
         )
         return
-    key = response.json()["key"]
-    await event.answer(
-        f"`Successfully pasted on` [hastebin](https://hastebin.com/{key})"
-    )
+    key = response.json()["paste_id"]
+    await event.answer(f"`Successfully pasted on` [Katbin](https://katb.in/{key})")
 
 
 @client.onMessage(command=("repo", plugin_category), outgoing=True, regex=r"repo$")
