@@ -1,18 +1,8 @@
-FROM python:3-slim-buster
+FROM python:3.9-slim
 
 RUN apt update && apt upgrade -y && \
     apt install --no-install-recommends -y \
-        bash \
-        curl \
-        ffmpeg \
-        git \
-        gcc \
-        libjpeg62-turbo-dev \
-        libwebp-dev \
-        musl-dev \
-        atomicparsley \
-        neofetch \
-        && rm -rf /var/lib/apt/lists /var/cache/apt/archives /tmp
+        bash curl git libjpeg62-turbo-dev libwebp-dev ffmpeg neofetch
 
 COPY . /usr/src/app/PaperplaneRemix/
 WORKDIR /usr/src/app/PaperplaneRemix/
@@ -27,7 +17,8 @@ RUN if [ ! -d /usr/src/app/PaperplaneRemix/.git ] ; then \
     fi
 
 # Install PIP packages
-RUN python3 -m pip install --no-warn-script-location --no-cache-dir --upgrade -r requirements.txt
+RUN python3 -m pip install --no-warn-script-location --no-cache-dir --upgrade pip && \
+    python3 -m pip install --no-warn-script-location --no-cache-dir --upgrade -r requirements.txt
 
 # Cleanup
 RUN rm -rf /var/lib/apt/lists /var/cache/apt/archives /tmp
