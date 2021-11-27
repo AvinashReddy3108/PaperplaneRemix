@@ -21,7 +21,7 @@ import os
 import pathlib
 import re
 import time
-import youtube_dl
+import yt_dlp
 
 from .. import LOGGER
 
@@ -155,7 +155,7 @@ async def list_formats(info_dict: dict) -> str:
     """
     formats = info_dict.get("formats", [info_dict])
     table = [
-        [f["format_id"], f["ext"], youtube_dl.YoutubeDL.format_resolution(f)]
+        [f["format_id"], f["ext"], yt_dlp.YoutubeDL.format_resolution(f)]
         for f in formats
         if f.get("preference") is None or f["preference"] >= -1000
     ]
@@ -165,7 +165,7 @@ async def list_formats(info_dict: dict) -> str:
     header_line = ["format code", "extension", "resolution"]
     return "Available formats for %s:\n%s" % (
         info_dict["title"],
-        youtube_dl.render_table(header_line, table),
+        yt_dlp.render_table(header_line, table),
     )
 
 
@@ -194,30 +194,31 @@ async def extract_info(
             string if any occur.
     """
     ydl_opts["outtmpl"] = ydl_opts["outtmpl"].format(time=time.time_ns())
-    ytdl = youtube_dl.YoutubeDL(ydl_opts)
+    ytdl = yt_dlp.YoutubeDL(ydl_opts)
 
     def downloader(url, download):
         eStr = None
         try:
-            info_dict = ytdl.extract_info(url, download=download)
-        except youtube_dl.utils.DownloadError as DE:
+            info = ytdl.extract_info(url, download=download)
+            info_dict = ytdl.sanitize_info(info)
+        except yt_dlp.utils.DownloadError as DE:
             eStr = f"`{DE}`"
-        except youtube_dl.utils.ContentTooShortError:
+        except yt_dlp.utils.ContentTooShortError:
             eStr = "`There download content was too short.`"
-        except youtube_dl.utils.GeoRestrictedError:
+        except yt_dlp.utils.GeoRestrictedError:
             eStr = (
                 "`Video is not available from your geographic location due "
                 "to geographic restrictions imposed by a website.`"
             )
-        except youtube_dl.utils.MaxDownloadsReached:
+        except yt_dlp.utils.MaxDownloadsReached:
             eStr = "`Max-downloads limit has been reached.`"
-        except youtube_dl.utils.PostProcessingError:
+        except yt_dlp.utils.PostProcessingError:
             eStr = "`There was an error during post processing.`"
-        except youtube_dl.utils.UnavailableVideoError:
+        except yt_dlp.utils.UnavailableVideoError:
             eStr = "`Video is not available in the requested format.`"
-        except youtube_dl.utils.XAttrMetadataError as XAME:
+        except yt_dlp.utils.XAttrMetadataError as XAME:
             eStr = f"`{XAME.code}: {XAME.msg}\n{XAME.reason}`"
-        except youtube_dl.utils.ExtractorError:
+        except yt_dlp.utils.ExtractorError:
             eStr = "`There was an error during info extraction.`"
         except Exception as e:
             return e
