@@ -1053,9 +1053,9 @@ async def deepfry(img: BinaryIO) -> BinaryIO:
     # Crush image to hell and back
     img = img.convert("RGB")
     width, height = img.width, img.height
-    img = img.resize((int(width ** 0.75), int(height ** 0.75)), resample=Image.LANCZOS)
-    img = img.resize((int(width ** 0.88), int(height ** 0.88)), resample=Image.BILINEAR)
-    img = img.resize((int(width ** 0.9), int(height ** 0.9)), resample=Image.BICUBIC)
+    img = img.resize((int(width**0.75), int(height**0.75)), resample=Image.LANCZOS)
+    img = img.resize((int(width**0.88), int(height**0.88)), resample=Image.BILINEAR)
+    img = img.resize((int(width**0.9), int(height**0.9)), resample=Image.BICUBIC)
     img = img.resize((width, height), resample=Image.BICUBIC)
 
     # Generate colour overlay

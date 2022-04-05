@@ -555,7 +555,8 @@ async def _get_new_ub_pack(
     await conv.send_message(pack)
     r11 = await conv.get_response()
     LOGGER.debug("Stickers:" + r11.text)
-    if "120 stickers" in r11.text:
+    limit = 50 if is_animated else 120
+    if f"{limit}" in r11.text:
         l_char = pack[-1:]  # Check if the suffix is a digit
         if l_char.isdigit():
             pack = pack[:-1] + str(int(l_char) + 1)  # ++ the suffix
