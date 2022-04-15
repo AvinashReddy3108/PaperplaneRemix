@@ -18,7 +18,6 @@ import configparser
 import logging
 import os
 import pathlib
-import platform
 import sys
 
 import redis
@@ -61,7 +60,7 @@ if sys.platform.startswith("win"):
 else:
     os.system("clear")
 
-if platform.python_version_tuple() < ("3", "7", "3"):
+if sys.version_info < (3, 7, 3):
     print("Please run this script with Python 3.7.3 or above." "\nExiting the script.")
     sys.exit(1)
 

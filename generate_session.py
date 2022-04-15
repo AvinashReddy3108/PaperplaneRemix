@@ -1,15 +1,13 @@
 import asyncio
 import configparser
 import os
-import platform
 import sys
-import os.path
 
 ERROR = (
     "Something is wrong with your API {}, " "please double check and re-enter the same."
 )
 
-if platform.python_version_tuple() < ("3", "7", "3"):
+if sys.version_info < (3, 7, 3):
     print("Please run this script with Python 3.7.3 or above." "\nExiting the script.")
     sys.exit(1)
 
