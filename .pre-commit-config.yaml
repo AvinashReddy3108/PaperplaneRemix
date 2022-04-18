@@ -1,3 +1,9 @@
+##
+## PaperplaneRemix - A modular Telegram selfbot script
+## Copyright (C) 2022, Avinash Reddy and the PaperplaneRemix contributors
+##
+## SPDX-License-Identifier: GPL-3.0-or-later
+##
 repos:
   - repo: 'https://github.com/pre-commit/pre-commit-hooks'
     rev: 'v4.2.0'
@@ -17,6 +23,7 @@ repos:
         additional_dependencies:
           - flake8-print
           - flake8-quotes
+          - flake8-async
         args:
           - '--ignore=W503,Q003,E203'
           - '--max-line-length=120'
@@ -25,3 +32,8 @@ repos:
               userbot/__main__.py:T001
               userbot/__init__.py:T001
               generate_session.py:T001'
+  - repo: 'https://github.com/johann-petrak/licenseheaders'
+    rev: 'v0.8.8'
+    hooks:
+      - id: licenseheaders
+        args: ["-t", ".copyright.tmpl", "-cy", "-x", "userbot/utils/FastTelethon.py", "-f"]

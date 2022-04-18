@@ -1,3 +1,9 @@
+<!--
+PaperplaneRemix - A modular Telegram selfbot script
+Copyright (C) 2022, Avinash Reddy and the PaperplaneRemix contributors
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
 <h1 align="center">Project Paperplane Remix</h1>
 <p align="center"><em>Such borked, much kanged, very meme.</em></p>
 <p style="text-align: center;" align="center"><a href="https://t.me/MemezByAvinashReddy"><img src="https://img.shields.io/badge/status-alpha-red?style=for-the-badge" alt="Status" /></a> <a href="https://github.com/AvinashReddy3108/PaperplaneRemix/issues"><img src="https://img.shields.io/github/issues/AvinashReddy3108/PaperplaneRemix?style=for-the-badge" alt="GitHub issues" /></a> <a href="https://github.com/AvinashReddy3108/PaperplaneRemix/network"><img src="https://img.shields.io/github/forks/AvinashReddy3108/PaperplaneRemix?style=for-the-badge" alt="GitHub forks" /></a> <a href="https://github.com/AvinashReddy3108/PaperplaneRemix/stargazers"><img src="https://img.shields.io/github/stars/AvinashReddy3108/PaperplaneRemix?style=for-the-badge" alt="GitHub stars" /></a></p>
@@ -11,8 +17,8 @@
 <p align="center">Until then, you can <a href="https://heroku.com/deploy?template=https://github.com/AvinashReddy3108/PaperplaneRemix">click here</a> to quickly deploy the userbot on Heroku.</p>
 <p style="text-align: center;">&nbsp;</p>
 <h2 align="center">Credits</h2>
-<p align="center"><a href="https://github.com/kandnub">Kan</a> - For the awesome <a href="https://github.com/kandnub/TG-UserBot">TG-Userbot</a> core, and helping me with many things.</p>
+<p align="center"><a href="https://github.com/kandnub">Kan</a> - For the awesome <a href="https://github.com/TG-UserBot/TG-UserBot">TG-Userbot</a> core, and helping me with many things.</p>
 <p align="center"><em>... and <a href="https://github.com/AvinashReddy3108/PaperplaneRemix/graphs/contributors">others</a> whose names are not mentioned here.</em></p>
 <p align="center">&nbsp;</p>
 <h2 align="center">License</h2>
-<p align="center">Unless specified otherwise, the code is licensed under the terms of the <a href="https://github.com/AvinashReddy3108/PaperplaneRemix/blob/master/LICENSE">GNU General Public License v3.0</a> and copyrighted by <a href="https://github.com/kandnub">Kan</a>.</p>
+<p align="center">Unless specified otherwise, the code is licensed under the terms of the <a href="https://github.com/AvinashReddy3108/PaperplaneRemix/blob/master/LICENSE">GNU General Public License v3.0.</p>
