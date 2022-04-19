@@ -17,39 +17,40 @@ import yt_dlp
 from .. import LOGGER
 
 downloads = {}
-audio = re.compile(r"\[ffmpeg\] Destination\: (.+)")
-video = re.compile(r"\[ffmpeg\] Converting video from \w+ to \w+, Destination: (.+)")
-merger = re.compile(r'\[ffmpeg\] Merging formats into "(.+)"')
+audio = re.compile(r"\[ExtractAudio\] Destination\: (.+)")
+video = re.compile(
+    r"\[VideoConvertor\] Converting video from \w+ to \w+; Destination: (.+)"
+)
+merger = re.compile(r'\[Merger\] Merging formats into "(.+)"')
 
 
 class YTdlLogger(object):
     """Logger used for YoutubeDL which logs to UserBot logger."""
 
     def debug(self, msg: str) -> None:
-        """Logs debug messages with youtube-dl tag to UserBot logger."""
-        LOGGER.debug("youtube-dl: " + msg)
+        """Logs debug messages with yt-dlp tag to UserBot logger."""
+        LOGGER.debug("yt-dlp: " + msg)
         f = None
-        if "[ffmpeg]" in msg:
-            if audio.search(msg):
-                f = audio.match(msg).group(1)
-            if video.search(msg):
-                f = video.match(msg).group(1)
-            if merger.search(msg):
-                f = merger.match(msg).group(1)
-            if f:
-                downloads.update({f.split(".")[0]: f})
+        if audio.search(msg):
+            f = audio.match(msg).group(1)
+        if video.search(msg):
+            f = video.match(msg).group(1)
+        if merger.search(msg):
+            f = merger.match(msg).group(1)
+        if f:
+            downloads.update({f.split(".")[0]: f})
 
     def warning(self, msg: str) -> None:
-        """Logs warning messages with youtube-dl tag to UserBot logger."""
-        LOGGER.warning("youtube-dl: " + msg)
+        """Logs warning messages with yt-dlp tag to UserBot logger."""
+        LOGGER.warning("yt-dlp: " + msg)
 
     def error(self, msg: str) -> None:
-        """Logs error messages with youtube-dl tag to UserBot logger."""
-        LOGGER.error("youtube-dl: " + msg)
+        """Logs error messages with yt-dlp tag to UserBot logger."""
+        LOGGER.error("yt-dlp: " + msg)
 
     def critical(self, msg: str) -> None:
-        """Logs critical messages with youtube-dl tag to UserBot logger."""
-        LOGGER.critical("youtube-dl: " + msg)
+        """Logs critical messages with yt-dlp tag to UserBot logger."""
+        LOGGER.critical("yt-dlp: " + msg)
 
 
 class ProgressHook:
@@ -133,6 +134,18 @@ class ProgressHook:
             LOGGER.error(finalStr)
 
 
+# https://stackoverflow.com/a/68165682
+# https://gist.github.com/jmilldotdev/b107f858729064daa940057fc9b14e89
+class FilenameCollectorPP(yt_dlp.postprocessor.common.PostProcessor):
+    def __init__(self):
+        super(FilenameCollectorPP, self).__init__(None)
+        self.filenames = []
+
+    def run(self, information):
+        self.filenames.append(information["filepath"])
+        return [], information
+
+
 async def list_formats(info_dict: dict) -> str:
     """YoutubeDL's list_formats method but without format notes.
 
@@ -186,6 +199,8 @@ async def extract_info(
     """
     ydl_opts["outtmpl"] = ydl_opts["outtmpl"].format(time=time.time_ns())
     ytdl = yt_dlp.YoutubeDL(ydl_opts)
+    filename_collector = FilenameCollectorPP()
+    ytdl.add_post_processor(filename_collector)
 
     def downloader(url, download):
         eStr = None
@@ -219,7 +234,7 @@ async def extract_info(
         if not download:
             return info_dict
 
-        filen = ytdl.prepare_filename(info_dict)
+        filen = filename_collector.filenames[0]
         opath = downloads.pop(filen.rsplit(".", maxsplit=1)[0], filen)
         downloaded = pathlib.Path(opath)
         if not downloaded.exists():

@@ -27,21 +27,19 @@ audioFormats = ["aac", "flac", "mp3", "m4a", "opus", "vorbis", "wav"]
 videoFormats = ["mp4", "flv", "ogg", "webm", "mkv", "avi"]
 
 ydl_opts = {
-    "logger": YTdlLogger(),
-    "progress_hooks": [],
-    "postprocessors": [],
-    "restrictfilenames": True,
-    "outtmpl": "YT_DL/%(title)s_{time}.%(ext)s",
-    "prefer_ffmpeg": True,
     "geo_bypass": True,
-    "nocheckcertificate": True,
-    "logtostderr": False,
-    "quiet": True,
-    "addmetadata": True,
-    "embedthumbnail": True,
-    "writethumbnail": True,
     "ignoreerrors": False,
+    "logger": YTdlLogger(),
+    "logtostderr": False,
+    "nocheckcertificate": True,
     "noplaylist": True,
+    "outtmpl": "YT_DL/%(title)s_{time}.%(ext)s",
+    "postprocessors": [],
+    "prefer_ffmpeg": True,
+    "progress_hooks": [],
+    "quiet": True,
+    "restrictfilenames": True,
+    "writethumbnail": True,
 }
 
 ffurl = "https://tg-userbot.readthedocs.io/en/latest/" "faq.html#how-to-install-ffmpeg"
@@ -103,28 +101,29 @@ async def yt_dl(event):
                 {
                     "key": "FFmpegExtractAudio",
                     "preferredcodec": fmt,
-                    "preferredquality": "320",
+                    "preferredquality": 0,
                 }
             )
-            if fmt in ["mp3", "m4a"]:
-                params["postprocessors"].append({"key": "EmbedThumbnail"})
-                if fmt in ["mp3"]:
-                    params["postprocessor_args"] += [
-                        "-write_id3v1",
-                        "1",
-                        "-id3v2_version",
-                        "3",
-                    ]
         elif fmt in videoFormats and ffmpeg:
             params["postprocessors"].append(
                 {"key": "FFmpegVideoConvertor", "preferedformat": fmt}
             )
-            if fmt in ["mp4"]:
-                params["postprocessors"].append({"key": "EmbedThumbnail"})
-        else:
-            params.update(format=fmt)
-            if ffmpeg:
-                params.update(key="FFmpegMetadata")
+
+        params["postprocessors"].append(
+            {"key": "EmbedThumbnail", "already_have_thumbnail": True}
+        )
+
+        if ffmpeg:
+            params["postprocessors"].append(
+                {
+                    "key": "FFmpegThumbnailsConvertor",
+                    "format": "jpg",
+                    "when": "before_dl",
+                }
+            )
+            params["postprocessors"].append(
+                {"key": "FFmpegMetadata", "add_metadata": True}
+            )
     else:
         fmts = []
         for url in args:
