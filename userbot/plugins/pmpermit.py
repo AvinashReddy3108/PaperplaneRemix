@@ -7,7 +7,7 @@
 
 
 import datetime
-import dill
+import msgpack
 import re
 from typing import Dict, List
 
@@ -54,7 +54,7 @@ DEFAULT_UNMUTE_SETTINGS = types.InputPeerNotifySettings(
 )
 
 if redis and redis.exists("approved:users"):
-    approvedUsers = dill.loads(redis.get("approved:users"))
+    approvedUsers = msgpack.unpackb(redis.get("approved:users"))
 
 
 @client.onMessage(incoming=True, edited=False)
@@ -368,6 +368,6 @@ async def get_users(event: NewMessage.Event) -> types.User or None:
 async def update_db() -> None:
     if redis:
         if approvedUsers:
-            redis.set("approved:users", dill.dumps(approvedUsers))
+            redis.set("approved:users", msgpack.packb(approvedUsers))
         else:
             redis.delete("approved:users")

@@ -7,14 +7,14 @@
 
 import base64
 import dataclasses
-import dill
+import msgpack
 import os
 
 
 def load_data(name: str) -> dict:
     b64 = os.environ.pop(name, {})
     if b64:
-        b64 = dill.loads(base64.b64decode(b64.encode()))
+        b64 = msgpack.unpackb(base64.b64decode(b64.encode()))
     return b64
 
 
@@ -23,7 +23,7 @@ def dump_data(instance) -> dict:
     for i in dataclasses.fields(instance):
         attr = getattr(instance, i.name, None)
         if attr:
-            data_dict[i.name] = base64.b64encode(dill.dumps(attr)).decode()
+            data_dict[i.name] = base64.b64encode(msgpack.packb(attr)).decode()
     return data_dict
 
 

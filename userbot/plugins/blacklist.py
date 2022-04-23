@@ -6,7 +6,7 @@
 #
 
 
-import dill
+import msgpack
 import io
 import re
 from typing import Dict, List, Tuple, Union
@@ -92,11 +92,11 @@ whitelistedChats: List[int] = []
 if redis:
     local_keys = redis.keys("blacklists:-*")
     if redis.exists("blacklists:global"):
-        globalData = dill.loads(redis.get("blacklists:global"))
+        globalData = msgpack.unpackb(redis.get("blacklists:global"))
     else:
         globalData = {}
     for key in local_keys:
-        data = dill.loads(redis.get(key))
+        data = msgpack.unpackb(redis.get(key))
         localBlacklists[int(key[11:])] = Blacklist(
             bio=data.get("bio", None),
             url=data.get("url", None),
@@ -106,11 +106,11 @@ if redis:
     for option, value in globalData.items():
         setattr(GlobalBlacklist, option, value)
     if redis.exists("blacklist:users"):
-        blacklistedUsers = dill.loads(redis.get("blacklist:users"))
+        blacklistedUsers = msgpack.unpackb(redis.get("blacklist:users"))
     if redis.exists("whitelist:users"):
-        whitelistedUsers = dill.loads(redis.get("whitelist:users"))
+        whitelistedUsers = msgpack.unpackb(redis.get("whitelist:users"))
     if redis.exists("whitelist:chats"):
-        whitelistedChats = dill.loads(redis.get("whitelist:chats"))
+        whitelistedChats = msgpack.unpackb(redis.get("whitelist:chats"))
 
 
 async def append(
@@ -121,7 +121,7 @@ async def append(
     skipped = []
 
     if redis.exists(key):
-        data = dill.loads(redis.get(key))
+        data = msgpack.unpackb(redis.get(key))
         if option in data:
             for value in values:
                 if value in data[option]:
@@ -133,9 +133,9 @@ async def append(
         else:
             data.setdefault(option, []).extend(values)
             added.extend(values)
-        data = dill.dumps(data)
+        data = msgpack.packb(data)
     else:
-        data = dill.dumps({option: values})
+        data = msgpack.packb({option: values})
     redis.set(key, data)
 
     key = key[11:]
@@ -172,7 +172,7 @@ async def unappend(
     if not redis.exists(key):
         return removed, skipped
 
-    data = dill.loads(redis.get(key))
+    data = msgpack.unpackb(redis.get(key))
     if option not in data:
         return removed, skipped
     for value in values:
@@ -187,7 +187,7 @@ async def unappend(
     if len(data) == 0:
         empty = True
     else:
-        data = dill.dumps(data)
+        data = msgpack.packb(data)
     if empty:
         redis.delete(key)
     else:
@@ -424,7 +424,7 @@ async def whitelister(event: NewMessage.Event) -> None:
             else:
                 skipped.append(name)
         if count != 0:
-            redis.set("whitelist:users", dill.dumps(whitelistedUsers))
+            redis.set("whitelist:users", msgpack.packb(whitelistedUsers))
             text += "**Whitelisted users:**\n" + usertext
             log += text
             await event.answer(text, log=None if chats else ("whitelist", log))
@@ -447,7 +447,7 @@ async def whitelister(event: NewMessage.Event) -> None:
                 text += "\n\n**Whitelisted chats:**\n" + chattext
             else:
                 text += "**Whitelisted chats:**\n" + chattext
-            redis.set("whitelist:chats", dill.dumps(whitelistedChats))
+            redis.set("whitelist:chats", msgpack.packb(whitelistedChats))
             log += text
             await event.answer(text, log=("whitelist", log))
     if skipped:
@@ -517,7 +517,7 @@ async def unwhitelister(event: NewMessage.Event) -> None:
                 skipped.append(f"`{user}`")
         if count:
             if whitelistedUsers:
-                redis.set("whitelist:users", dill.dumps(whitelistedUsers))
+                redis.set("whitelist:users", msgpack.packb(whitelistedUsers))
             else:
                 redis.delete("whitelist:users")
             text += "**Un-whitelisted users:**\n" + usertext
@@ -535,7 +535,7 @@ async def unwhitelister(event: NewMessage.Event) -> None:
                 skipped.append(f"`{chat}`")
         if count:
             if whitelistedChats:
-                redis.set("whitelist:chats", dill.dumps(whitelistedChats))
+                redis.set("whitelist:chats", msgpack.packb(whitelistedChats))
             else:
                 redis.delete("whitelist:chats")
             if text:
@@ -599,7 +599,7 @@ async def unblacklistuser(event: NewMessage.Event) -> None:
                 blacklistedUsers.pop(user)
                 targets.append(f"[{user}](tg://user?id={user})")
         if blacklistedUsers:
-            redis.set("blacklist:users", dill.dumps(blacklistedUsers))
+            redis.set("blacklist:users", msgpack.packb(blacklistedUsers))
         else:
             redis.delete("blacklist:users")
         text += ", ".join(targets)
@@ -1139,7 +1139,7 @@ async def ban_user(
         await client.edit_permissions(entity=chat.id, user=sender, view_messages=False)
         if bl_type and match and sender.user_id not in blacklistedUsers:
             blacklistedUsers.update({sender.user_id: (bl_type, match)})
-            redis.set("blacklist:users", dill.dumps(blacklistedUsers))
+            redis.set("blacklist:users", msgpack.packb(blacklistedUsers))
     except Exception as e:
         exc = await client.get_traceback(e)
         await client.send_message(exc_logger, exc)
