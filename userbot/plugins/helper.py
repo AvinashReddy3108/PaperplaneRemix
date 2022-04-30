@@ -7,7 +7,6 @@
 
 import os.path
 import re
-from typing import Tuple
 
 from userbot import client
 from userbot.utils.events import NewMessage
@@ -38,7 +37,7 @@ async def setprefix(event: NewMessage.Event) -> None:
     client.config["userbot"]["userbot_prefix"] = match
     if old_prefix is None:
         await event.answer(
-            "`Successfully changed the prefix to `**{0}**`. "
+            "`Successfully changed the prefix to `**{}**`. "
             "To revert this, do `**resetprefix**".format(client.prefix),
             log=("setprefix", f"Prefix changed to {client.prefix}"),
         )
@@ -78,6 +77,20 @@ async def resetprefix(event: NewMessage.Event) -> None:
         client._updateconfig()
     else:
         await event.answer("`There is no prefix set as a default!`")
+
+
+async def solve_commands(commands: dict) -> tuple[dict, dict]:
+    new_dict: dict = {}
+    com_tuples: dict = {}
+    for com_names, command in commands.items():
+        splat = split_exp.split(com_names)
+        if splat:
+            for n in splat:
+                com_tuples[n] = command
+                new_dict[" | ".join(splat)] = command
+        else:
+            new_dict[com_names] = command
+    return new_dict, com_tuples
 
 
 @client.onMessage(
@@ -267,17 +280,3 @@ async def helper(event: NewMessage.Event) -> None:
         for category in sorted(categories.keys()):
             text += f"\n    • **{category}**"
     await event.answer(text, link_preview=False)
-
-
-async def solve_commands(commands: dict) -> Tuple[dict, dict]:
-    new_dict: dict = {}
-    com_tuples: dict = {}
-    for com_names, command in commands.items():
-        splat = split_exp.split(com_names)
-        if splat:
-            for n in splat:
-                com_tuples[n] = command
-                new_dict[" | ".join(splat)] = command
-        else:
-            new_dict[com_names] = command
-    return new_dict, com_tuples

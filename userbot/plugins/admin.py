@@ -9,10 +9,44 @@ from datetime import timedelta
 
 from userbot import client
 from userbot.helper_funcs.time import string_to_secs
-from userbot.utils.helpers import _humanfriendly_seconds, get_chat_link
 from userbot.utils.events import NewMessage
+from userbot.utils.helpers import _humanfriendly_seconds, get_chat_link
 
 plugin_category = "admin"
+
+
+async def get_rights(
+    event: NewMessage.Event,
+    change_info: bool = False,
+    post_messages: bool = False,
+    edit_messages: bool = False,
+    delete_messages: bool = False,
+    ban_users: bool = False,
+    invite_users: bool = False,
+    pin_messages: bool = False,
+    add_admins: bool = False,
+) -> bool:
+    """Return a bool according the required admin rights"""
+    chat = await event.get_chat()
+    if chat.creator:
+        return True
+    rights = {
+        "change_info": change_info,
+        "post_messages": post_messages,
+        "edit_messages": edit_messages,
+        "delete_messages": delete_messages,
+        "ban_users": ban_users,
+        "invite_users": invite_users,
+        "pin_messages": pin_messages,
+        "add_admins": add_admins,
+    }
+    required_rights = [
+        getattr(chat.admin_rights, right, False)
+        for right, required in rights.items()
+        if required
+    ]
+
+    return all(required_rights)
 
 
 @client.onMessage(
@@ -62,7 +96,7 @@ async def promote(event: NewMessage.Event) -> None:
             skipped.append(user)
     if promoted:
         text = "`Successfully promoted:`\n"
-        text += ", ".join((f"`{x}`" for x in promoted))
+        text += ", ".join(f"`{x}`" for x in promoted)
         if title:
             text += f"\n`Title:` `{title}`"
         if reason:
@@ -72,7 +106,7 @@ async def promote(event: NewMessage.Event) -> None:
         await event.answer(text, log=("promote", log_msg))
     if skipped:
         text = "`Skipped users:`"
-        text += ", ".join((f"`{x}`" for x in skipped))
+        text += ", ".join(f"`{x}`" for x in skipped)
         await event.answer(text, reply=True)
 
 
@@ -120,7 +154,7 @@ async def demote(event: NewMessage.Event) -> None:
             skipped.append(user)
     if demoted:
         text = "`Successfully demoted:`\n"
-        text += ", ".join((f"`{x}`" for x in demoted))
+        text += ", ".join(f"`{x}`" for x in demoted)
         if reason:
             text += f"\n`Reason:` `{reason}`"
         e2 = await get_chat_link(entity, event.id)
@@ -128,7 +162,7 @@ async def demote(event: NewMessage.Event) -> None:
         await event.answer(text, log=("demote", log_msg))
     if skipped:
         text = "`Skipped users:`"
-        text += ", ".join((f"`{x}`" for x in skipped))
+        text += ", ".join(f"`{x}`" for x in skipped)
         await event.answer(text, reply=True)
 
 
@@ -176,7 +210,7 @@ async def ban(event: NewMessage.Event) -> None:
             skipped.append(user)
     if banned:
         text = "`Successfully banned:`\n"
-        text += ", ".join((f"`{x}`" for x in banned))
+        text += ", ".join(f"`{x}`" for x in banned)
         if reason:
             text += f"\n`Reason:` `{reason}`"
         e2 = await get_chat_link(entity, event.id)
@@ -184,7 +218,7 @@ async def ban(event: NewMessage.Event) -> None:
         await event.answer(text, log=("ban", log_msg))
     if skipped:
         text = "`Skipped users:`"
-        text += ", ".join((f"`{x}`" for x in skipped))
+        text += ", ".join(f"`{x}`" for x in skipped)
         await event.answer(text, reply=True)
 
 
@@ -243,7 +277,7 @@ async def unban(event: NewMessage.Event) -> None:
             skipped.append(user)
     if unbanned:
         text = "`Successfully unbanned:`\n"
-        text += ", ".join((f"`{x}`" for x in unbanned))
+        text += ", ".join(f"`{x}`" for x in unbanned)
         if reason:
             text += f"\n`Reason:` `{reason}`"
         e2 = await get_chat_link(entity, event.id)
@@ -251,7 +285,7 @@ async def unban(event: NewMessage.Event) -> None:
         await event.answer(text, log=("unban", log_msg))
     if skipped:
         text = "`Skipped users:`"
-        text += ", ".join((f"`{x}`" for x in skipped))
+        text += ", ".join(f"`{x}`" for x in skipped)
         await event.answer(text, reply=True)
 
 
@@ -299,7 +333,7 @@ async def kick(event: NewMessage.Event) -> None:
             skipped.append(user)
     if kicked:
         text = "`Successfully kicked:`\n"
-        text += ", ".join((f"`{x}`" for x in kicked))
+        text += ", ".join(f"`{x}`" for x in kicked)
         if reason:
             text += f"\n`Reason:` `{reason}`"
         e2 = await get_chat_link(entity, event.id)
@@ -307,7 +341,7 @@ async def kick(event: NewMessage.Event) -> None:
         await event.answer(text, log=("kick", log_msg))
     if skipped:
         text = "`Skipped users:`"
-        text += ", ".join((f"`{x}`" for x in skipped))
+        text += ", ".join(f"`{x}`" for x in skipped)
         await event.answer(text, reply=True)
 
 
@@ -355,7 +389,7 @@ async def mute(event: NewMessage.Event) -> None:
             skipped.append(user)
     if muted:
         text = "`Successfully muted:`\n"
-        text += ", ".join((f"`{x}`" for x in muted))
+        text += ", ".join(f"`{x}`" for x in muted)
         if reason:
             text += f"\n`Reason:` `{reason}`"
         e2 = await get_chat_link(entity, event.id)
@@ -363,7 +397,7 @@ async def mute(event: NewMessage.Event) -> None:
         await event.answer(text, log=("mute", log_msg))
     if skipped:
         text = "`Skipped users:`"
-        text += ", ".join((f"`{x}`" for x in skipped))
+        text += ", ".join(f"`{x}`" for x in skipped)
         await event.answer(text, reply=True)
 
 
@@ -411,7 +445,7 @@ async def unmute(event: NewMessage.Event) -> None:
             skipped.append(user)
     if unmuted:
         text = "`Successfully unmuted:`\n"
-        text += ", ".join((f"`{x}`" for x in unmuted))
+        text += ", ".join(f"`{x}`" for x in unmuted)
         if reason:
             text += f"\n`Reason:` `{reason}`"
         e2 = await get_chat_link(entity, event.id)
@@ -419,7 +453,7 @@ async def unmute(event: NewMessage.Event) -> None:
         await event.answer(text, log=("unmute", log_msg))
     if skipped:
         text = "`Skipped users:`"
-        text += ", ".join((f"`{x}`" for x in skipped))
+        text += ", ".join(f"`{x}`" for x in skipped)
         await event.answer(text, reply=True)
 
 
@@ -477,7 +511,7 @@ async def tmute(event: NewMessage.Event) -> None:
             skipped.append(user)
     if tmuted:
         text = "`Successfully tmuted:`\n"
-        text += ", ".join((f"`{x}`" for x in tmuted))
+        text += ", ".join(f"`{x}`" for x in tmuted)
         text += f"\n`Time:` `{await _humanfriendly_seconds(period)}`"
         if reason:
             text += f"\n`Reason:` `{reason}`"
@@ -486,7 +520,7 @@ async def tmute(event: NewMessage.Event) -> None:
         await event.answer(text, log=("tmute", log_msg))
     if skipped:
         text = "`Skipped users:`"
-        text += ", ".join((f"`{x}`" for x in skipped))
+        text += ", ".join(f"`{x}`" for x in skipped)
         await event.answer(text, reply=True)
 
 
@@ -544,7 +578,7 @@ async def tban(event: NewMessage.Event) -> None:
             skipped.append(user)
     if tbanned:
         text = "`Successfully tbanned:`\n"
-        text += ", ".join((f"`{x}`" for x in tbanned))
+        text += ", ".join(f"`{x}`" for x in tbanned)
         text += f"\n`Time:` `{await _humanfriendly_seconds(period)}`"
         if reason:
             text += f"\n`Reason:` `{reason}`"
@@ -553,7 +587,7 @@ async def tban(event: NewMessage.Event) -> None:
         await event.answer(text, log=("tban", log_msg))
     if skipped:
         text = "`Skipped users:`"
-        text += ", ".join((f"`{x}`" for x in skipped))
+        text += ", ".join(f"`{x}`" for x in skipped)
         await event.answer(text, reply=True)
 
 
@@ -590,37 +624,3 @@ async def pin(event: NewMessage.Event) -> None:
     e2 = await get_chat_link(event, event.reply_to_msg_id)
     log_msg = text + f"`Chat:` {e2}"
     await event.answer(text, log=("pin", log_msg))
-
-
-async def get_rights(
-    event: NewMessage.Event,
-    change_info: bool = False,
-    post_messages: bool = False,
-    edit_messages: bool = False,
-    delete_messages: bool = False,
-    ban_users: bool = False,
-    invite_users: bool = False,
-    pin_messages: bool = False,
-    add_admins: bool = False,
-) -> bool:
-    """Return a bool according the required admin rights"""
-    chat = await event.get_chat()
-    if chat.creator:
-        return True
-    rights = {
-        "change_info": change_info,
-        "post_messages": post_messages,
-        "edit_messages": edit_messages,
-        "delete_messages": delete_messages,
-        "ban_users": ban_users,
-        "invite_users": invite_users,
-        "pin_messages": pin_messages,
-        "add_admins": add_admins,
-    }
-    required_rights = [
-        getattr(chat.admin_rights, right, False)
-        for right, required in rights.items()
-        if required
-    ]
-
-    return all(required_rights)

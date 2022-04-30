@@ -15,9 +15,9 @@ import re
 import typing
 
 from telethon import errors, events
-from telethon.extensions import markdown, html
+from telethon.extensions import html, markdown
+from telethon.hints import DateLike, FileLike, MarkupLike
 from telethon.tl import custom, functions, types
-from telethon.hints import FileLike, MarkupLike, DateLike
 
 LOGGER = logging.getLogger(__name__)
 MAXLIM: int = 4096
@@ -36,6 +36,91 @@ file_kwargs = (
     "buttons",
     "supports_streaming",
 )
+
+
+async def _reset_entities(entities: list, end: int, next_offset: int) -> None:
+    """Reset the offset of entities's list which has been cut"""
+    offset = entities[0].offset
+    increment = 0 if next_offset == end else next_offset - end
+    for entity in entities:
+        entity.offset = entity.offset + increment - offset
+
+
+async def _next_offset(end, entities) -> typing.Tuple[int, bool]:
+    """Find out how much length we need to skip ahead for the next entities"""
+    last_chunk = False
+    if len(entities) >= end + 1:
+        next_offset = entities[end].offset
+    else:
+        # It's always the last entity so just grab the last index
+        next_offset = entities[-1].offset + entities[-1].length
+        last_chunk = True
+    return next_offset, last_chunk
+
+
+async def _resolve_entities(message: str, entities: list) -> dict:
+    """Don't even bother trying to figure this mess out"""
+    messages = []
+    while entities:
+        end = 100 if len(entities) >= 100 else len(entities)
+        if len(message) > MAXLIM:
+            end, _ = min(
+                enumerate(entities[:end]),
+                key=lambda x: abs(x[1].offset + x[1].length - MAXLIM),
+            )
+            if end == 0:
+                msg_end = entities[0].offset + entities[0].length
+                if msg_end > MAXLIM:
+                    entity_type = getattr(types, type(entities[0]).__name__)
+                    kwargs = vars(entities[0])
+                    kwargs.update(offset=0)
+                    for i in range(0, msg_end, MAXLIM):
+                        end = i + MAXLIM if i + MAXLIM <= msg_end else msg_end
+                        m_chunk = message[i:end]
+                        kwargs.update(length=len(m_chunk))
+                        messages.append((m_chunk, [entity_type(**kwargs)]))
+                else:
+                    messages.append((message[:msg_end], [entities[0]]))
+                next_offset, _ = await _next_offset(1, entities)
+                del entities[0]
+                message = message[msg_end:]
+                await _reset_entities(entities, msg_end, next_offset)
+                continue
+            end = end + 1  # We don't want the index
+
+        _, last_chunk = await _next_offset(end, entities)
+        if not last_chunk:
+            last_end = entities[end].offset + entities[end].length
+            if end > 3 and not whitespace_exp.search(message[last_end:]):
+                for e in entities[:end:-1]:
+                    start = e.offset + e.length
+                    if end == 2 or whitespace_exp.search(message[start:]):
+                        break
+                    end = end - 1
+        e_chunk = entities[:end]
+        next_offset, last_chunk = await _next_offset(end, entities)
+        if last_chunk:
+            msg_end = len(message) + 1
+        else:
+            msg_end = e_chunk[-1].offset + e_chunk[-1].length
+        t_chunk = message[:msg_end]
+        messages.append((t_chunk, e_chunk))
+        entities = entities[end:]
+        message = message[len(t_chunk) :]
+        if entities:
+            await _reset_entities(entities, msg_end, next_offset)
+    return messages
+
+
+async def _self_destructor(
+    event: typing.Union[custom.Message, typing.Sequence[custom.Message]],
+    timeout: int or float,
+) -> typing.Union[custom.Message, typing.Sequence[custom.Message]]:
+    await asyncio.sleep(timeout)
+    if isinstance(event, list):
+        return [await e.delete() for e in event]
+    else:
+        return await event.delete()
 
 
 async def answer(
@@ -220,6 +305,22 @@ async def answer(
     return message_out
 
 
+async def resolve_strings(strings: str or None or list) -> list:
+    tmp = []
+    if inspect.isfunction(strings):
+        strings = strings()
+
+    if isinstance(strings, list):
+        tmp = [
+            str(s()) if inspect.isfunction(s) else str(s)
+            for s in strings
+            if s is not None
+        ]
+    elif strings is not None:
+        tmp = [str(strings)]
+    return tmp
+
+
 async def resanswer(
     self,
     entity,
@@ -275,104 +376,3 @@ async def resanswer(
         except KeyError:
             LOGGER.warning("Invalid extra string %s found in %s resource", name, plugin)
     return sent
-
-
-async def _resolve_entities(message: str, entities: list) -> dict:
-    """Don't even bother trying to figure this mess out"""
-    messages = []
-    while entities:
-        end = 100 if len(entities) >= 100 else len(entities)
-        if len(message) > MAXLIM:
-            end, _ = min(
-                enumerate(entities[:end]),
-                key=lambda x: abs(x[1].offset + x[1].length - MAXLIM),
-            )
-            if end == 0:
-                msg_end = entities[0].offset + entities[0].length
-                if msg_end > MAXLIM:
-                    entity_type = getattr(types, type(entities[0]).__name__)
-                    kwargs = vars(entities[0])
-                    kwargs.update(offset=0)
-                    for i in range(0, msg_end, MAXLIM):
-                        end = i + MAXLIM if i + MAXLIM <= msg_end else msg_end
-                        m_chunk = message[i:end]
-                        kwargs.update(length=len(m_chunk))
-                        messages.append((m_chunk, [entity_type(**kwargs)]))
-                else:
-                    messages.append((message[:msg_end], [entities[0]]))
-                next_offset, _ = await _next_offset(1, entities)
-                del entities[0]
-                message = message[msg_end:]
-                await _reset_entities(entities, msg_end, next_offset)
-                continue
-            end = end + 1  # We don't want the index
-
-        _, last_chunk = await _next_offset(end, entities)
-        if not last_chunk:
-            last_end = entities[end].offset + entities[end].length
-            if end > 3 and not whitespace_exp.search(message[last_end:]):
-                for e in entities[:end:-1]:
-                    start = e.offset + e.length
-                    if end == 2 or whitespace_exp.search(message[start:]):
-                        break
-                    end = end - 1
-        e_chunk = entities[:end]
-        next_offset, last_chunk = await _next_offset(end, entities)
-        if last_chunk:
-            msg_end = len(message) + 1
-        else:
-            msg_end = e_chunk[-1].offset + e_chunk[-1].length
-        t_chunk = message[:msg_end]
-        messages.append((t_chunk, e_chunk))
-        entities = entities[end:]
-        message = message[len(t_chunk) :]
-        if entities:
-            await _reset_entities(entities, msg_end, next_offset)
-    return messages
-
-
-async def _reset_entities(entities: list, end: int, next_offset: int) -> None:
-    """Reset the offset of entities's list which has been cut"""
-    offset = entities[0].offset
-    increment = 0 if next_offset == end else next_offset - end
-    for entity in entities:
-        entity.offset = entity.offset + increment - offset
-
-
-async def _next_offset(end, entities) -> typing.Tuple[int, bool]:
-    """Find out how much length we need to skip ahead for the next entities"""
-    last_chunk = False
-    if len(entities) >= end + 1:
-        next_offset = entities[end].offset
-    else:
-        # It's always the last entity so just grab the last index
-        next_offset = entities[-1].offset + entities[-1].length
-        last_chunk = True
-    return next_offset, last_chunk
-
-
-async def _self_destructor(
-    event: typing.Union[custom.Message, typing.Sequence[custom.Message]],
-    timeout: int or float,
-) -> typing.Union[custom.Message, typing.Sequence[custom.Message]]:
-    await asyncio.sleep(timeout)
-    if isinstance(event, list):
-        return [await e.delete() for e in event]
-    else:
-        return await event.delete()
-
-
-async def resolve_strings(strings: str or None or list) -> list:
-    tmp = []
-    if inspect.isfunction(strings):
-        strings = strings()
-
-    if isinstance(strings, list):
-        tmp = [
-            str(s()) if inspect.isfunction(s) else str(s)
-            for s in strings
-            if s is not None
-        ]
-    elif strings is not None:
-        tmp = [str(strings)]
-    return tmp

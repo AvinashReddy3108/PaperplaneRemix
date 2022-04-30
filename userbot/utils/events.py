@@ -136,6 +136,11 @@ class NewMessage(events.NewMessage):
 class MessageEdited(NewMessage):
     """Custom MessageEdited event inheriting the custom NewMessage event"""
 
+    class Event(NewMessage.Event):
+        """Overriding the default Event which inherits Telethon's NewMessage"""
+
+        pass  # Required if we want a different name for it
+
     @classmethod
     def build(cls, update, others=None, self_id=None):
         """
@@ -153,8 +158,3 @@ class MessageEdited(NewMessage):
             ):
                 return
             return cls.Event(update.message)
-
-    class Event(NewMessage.Event):
-        """Overriding the default Event which inherits Telethon's NewMessage"""
-
-        pass  # Required if we want a different name for it

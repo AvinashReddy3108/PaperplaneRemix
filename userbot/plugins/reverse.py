@@ -6,25 +6,24 @@
 #
 
 
-import aiohttp
 import asyncio
-import bs4
 import concurrent
 import functools
 import io
 import os
 import random
 import re
-import requests
 import urllib
 import urllib.parse
 
+import aiohttp
+import bs4
+import requests
 from telethon.utils import get_extension
 
 from userbot import client
-from userbot.utils.helpers import get_chat_link, is_ffmpeg_there
 from userbot.utils.events import NewMessage
-
+from userbot.utils.helpers import get_chat_link, is_ffmpeg_there
 
 opener = urllib.request.build_opener()
 loop = client.loop
@@ -36,6 +35,109 @@ heavy_ua1 = """Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 \
 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36"""
 heavy_ua2 = """Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36"""
+
+
+def _post(name: str, media: io.BytesIO):
+    searchUrl = "https://www.google.com/searchbyimage/upload"
+    multipart = {"encoded_image": (name, media), "image_content": ""}
+    headers = {"User-Agent": heavy_ua1}
+
+    return requests.post(
+        searchUrl, files=multipart, allow_redirects=False, headers=headers
+    )
+
+
+async def _run_sync(func: callable):
+    try:
+        return await loop.run_in_executor(concurrent.futures.ThreadPoolExecutor(), func)
+    except urllib.error.HTTPError as e:
+        return e
+
+
+async def _scrape_url(googleurl):
+    """Parse/Scrape the HTML code for the info we want."""
+
+    UA = random.choice([heavy_ua1, heavy_ua2])
+    opener.addheaders = [("User-Agent", UA)]
+
+    source = await _run_sync(functools.partial(opener.open, googleurl))
+    if isinstance(source, urllib.error.HTTPError):
+        return source
+    soup = bs4.BeautifulSoup(source.read(), "html.parser")
+
+    result = {
+        "similar_images": "",
+        "best_guess": "",
+        "matching_text": "",
+        "matching": {},
+    }
+
+    best_guess = soup.find("div", {"class": "r5a77d"})
+    similar_images = soup.find("div", {"class": "e2BEnf U7izfe"})
+    matching_text = soup.find(
+        "div", {"class": "rg-header V5niGc dPAwzb", "role": "heading"}
+    )
+    _matching = soup.find("div", {"id": "search"})
+    matching = _matching.find_all("div", {"class": "g"}) if _matching else None
+    if best_guess:
+        result["best_guess"] = best_guess.a.get_text()
+
+    if similar_images:
+        result["similar_images"] = "https://www.google.com" + similar_images.find(
+            "a"
+        ).get("href")
+
+    if matching_text:
+        result["matching_text"] = matching_text.get_text()
+
+    if matching:
+        for tag in matching:
+            tmp = tag.find("a", {"href": True, "ping": True})
+            if tmp and len(tmp.attrs) == 2:
+                text = tmp.h3.get_text().strip()
+                text = text.replace("[", "").replace("]", "")
+                link = urllib.parse.quote_plus(tmp.get("href"), safe=":/-&")
+                result["matching"][text] = link
+
+    return result
+
+
+async def _get_similar_links(link: str, lim: int = 2):
+    """Parse/Scrape the HTML code for the info we want."""
+
+    opener.addheaders = [("User-Agent", light_useragent)]
+
+    source = await _run_sync(functools.partial(opener.open, link))
+    if isinstance(source, urllib.error.HTTPError):
+        return source
+
+    links = []
+    gifs = []
+    pattern = (
+        r",\[\""
+        r"(.*\.(?:png|jpg|jpeg|bmp|svg\+xml|webp|gif))"  # link
+        r".*\""  # Suffix of the link which isn't needed
+        r",[0-9]+,[0-9]+\]"  # Media height and width
+    )
+    matches = re.findall(pattern, source.read().decode("utf-8"), re.I)
+
+    async with aiohttp.ClientSession() as session:
+        counter = 0
+
+        for link in matches:
+            async with session.get(link) as response:
+                if response.status == 200 and response.content_type.startswith(
+                    "image/"
+                ):
+                    counter += 1
+                    if response.content_type.endswith("gif"):
+                        gifs.append(link)
+                    else:
+                        links.append(await response.read())
+            if counter >= int(lim):
+                break
+
+    return links, gifs
 
 
 @client.onMessage(command="reverse", outgoing=True, regex=r"reverse(?: |$)(\d*)")
@@ -135,106 +237,3 @@ async def reverse(event: NewMessage.Event) -> None:
         if gifs:
             for gif in gifs:
                 await event.answer(file=gif, reply_to=event.message.id)
-
-
-def _post(name: str, media: io.BytesIO):
-    searchUrl = "https://www.google.com/searchbyimage/upload"
-    multipart = {"encoded_image": (name, media), "image_content": ""}
-    headers = {"User-Agent": heavy_ua1}
-
-    return requests.post(
-        searchUrl, files=multipart, allow_redirects=False, headers=headers
-    )
-
-
-async def _scrape_url(googleurl):
-    """Parse/Scrape the HTML code for the info we want."""
-
-    UA = random.choice([heavy_ua1, heavy_ua2])
-    opener.addheaders = [("User-Agent", UA)]
-
-    source = await _run_sync(functools.partial(opener.open, googleurl))
-    if isinstance(source, urllib.error.HTTPError):
-        return source
-    soup = bs4.BeautifulSoup(source.read(), "html.parser")
-
-    result = {
-        "similar_images": "",
-        "best_guess": "",
-        "matching_text": "",
-        "matching": {},
-    }
-
-    best_guess = soup.find("div", {"class": "r5a77d"})
-    similar_images = soup.find("div", {"class": "e2BEnf U7izfe"})
-    matching_text = soup.find(
-        "div", {"class": "rg-header V5niGc dPAwzb", "role": "heading"}
-    )
-    _matching = soup.find("div", {"id": "search"})
-    matching = _matching.find_all("div", {"class": "g"}) if _matching else None
-    if best_guess:
-        result["best_guess"] = best_guess.a.get_text()
-
-    if similar_images:
-        result["similar_images"] = "https://www.google.com" + similar_images.find(
-            "a"
-        ).get("href")
-
-    if matching_text:
-        result["matching_text"] = matching_text.get_text()
-
-    if matching:
-        for tag in matching:
-            tmp = tag.find("a", {"href": True, "ping": True})
-            if tmp and len(tmp.attrs) == 2:
-                text = tmp.h3.get_text().strip()
-                text = text.replace("[", "").replace("]", "")
-                link = urllib.parse.quote_plus(tmp.get("href"), safe=":/-&")
-                result["matching"][text] = link
-
-    return result
-
-
-async def _get_similar_links(link: str, lim: int = 2):
-    """Parse/Scrape the HTML code for the info we want."""
-
-    opener.addheaders = [("User-Agent", light_useragent)]
-
-    source = await _run_sync(functools.partial(opener.open, link))
-    if isinstance(source, urllib.error.HTTPError):
-        return source
-
-    links = []
-    gifs = []
-    pattern = (
-        r",\[\""
-        r"(.*\.(?:png|jpg|jpeg|bmp|svg\+xml|webp|gif))"  # link
-        r".*\""  # Suffix of the link which isn't needed
-        r",[0-9]+,[0-9]+\]"  # Media height and width
-    )
-    matches = re.findall(pattern, source.read().decode("utf-8"), re.I)
-
-    async with aiohttp.ClientSession() as session:
-        counter = 0
-
-        for link in matches:
-            async with session.get(link) as response:
-                if response.status == 200 and response.content_type.startswith(
-                    "image/"
-                ):
-                    counter += 1
-                    if response.content_type.endswith("gif"):
-                        gifs.append(link)
-                    else:
-                        links.append(await response.read())
-            if counter >= int(lim):
-                break
-
-    return links, gifs
-
-
-async def _run_sync(func: callable):
-    try:
-        return await loop.run_in_executor(concurrent.futures.ThreadPoolExecutor(), func)
-    except urllib.error.HTTPError as e:
-        return e

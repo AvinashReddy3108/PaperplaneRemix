@@ -7,17 +7,16 @@
 
 import datetime
 import os
-import time
 import random
+import time
 
 from telethon.events import StopPropagation
-from telethon.tl import types, functions
-from typing import Tuple
+from telethon.tl import functions, types
 
 from userbot import client
 from userbot.plugins import plugins_data
-from userbot.utils.helpers import _humanfriendly_seconds, get_chat_link
 from userbot.utils.events import NewMessage
+from userbot.utils.helpers import _humanfriendly_seconds, get_chat_link
 
 DEFAULT_MUTE_SETTINGS = types.InputPeerNotifySettings(
     silent=True, mute_until=datetime.timedelta(days=365)
@@ -91,6 +90,22 @@ async def awayfromkeyboard(event: NewMessage.Event) -> None:
     else:
         await event.resanswer(going_afk, plugin="afk", name="going_afk", log=log)
     raise StopPropagation
+
+
+async def _update_notif_settings(
+    peer: int, settings: types.InputPeerNotifySettings = DEFAULT_MUTE_SETTINGS
+) -> None:
+    await client(
+        functions.account.UpdateNotifySettingsRequest(peer=peer, settings=settings)
+    )
+
+
+async def _correct_grammer(mentions: int, chats: int) -> tuple[str, str, str, str]:
+    a1 = "one" if mentions == 1 else mentions
+    a2 = "" if mentions == 1 else "s"
+    a3 = "one" if chats == 1 else chats
+    a4 = "" if chats == 1 else "s"
+    return a1, a2, a3, a4
 
 
 @client.onMessage(outgoing=True, forwards=None)
@@ -167,6 +182,38 @@ async def out_listner(event: NewMessage.Event) -> None:
     AFK.sent.clear()
 
 
+async def _append_msg(variable: dict, chat: int, event: int) -> None:
+    if chat in variable:
+        variable[chat]["mentions"].append(event)
+    else:
+        notif = await client(functions.account.GetNotifySettingsRequest(peer=chat))
+        notif = types.InputPeerNotifySettings(**vars(notif))
+        await _update_notif_settings(chat)
+        async for dialog in client.iter_dialogs():
+            if chat == dialog.entity.id:
+                title = getattr(dialog, "title", dialog.name)
+                unread_count = dialog.unread_count
+                last_msg = dialog.message.id
+                break
+        x = 1
+        messages = []
+        async for message in client.iter_messages(chat, max_id=last_msg):
+            if x >= unread_count:
+                if not messages:
+                    messages.append(message.id)
+                break
+            if not message.out:
+                x += 1
+                messages.append(message.id)
+        variable[chat] = {
+            "title": title,
+            "unread_from": messages[-1],
+            "mentions": [event],
+            "PeerNotifySettings": notif,
+        }
+        messages.clear()
+
+
 @client.onMessage(incoming=True, edited=False)
 async def inc_listner(event: NewMessage.Event) -> None:
     """Handle tags and new messages by listening to new incoming messages."""
@@ -213,51 +260,3 @@ async def inc_listner(event: NewMessage.Event) -> None:
             reply_to=event if not event.is_private else None,
         )
     AFK.sent.setdefault(chat.id, []).append((result.id, result.date))
-
-
-async def _append_msg(variable: dict, chat: int, event: int) -> None:
-    if chat in variable:
-        variable[chat]["mentions"].append(event)
-    else:
-        notif = await client(functions.account.GetNotifySettingsRequest(peer=chat))
-        notif = types.InputPeerNotifySettings(**vars(notif))
-        await _update_notif_settings(chat)
-        async for dialog in client.iter_dialogs():
-            if chat == dialog.entity.id:
-                title = getattr(dialog, "title", dialog.name)
-                unread_count = dialog.unread_count
-                last_msg = dialog.message.id
-                break
-        x = 1
-        messages = []
-        async for message in client.iter_messages(chat, max_id=last_msg):
-            if x >= unread_count:
-                if not messages:
-                    messages.append(message.id)
-                break
-            if not message.out:
-                x += 1
-                messages.append(message.id)
-        variable[chat] = {
-            "title": title,
-            "unread_from": messages[-1],
-            "mentions": [event],
-            "PeerNotifySettings": notif,
-        }
-        messages.clear()
-
-
-async def _update_notif_settings(
-    peer: int, settings: types.InputPeerNotifySettings = DEFAULT_MUTE_SETTINGS
-) -> None:
-    await client(
-        functions.account.UpdateNotifySettingsRequest(peer=peer, settings=settings)
-    )
-
-
-async def _correct_grammer(mentions: int, chats: int) -> Tuple[str, str, str, str]:
-    a1 = "one" if mentions == 1 else mentions
-    a2 = "" if mentions == 1 else "s"
-    a3 = "one" if chats == 1 else chats
-    a4 = "" if chats == 1 else "s"
-    return a1, a2, a3, a4

@@ -7,23 +7,21 @@
 
 
 import datetime
-import msgpack
 import re
-from typing import Dict, List
 
+import msgpack
 from telethon.tl import functions, types
 
 from userbot import client
-from userbot.utils.helpers import get_chat_link
 from userbot.utils.events import NewMessage
-
+from userbot.utils.helpers import get_chat_link
 
 plugin_category = "pmpermit"
 PM_PERMIT = client.config["userbot"].getboolean("pm_permit", False)
 redis = client.database
 
-approvedUsers: List[int] = []
-spammers: Dict[int, tuple] = {}
+approvedUsers: list[int] = []
+spammers: dict[int, tuple] = {}
 
 warning = (
     "`You have only` **1** `message left, if you send the next one "
@@ -55,6 +53,14 @@ DEFAULT_UNMUTE_SETTINGS = types.InputPeerNotifySettings(
 
 if redis and redis.exists("approved:users"):
     approvedUsers = msgpack.unpackb(redis.get("approved:users"))
+
+
+async def update_db() -> None:
+    if redis:
+        if approvedUsers:
+            redis.set("approved:users", msgpack.packb(approvedUsers))
+        else:
+            redis.delete("approved:users")
 
 
 @client.onMessage(incoming=True, edited=False)
@@ -174,6 +180,26 @@ async def pm_outgoing(event: NewMessage.Event) -> None:
             self_destruct=2,
             log=("pmpermit", autoapprove.format(user=user)),
         )
+
+
+async def get_users(event: NewMessage.Event) -> types.User or None:
+    match = event.matches[0].group(1)
+    users = []
+    if match:
+        matches, _ = await client.parse_arguments(match)
+        for match in matches:
+            try:
+                entity = await client.get_entity(match)
+                if isinstance(entity, types.User):
+                    users.append(entity)
+            except (TypeError, ValueError):
+                pass
+    elif event.is_private and event.out:
+        users = [await event.get_chat()]
+    elif event.reply_to_msg_id:
+        reply = await event.get_reply_message()
+        users = [await reply.get_sender()]
+    return users
 
 
 @client.onMessage(
@@ -343,31 +369,3 @@ async def approved(event: NewMessage.Event) -> None:
         await event.answer(text)
     else:
         await event.answer("`I haven't approved anyone to PM me yet.`")
-
-
-async def get_users(event: NewMessage.Event) -> types.User or None:
-    match = event.matches[0].group(1)
-    users = []
-    if match:
-        matches, _ = await client.parse_arguments(match)
-        for match in matches:
-            try:
-                entity = await client.get_entity(match)
-                if isinstance(entity, types.User):
-                    users.append(entity)
-            except (TypeError, ValueError):
-                pass
-    elif event.is_private and event.out:
-        users = [await event.get_chat()]
-    elif event.reply_to_msg_id:
-        reply = await event.get_reply_message()
-        users = [await reply.get_sender()]
-    return users
-
-
-async def update_db() -> None:
-    if redis:
-        if approvedUsers:
-            redis.set("approved:users", msgpack.packb(approvedUsers))
-        else:
-            redis.delete("approved:users")

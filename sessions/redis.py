@@ -11,7 +11,6 @@
 import logging
 
 import redis
-
 from telethon.crypto import AuthKey
 from telethon.sessions import MemorySession
 
@@ -55,6 +54,18 @@ class RedisSession(MemorySession):
         self._entities = set()
         self._update_states = {}
 
+    def _get_sessions(self, strip_prefix=False):
+        key_pattern = "{}:auth".format(self.sess_prefix)
+        try:
+            sessions = self.redis_connection.keys(key_pattern + "*")
+            return [
+                s.decode().replace(key_pattern, "") if strip_prefix else s.decode()
+                for s in sessions
+            ]
+        except Exception as ex:
+            LOGGER.exception(ex.args)
+            return []
+
     def feed_session(self):
         try:
             s = self._get_sessions()
@@ -77,18 +88,6 @@ class RedisSession(MemorySession):
 
         except Exception as ex:
             LOGGER.exception(ex.args)
-
-    def _get_sessions(self, strip_prefix=False):
-        key_pattern = "{}:auth".format(self.sess_prefix)
-        try:
-            sessions = self.redis_connection.keys(key_pattern + "*")
-            return [
-                s.decode().replace(key_pattern, "") if strip_prefix else s.decode()
-                for s in sessions
-            ]
-        except Exception as ex:
-            LOGGER.exception(ex.args)
-            return []
 
     def _update_sessions(self):
         if not self._dc_id:

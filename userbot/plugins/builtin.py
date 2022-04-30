@@ -11,7 +11,7 @@ import logging
 import os
 import sys
 
-from userbot import client, LOGGER, loggingHandler
+from userbot import LOGGER, client, loggingHandler
 from userbot.utils.events import NewMessage
 from userbot.utils.helpers import restart
 

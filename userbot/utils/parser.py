@@ -8,7 +8,7 @@
 # This is based on the parser of https://github.com/mojurasu/kantek/
 
 import re
-from typing import Dict, List, Tuple, Union
+from typing import Union
 
 KWARGS = re.compile(
     r"(?<!\S)"  # Make sure the key starts after a whitespace
@@ -23,7 +23,7 @@ BOOL_MAP = {
 }
 
 Value = Union[int, str, float, list]
-KeywordArgument = Union[Value, range, List[Value]]
+KeywordArgument = Union[Value, range, list[Value]]
 
 
 async def _parse_arg(val: str) -> Union[int, str, float]:
@@ -51,7 +51,7 @@ async def _parse_arg(val: str) -> Union[int, str, float]:
 @staticmethod
 async def parse_arguments(
     arguments: str,
-) -> Tuple[List[Value], Dict[str, KeywordArgument]]:
+) -> tuple[list[Value], dict[str, KeywordArgument]]:
     keyword_args = {}
     for match in KWARGS.finditer(arguments):
         key = match.group("key")

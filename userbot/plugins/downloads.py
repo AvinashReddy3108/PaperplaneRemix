@@ -12,12 +12,16 @@ from telethon.tl import types
 from telethon.utils import get_attributes, get_extension
 
 from userbot import client
-from userbot.utils.helpers import ProgressCallback
 from userbot.utils.events import NewMessage
+from userbot.utils.helpers import ProgressCallback
 
 plugin_category = "downloads"
 downloads = pathlib.Path("./downloads/").absolute()
 NAME = "untitled"
+
+
+async def _get_file_name(path: pathlib.Path, full: bool = True) -> str:
+    return str(path.absolute()) if full else path.stem + path.suffix
 
 
 @client.onMessage(
@@ -153,7 +157,3 @@ async def upload(event: NewMessage.Event) -> None:
         )
 
     await event.answer(f"`Successfully uploaded {files}.`")
-
-
-async def _get_file_name(path: pathlib.Path, full: bool = True) -> str:
-    return str(path.absolute()) if full else path.stem + path.suffix

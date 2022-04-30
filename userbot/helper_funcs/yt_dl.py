@@ -12,6 +12,7 @@ import os
 import pathlib
 import re
 import time
+
 import yt_dlp
 
 from .. import LOGGER
@@ -167,7 +168,7 @@ async def list_formats(info_dict: dict) -> str:
         table[-1][-1] += (" " if table[-1][-1] else "") + "(best)"
 
     header_line = ["format code", "extension", "resolution"]
-    return "Available formats for %s:\n%s" % (
+    return "Available formats for {}:\n{}".format(
         info_dict["title"],
         yt_dlp.render_table(header_line, table),
     )

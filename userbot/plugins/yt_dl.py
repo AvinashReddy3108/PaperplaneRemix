@@ -14,13 +14,13 @@ from telethon.tl import types
 from telethon.utils import get_attributes
 
 from userbot import client
-from userbot.utils.helpers import is_ffmpeg_there, ProgressCallback
 from userbot.helper_funcs.yt_dl import (
-    extract_info,
-    list_formats,
     ProgressHook,
     YTdlLogger,
+    extract_info,
+    list_formats,
 )
+from userbot.utils.helpers import ProgressCallback, is_ffmpeg_there
 
 audioFormats = ["aac", "flac", "mp3", "m4a", "opus", "vorbis", "wav"]
 
@@ -48,6 +48,55 @@ warning = (
     " `If you requested multiple formats, they won't be merged.`\n\n"
 )
 success = "`Successfully downloaded` {}"
+
+
+async def fix_attributes(
+    path, info_dict: dict, round_message: bool = False, supports_streaming: bool = False
+) -> list:
+    """Avoid multiple instances of an attribute."""
+    new_attributes = []
+    video = False
+    audio = False
+
+    uploader = info_dict.get("uploader", "Unknown artist")
+    duration = int(info_dict.get("duration", 0))
+    suffix = path.suffix[1:]
+    if supports_streaming and suffix != "mp4":
+        supports_streaming = False
+
+    attributes, mime_type = get_attributes(path)
+    if suffix in audioFormats:
+        title = str(info_dict.get("title", info_dict.get("id", "Unknown title")))
+        audio = types.DocumentAttributeAudio(duration, None, title, uploader)
+    elif suffix in videoFormats:
+        width = int(info_dict.get("width", 0))
+        height = int(info_dict.get("height", 0))
+        for attr in attributes:
+            if isinstance(attr, types.DocumentAttributeVideo):
+                duration = duration or attr.duration
+                width = width or attr.w
+                height = height or attr.h
+                break
+        video = types.DocumentAttributeVideo(
+            duration, width, height, round_message, supports_streaming
+        )
+
+    if audio and isinstance(audio, types.DocumentAttributeAudio):
+        new_attributes.append(audio)
+    if video and isinstance(video, types.DocumentAttributeVideo):
+        new_attributes.append(video)
+
+    for attr in attributes:
+        if (
+            isinstance(attr, types.DocumentAttributeAudio)
+            and not audio
+            or not isinstance(attr, types.DocumentAttributeAudio)
+            and not video
+            or not isinstance(attr, types.DocumentAttributeAudio)
+            and not isinstance(attr, types.DocumentAttributeVideo)
+        ):
+            new_attributes.append(attr)
+    return new_attributes, mime_type
 
 
 @client.onMessage(command="ytdl", outgoing=True, regex=r"ytdl(?: |$|\n)([\s\S]*)")
@@ -221,52 +270,3 @@ async def yt_dl(event):
         await event.answer(text)
     else:
         await event.delete()
-
-
-async def fix_attributes(
-    path, info_dict: dict, round_message: bool = False, supports_streaming: bool = False
-) -> list:
-    """Avoid multiple instances of an attribute."""
-    new_attributes = []
-    video = False
-    audio = False
-
-    uploader = info_dict.get("uploader", "Unknown artist")
-    duration = int(info_dict.get("duration", 0))
-    suffix = path.suffix[1:]
-    if supports_streaming and suffix != "mp4":
-        supports_streaming = False
-
-    attributes, mime_type = get_attributes(path)
-    if suffix in audioFormats:
-        title = str(info_dict.get("title", info_dict.get("id", "Unknown title")))
-        audio = types.DocumentAttributeAudio(duration, None, title, uploader)
-    elif suffix in videoFormats:
-        width = int(info_dict.get("width", 0))
-        height = int(info_dict.get("height", 0))
-        for attr in attributes:
-            if isinstance(attr, types.DocumentAttributeVideo):
-                duration = duration or attr.duration
-                width = width or attr.w
-                height = height or attr.h
-                break
-        video = types.DocumentAttributeVideo(
-            duration, width, height, round_message, supports_streaming
-        )
-
-    if audio and isinstance(audio, types.DocumentAttributeAudio):
-        new_attributes.append(audio)
-    if video and isinstance(video, types.DocumentAttributeVideo):
-        new_attributes.append(video)
-
-    for attr in attributes:
-        if (
-            isinstance(attr, types.DocumentAttributeAudio)
-            and not audio
-            or not isinstance(attr, types.DocumentAttributeAudio)
-            and not video
-            or not isinstance(attr, types.DocumentAttributeAudio)
-            and not isinstance(attr, types.DocumentAttributeVideo)
-        ):
-            new_attributes.append(attr)
-    return new_attributes, mime_type

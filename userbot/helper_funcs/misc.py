@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
-from typing import Tuple, Union
+from typing import Union
 
 from telethon.tl import types
 
@@ -63,7 +63,7 @@ async def parse_banned_rights(BannedRights: types.ChatBannedRights) -> str:
 
 async def get_entity_info(
     arg: Union[types.ChatFull, types.ChannelFull]
-) -> Tuple[int, int, int, int, int, int]:
+) -> tuple[int, int, int, int, int, int]:
     creator, admins, bots, participants, kicked, banned = (
         None,
         None,

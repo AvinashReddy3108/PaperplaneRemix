@@ -7,8 +7,9 @@
 
 import base64
 import dataclasses
-import msgpack
 import os
+
+import msgpack
 
 
 def load_data(name: str) -> dict:

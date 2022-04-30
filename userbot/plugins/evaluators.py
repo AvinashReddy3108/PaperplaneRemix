@@ -11,8 +11,8 @@ import inspect
 from meval import meval
 
 from userbot import client
-from userbot.utils.helpers import get_chat_link
 from userbot.utils.events import NewMessage
+from userbot.utils.helpers import get_chat_link
 
 plugin_category = "scripting"
 

@@ -13,11 +13,11 @@
 import asyncio
 import re
 
+from telethon.tl.types import ChannelParticipantsBots
+
 from userbot import client
 from userbot.helper_funcs.sed import sub_matches
 from userbot.utils.events import NewMessage
-
-from telethon.tl.types import ChannelParticipantsBots
 
 pattern = (
     r"(?:^{prefix}|;\s)"  # Ensure that the expression doesn't go blatant

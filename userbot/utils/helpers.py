@@ -12,17 +12,17 @@ import os
 import os.path
 import sys
 import time
-from typing import Tuple, Union
+from typing import Union
 
 from heroku3 import from_key
-
 from telethon import errors
 from telethon.tl import types
 from telethon.utils import get_display_name
 
+from userbot.plugins import plugins_data
+
 from .client import UserBotClient
 from .events import NewMessage
-from userbot.plugins import plugins_data
 
 LOGGER = logging.getLogger("userbot")
 
@@ -30,7 +30,7 @@ LOGGER = logging.getLogger("userbot")
 def printUser(entity: types.User) -> None:
     """Print the user's first name + last name upon start"""
     user = get_display_name(entity)
-    LOGGER.warning("Successfully logged in as {0}".format(user))
+    LOGGER.warning("Successfully logged in as {}".format(user))
 
 
 def printVersion(version: int, prefix: str) -> None:
@@ -38,9 +38,20 @@ def printVersion(version: int, prefix: str) -> None:
     if not prefix:
         prefix = "."
     LOGGER.warning(
-        "UserBot v{0} is running, test it by sending {1}ping in"
+        "UserBot v{} is running, test it by sending {}ping in"
         " any chat.".format(version, prefix)
     )
+
+
+async def disable_commands(client: UserBotClient, commands: str) -> None:
+    commands = commands.split(", ")
+    for command in commands:
+        target = client.commands.get(command, False)
+        if target:
+            client.remove_event_handler(target.func)
+            client.disabled_commands.update({command: target})
+            del client.commands[command]
+            LOGGER.debug("Disabled command: %s", command)
 
 
 async def isRestart(client: UserBotClient) -> None:
@@ -124,15 +135,6 @@ async def restart(event: NewMessage.Event) -> None:
         await event.client.disconnect()
 
 
-async def _humanfriendly_seconds(seconds: int or float) -> str:
-    elapsed = datetime.timedelta(seconds=round(seconds)).__str__()
-    splat = elapsed.split(", ")
-    if len(splat) == 1:
-        return await _human_friendly_timedelta(splat[0])
-    friendly_units = await _human_friendly_timedelta(splat[1])
-    return ", ".join([splat[0], friendly_units])
-
-
 async def _human_friendly_timedelta(timedelta: str) -> str:
     splat = timedelta.split(":")
     nulls = ["0", "00"]
@@ -154,6 +156,15 @@ async def _human_friendly_timedelta(timedelta: str) -> str:
     if len(text) == 0:
         text = "\u221E"
     return text
+
+
+async def _humanfriendly_seconds(seconds: int or float) -> str:
+    elapsed = datetime.timedelta(seconds=round(seconds)).__str__()
+    splat = elapsed.split(", ")
+    if len(splat) == 1:
+        return await _human_friendly_timedelta(splat[0])
+    friendly_units = await _human_friendly_timedelta(splat[1])
+    return ", ".join([splat[0], friendly_units])
 
 
 async def get_chat_link(
@@ -190,17 +201,6 @@ async def get_chat_link(
     return extra
 
 
-async def disable_commands(client: UserBotClient, commands: str) -> None:
-    commands = commands.split(", ")
-    for command in commands:
-        target = client.commands.get(command, False)
-        if target:
-            client.remove_event_handler(target.func)
-            client.disabled_commands.update({command: target})
-            del client.commands[command]
-            LOGGER.debug("Disabled command: %s", command)
-
-
 async def is_ffmpeg_there():
     cmd = await asyncio.create_subprocess_shell(
         "ffmpeg -version",
@@ -220,6 +220,15 @@ async def format_speed(speed_per_second, unit):
         if speed / base < 1:
             return speed, i, unit0
         speed /= base
+
+
+async def calc_eta(elp: float, speed: int, current: int, total: int) -> int:
+    if total is None or total == 0:
+        return 0
+    if current == 0 or elp < 0.001:
+        return 0
+    speed = speed or 1
+    return int((float(total) - float(current)) / speed)
 
 
 class ProgressCallback:
@@ -288,16 +297,7 @@ class ProgressCallback:
             self.last_download_edit = time.time()
 
 
-async def calc_eta(elp: float, speed: int, current: int, total: int) -> int:
-    if total is None or total == 0:
-        return 0
-    if current == 0 or elp < 0.001:
-        return 0
-    speed = speed or 1
-    return int((float(total) - float(current)) / speed)
-
-
-def ul_prog(d: dict, cb: ProgressCallback) -> Tuple[Union[str, bool], bool]:
+def ul_prog(d: dict, cb: ProgressCallback) -> tuple[Union[str, bool], bool]:
     """Logs the upload progress"""
     uploaded = cb._uploaded
     current = d.get("percentage", 0)
@@ -322,7 +322,7 @@ def ul_prog(d: dict, cb: ProgressCallback) -> Tuple[Union[str, bool], bool]:
     return False, False
 
 
-def dl_prog(d: dict, cb: ProgressCallback) -> Tuple[Union[str, bool], bool]:
+def dl_prog(d: dict, cb: ProgressCallback) -> tuple[Union[str, bool], bool]:
     """Logs the download progress"""
     downloaded = cb._downloaded
     current = d.get("percentage", 0)

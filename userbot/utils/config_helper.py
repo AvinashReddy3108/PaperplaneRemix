@@ -13,6 +13,15 @@ sample_config_file = os.path.join(
 )
 
 
+def make_config(
+    config: configparser.ConfigParser, section: str, section_dict: dict
+) -> None:
+    UNACCETPABLE = ["", "0", "None", "none", 0, None]
+    for key, value in section_dict.items():
+        if value is not None and value not in UNACCETPABLE:
+            config[section][key] = str(value)
+
+
 def resolve_env(config: configparser.ConfigParser):
     """Check the environment variables and add them a configparser obj"""
     api_id = os.getenv("api_id", None)
@@ -81,12 +90,3 @@ def resolve_env(config: configparser.ConfigParser):
     make_config(config, "userbot", userbot)
     make_config(config, "api_keys", api_keys)
     make_config(config, "plugins", plugins)
-
-
-def make_config(
-    config: configparser.ConfigParser, section: str, section_dict: dict
-) -> None:
-    UNACCETPABLE = ["", "0", "None", "none", 0, None]
-    for key, value in section_dict.items():
-        if value is not None and value not in UNACCETPABLE:
-            config[section][key] = str(value)

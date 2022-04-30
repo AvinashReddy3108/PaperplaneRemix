@@ -6,7 +6,7 @@
 #
 
 import re
-from typing import Tuple, Union
+from typing import Union
 
 regexp = re.compile(r"(\d+)(w|d|h|m|s)?")
 adminregexp = re.compile(r"\d+(?:w|d|h|m|s)?")
@@ -73,7 +73,7 @@ async def string_to_secs(string: str) -> int:
     return sum(await amount_to_secs(amount) for amount in values)
 
 
-async def split_extra_string(string: str) -> Tuple[Union[str, None], Union[int, None]]:
+async def split_extra_string(string: str) -> tuple[Union[str, None], Union[int, None]]:
     reason = string
     time = adminregexp.findall(string)
     for u in time:

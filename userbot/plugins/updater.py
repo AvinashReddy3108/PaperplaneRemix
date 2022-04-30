@@ -6,19 +6,17 @@
 #
 
 import asyncio
-
 import datetime
 import os
 import sys
+from configparser import NoOptionError, NoSectionError
 
 import git
 import heroku3
 
-from configparser import NoSectionError, NoOptionError
-
-from userbot import client, LOGGER
-from userbot.utils.helpers import restart, _humanfriendly_seconds
+from userbot import LOGGER, client
 from userbot.utils.events import NewMessage
+from userbot.utils.helpers import _humanfriendly_seconds, restart
 
 basedir = os.path.abspath(os.path.curdir)
 author_link = "[{author}]({url}commits?author={author})"
@@ -26,6 +24,22 @@ summary = "\n[{rev}]({url}commit/{sha}) `{summary}`\n"
 commited = "{committer}` committed {elapsed} ago`\n"
 authored = "{author}` authored and `{committer}` committed {elapsed} ago`\n"
 main_repo = "https://github.com/AvinashReddy3108/PaperplaneRemix.git"
+
+
+async def update_requirements():
+    args = ["-m", "pip", "install", "--user", "-r", "requirements.txt"]
+    try:
+        process = await asyncio.create_subprocess_exec(
+            sys.executable.replace(" ", "\\ "),
+            *args,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        await process.communicate()
+        return process.returncode
+    except Exception as e:
+        LOGGER.exception(e)
+        return await client.get_traceback(e)
 
 
 @client.onMessage(
@@ -237,19 +251,3 @@ async def updater(event: NewMessage.Event) -> None:
     else:
         repo.__del__()
         await restart(event)
-
-
-async def update_requirements():
-    args = ["-m", "pip", "install", "--user", "-r", "requirements.txt"]
-    try:
-        process = await asyncio.create_subprocess_exec(
-            sys.executable.replace(" ", "\\ "),
-            *args,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        await process.communicate()
-        return process.returncode
-    except Exception as e:
-        LOGGER.exception(e)
-        return await client.get_traceback(e)

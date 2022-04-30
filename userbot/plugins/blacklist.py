@@ -6,19 +6,18 @@
 #
 
 
-import msgpack
 import io
 import re
-from typing import Dict, List, Tuple, Union
+from typing import Union
 
+import msgpack
 from telethon.events import ChatAction
-from telethon.tl import types, functions
+from telethon.tl import functions, types
 from telethon.utils import get_display_name, resolve_invite_link
 
-from userbot import client, LOGGER
-from userbot.utils.events import NewMessage
+from userbot import LOGGER, client
 from userbot.plugins.plugins_data import Blacklist, GlobalBlacklist
-
+from userbot.utils.events import NewMessage
 
 plugin_category = "blacklisting"
 redis = client.database
@@ -83,11 +82,11 @@ full_key_strings = {
     "blacklisted": (blacklisted_text, "blacklisted_text"),
 }
 
-temp_banlist: List[int] = []
-localBlacklists: Dict[int, Blacklist] = {}
-blacklistedUsers: Dict[int, Tuple[str, Union[str, int]]] = {}
-whitelistedUsers: List[int] = []
-whitelistedChats: List[int] = []
+temp_banlist: list[int] = []
+localBlacklists: dict[int, Blacklist] = {}
+blacklistedUsers: dict[int, tuple[str, Union[str, int]]] = {}
+whitelistedUsers: list[int] = []
+whitelistedChats: list[int] = []
 
 if redis:
     local_keys = redis.keys("blacklists:-*")
@@ -114,8 +113,8 @@ if redis:
 
 
 async def append(
-    key: str or bytes, option: str, values: List[Union[str, int]]
-) -> Tuple[list, list]:
+    key: str or bytes, option: str, values: list[Union[str, int]]
+) -> tuple[list, list]:
     """Create/Append values to keys in Redis DB"""
     added = []
     skipped = []
@@ -163,8 +162,8 @@ async def append(
 
 
 async def unappend(
-    key: str or bytes, option: str, values: List[Union[str, int]]
-) -> Tuple[list, list]:
+    key: str or bytes, option: str, values: list[Union[str, int]]
+) -> tuple[list, list]:
     """Remove/Unappend values to keys from Redis DB"""
     removed = []
     skipped = []
@@ -219,6 +218,114 @@ async def unappend(
                         setattr(localBlacklists[blkey], option, None)
 
     return removed, skipped
+
+
+async def get_peer_id(entity: str or int) -> int:
+    peer = None
+    try:
+        peer = await client.get_peer_id(entity)
+    except Exception as e:
+        LOGGER.debug(e)
+    return peer
+
+
+async def append_args_to_list(
+    option: list, args_list: str or list, tg_id: bool = False
+) -> list:
+    """Iter through the values and append if they're not in the list."""
+    if isinstance(args_list, list):
+        for i in args_list:
+            if tg_id:
+                value = i if isinstance(i, int) else await get_peer_id(i)
+                if value and value not in option:
+                    option.append(value)
+            else:
+                i = str(i)
+                if i not in option:
+                    option.append(i)
+    else:
+        if tg_id:
+            if not isinstance(args_list, int):
+                args_list = await get_peer_id(args_list)
+        else:
+            args_list = str(args_list)
+        if args_list not in option:
+            option.append(args_list)
+    return option
+
+
+async def get_values(args: list, kwargs: dict) -> dict[str, list]:
+    """
+    Iter through the parsed arguments and
+    return a list of the proper options.
+    """
+    txt: list[str] = []
+    tgid: list[int] = []
+    bio: list[str] = []
+    url: list[str] = []
+
+    if args:
+        for i in args:
+            if isinstance(i, list):
+                txt += [str(o) for o in i if o not in txt]
+            else:
+                if i not in txt:
+                    txt.append(str(i))
+
+    temp_id = kwargs.get("id", [])
+    if not isinstance(temp_id, list):
+        temp_id = [temp_id]
+    await append_args_to_list(tgid, temp_id, True)
+    temp_tgid = kwargs.get("tgid", [])
+    if isinstance(temp_tgid, list):
+        temp_id.extend(temp_tgid)
+    else:
+        temp_id.append(temp_tgid)
+    await append_args_to_list(tgid, temp_id, True)
+
+    temp_bio = kwargs.get("bio", [])
+    await append_args_to_list(bio, temp_bio)
+
+    temp_string = kwargs.get("string", [])
+    if not isinstance(temp_string, list):
+        temp_string = [temp_string]
+    temp_str = kwargs.get("str", [])
+    if isinstance(temp_str, list):
+        temp_string.extend(temp_str)
+    else:
+        temp_string.append(temp_str)
+    await append_args_to_list(txt, temp_string)
+    temp_str = kwargs.get("txt", [])
+    if isinstance(temp_str, list):
+        temp_string.extend(temp_str)
+    else:
+        temp_string.append(temp_str)
+    await append_args_to_list(txt, temp_string)
+
+    temp_domain = kwargs.get("domain", [])
+    if not isinstance(temp_domain, list):
+        temp_domain = [temp_domain]
+    temp_url = kwargs.get("url", [])
+    if isinstance(temp_url, list):
+        temp_domain.extend(temp_url)
+    else:
+        temp_domain.append(temp_url)
+    await append_args_to_list(url, temp_domain)
+
+    return {"txt": txt, "tgid": tgid, "bio": bio, "url": url}
+
+
+async def values_to_str(values_dict: dict) -> str:
+    text = ""
+    id_str = "[{0}](tg://user?id={0})"
+    for key, values in values_dict.items():
+        title = full_key_names.get(key, key)
+        text += f"**{title}:**\n  " if len(text) == 0 else f"\n\n**{title}**\n"
+        if key == "tgid":
+            text += ", ".join(id_str.format(x) for x in values)
+        else:
+            text += ", ".join(f"`{x}`" for x in values)
+    return text
 
 
 @client.onMessage(
@@ -610,6 +717,28 @@ async def unblacklistuser(event: NewMessage.Event) -> None:
         await event.answer(text, reply=True)
 
 
+async def blattributes(blacklist) -> str:
+    """Get all the available attributes from a BL class"""
+    text = ""
+    strings = getattr(blacklist, "txt", None)
+    bio = getattr(blacklist, "bio", None)
+    tgid = getattr(blacklist, "tgid", None)
+    url = getattr(blacklist, "url", None)
+    if strings:
+        text += f"\n**{full_key_names['txt']}:** "
+        text += ", ".join(f"`{x}`" for x in strings)
+    if bio:
+        text += f"\n\n**{full_key_names['bio']}:** "
+        text += ", ".join(f"`{x}`" for x in bio)
+    if tgid:
+        text += f"\n\n**{full_key_names['tgid']}:** "
+        text += ", ".join(f"`{x}`" for x in tgid)
+    if url:
+        text += f"\n\n**{full_key_names['url']}:** "
+        text += ", ".join(f"`{x}`" for x in url)
+    return text
+
+
 @client.onMessage(
     command=("blacklists", plugin_category), outgoing=True, regex=bls_pattern
 )
@@ -905,6 +1034,109 @@ async def listbld(event: NewMessage.Event) -> None:
         await event.answer(text, reply=True)
 
 
+async def escape_string(string: str) -> str:
+    """Literal match everything but * and ?"""
+    string = re.sub(r"(?<!\\)\*", ".+", string, count=0)
+    string = re.sub(r"(?<!\\)\?", ".", string, count=0)
+    return string
+
+
+async def is_admin(chat_id, sender_id) -> bool:
+    """Check if the sender is an admin, owner or bot"""
+    try:
+        result = await client(
+            functions.channels.GetParticipantRequest(channel=chat_id, user_id=sender_id)
+        )
+        if isinstance(
+            result.participant,
+            (
+                types.ChannelParticipantAdmin,
+                types.ChannelParticipantCreator,
+                types.ChannelParticipantBots,
+            ),
+        ):
+            return True
+    except Exception:
+        return False
+
+
+async def ban_user(
+    event: NewMessage.Event or ChatAction.Event,
+    bl_type: str = None,
+    match: Union[str, int] = None,
+    index: int = None,
+    globally: bool = False,
+) -> bool:
+    if isinstance(event, NewMessage.Event):
+        sender = await event.get_input_sender()
+    else:
+        sender = await event.get_input_user()
+    temp_banlist.append(sender)
+    chat = await event.get_chat()
+    ban_right = getattr(chat.admin_rights, "ban_users", False)
+    delete_messages = getattr(chat.admin_rights, "delete_messages", False)
+    exc_logger = client.logger or "self"
+
+    if not (ban_right or chat.creator):
+        return False
+    user_href = "[{0}](tg://user?id={0})".format(sender.user_id)
+
+    try:
+        await client.edit_permissions(entity=chat.id, user=sender, view_messages=False)
+        if bl_type and match and sender.user_id not in blacklistedUsers:
+            blacklistedUsers.update({sender.user_id: (bl_type, match)})
+            redis.set("blacklist:users", msgpack.packb(blacklistedUsers))
+    except Exception as e:
+        exc = await client.get_traceback(e)
+        await client.send_message(exc_logger, exc)
+        LOGGER.exception(e)
+        return False
+    try:
+        if delete_messages:
+            await event.delete()
+    except Exception:
+        pass
+    try:
+        key = "g" + bl_type if globally else bl_type
+        text, var = full_key_strings.get(key)
+        formats = {
+            "match": match,
+            "type": bl_type,
+            "index": index,
+            "chat": chat.id,
+            "user": sender.user_id,
+            "user_link": user_href,
+        }
+        await client.resanswer(
+            await event.get_input_chat(),
+            text,
+            plugin="blacklist",
+            name=var,
+            formats=formats,
+            reply_to=event,
+        )
+        if client.logger:
+            logger_group = client.config["userbot"].getint("logger_group_id", "me")
+            if chat.username:
+                chat_href = f"[{chat.title}]" f"(tg://resolve?domain={chat.username})"
+            else:
+                chat_href = f"[{chat.title}] `{chat.id}`"
+            log_text = (
+                "**USERBOT LOG** #blacklist\n" f"Banned {user_href} from {chat_href}.\n"
+            )
+            if bl_type and match:
+                log_text += f"Blacklist type: `{bl_type}`.\nMatch: `{match}`"
+            await client.send_message(logger_group, log_text)
+        return True
+    except Exception as e:
+        exc = await client.get_traceback(e)
+        await client.send_message(exc_logger, exc)
+        LOGGER.exception(e)
+        return False
+    finally:
+        temp_banlist.remove(sender)
+
+
 @client.onMessage(incoming=True, forwards=None)
 async def inc_listener(event: NewMessage.Event) -> None:
     """Filter incoming messages for blacklisting."""
@@ -1086,236 +1318,3 @@ async def joined_listener(event: ChatAction.Event) -> None:
                     if re.search(bio, user.about, flags=re.I):
                         await ban_user(event, "bio", value, index)
                         break
-
-
-async def escape_string(string: str) -> str:
-    """Literal match everything but * and ?"""
-    string = re.sub(r"(?<!\\)\*", ".+", string, count=0)
-    string = re.sub(r"(?<!\\)\?", ".", string, count=0)
-    return string
-
-
-async def is_admin(chat_id, sender_id) -> bool:
-    """Check if the sender is an admin, owner or bot"""
-    try:
-        result = await client(
-            functions.channels.GetParticipantRequest(channel=chat_id, user_id=sender_id)
-        )
-        if isinstance(
-            result.participant,
-            (
-                types.ChannelParticipantAdmin,
-                types.ChannelParticipantCreator,
-                types.ChannelParticipantBots,
-            ),
-        ):
-            return True
-    except Exception:
-        return False
-
-
-async def ban_user(
-    event: NewMessage.Event or ChatAction.Event,
-    bl_type: str = None,
-    match: Union[str, int] = None,
-    index: int = None,
-    globally: bool = False,
-) -> bool:
-    if isinstance(event, NewMessage.Event):
-        sender = await event.get_input_sender()
-    else:
-        sender = await event.get_input_user()
-    temp_banlist.append(sender)
-    chat = await event.get_chat()
-    ban_right = getattr(chat.admin_rights, "ban_users", False)
-    delete_messages = getattr(chat.admin_rights, "delete_messages", False)
-    exc_logger = client.logger or "self"
-
-    if not (ban_right or chat.creator):
-        return False
-    user_href = "[{0}](tg://user?id={0})".format(sender.user_id)
-
-    try:
-        await client.edit_permissions(entity=chat.id, user=sender, view_messages=False)
-        if bl_type and match and sender.user_id not in blacklistedUsers:
-            blacklistedUsers.update({sender.user_id: (bl_type, match)})
-            redis.set("blacklist:users", msgpack.packb(blacklistedUsers))
-    except Exception as e:
-        exc = await client.get_traceback(e)
-        await client.send_message(exc_logger, exc)
-        LOGGER.exception(e)
-        return False
-    try:
-        if delete_messages:
-            await event.delete()
-    except Exception:
-        pass
-    try:
-        key = "g" + bl_type if globally else bl_type
-        text, var = full_key_strings.get(key)
-        formats = {
-            "match": match,
-            "type": bl_type,
-            "index": index,
-            "chat": chat.id,
-            "user": sender.user_id,
-            "user_link": user_href,
-        }
-        await client.resanswer(
-            await event.get_input_chat(),
-            text,
-            plugin="blacklist",
-            name=var,
-            formats=formats,
-            reply_to=event,
-        )
-        if client.logger:
-            logger_group = client.config["userbot"].getint("logger_group_id", "me")
-            if chat.username:
-                chat_href = f"[{chat.title}]" f"(tg://resolve?domain={chat.username})"
-            else:
-                chat_href = f"[{chat.title}] `{chat.id}`"
-            log_text = (
-                "**USERBOT LOG** #blacklist\n" f"Banned {user_href} from {chat_href}.\n"
-            )
-            if bl_type and match:
-                log_text += f"Blacklist type: `{bl_type}`.\nMatch: `{match}`"
-            await client.send_message(logger_group, log_text)
-        return True
-    except Exception as e:
-        exc = await client.get_traceback(e)
-        await client.send_message(exc_logger, exc)
-        LOGGER.exception(e)
-        return False
-    finally:
-        temp_banlist.remove(sender)
-
-
-async def blattributes(blacklist) -> str:
-    """Get all the available attributes from a BL class"""
-    text = ""
-    strings = getattr(blacklist, "txt", None)
-    bio = getattr(blacklist, "bio", None)
-    tgid = getattr(blacklist, "tgid", None)
-    url = getattr(blacklist, "url", None)
-    if strings:
-        text += f"\n**{full_key_names['txt']}:** "
-        text += ", ".join(f"`{x}`" for x in strings)
-    if bio:
-        text += f"\n\n**{full_key_names['bio']}:** "
-        text += ", ".join(f"`{x}`" for x in bio)
-    if tgid:
-        text += f"\n\n**{full_key_names['tgid']}:** "
-        text += ", ".join(f"`{x}`" for x in tgid)
-    if url:
-        text += f"\n\n**{full_key_names['url']}:** "
-        text += ", ".join(f"`{x}`" for x in url)
-    return text
-
-
-async def get_values(args: list, kwargs: dict) -> Dict[str, List]:
-    """
-    Iter through the parsed arguments and
-    return a list of the proper options.
-    """
-    txt: List[str] = []
-    tgid: List[int] = []
-    bio: List[str] = []
-    url: List[str] = []
-
-    if args:
-        for i in args:
-            if isinstance(i, list):
-                txt += [str(o) for o in i if o not in txt]
-            else:
-                if i not in txt:
-                    txt.append(str(i))
-
-    temp_id = kwargs.get("id", [])
-    if not isinstance(temp_id, list):
-        temp_id = [temp_id]
-    await append_args_to_list(tgid, temp_id, True)
-    temp_tgid = kwargs.get("tgid", [])
-    if isinstance(temp_tgid, list):
-        temp_id.extend(temp_tgid)
-    else:
-        temp_id.append(temp_tgid)
-    await append_args_to_list(tgid, temp_id, True)
-
-    temp_bio = kwargs.get("bio", [])
-    await append_args_to_list(bio, temp_bio)
-
-    temp_string = kwargs.get("string", [])
-    if not isinstance(temp_string, list):
-        temp_string = [temp_string]
-    temp_str = kwargs.get("str", [])
-    if isinstance(temp_str, list):
-        temp_string.extend(temp_str)
-    else:
-        temp_string.append(temp_str)
-    await append_args_to_list(txt, temp_string)
-    temp_str = kwargs.get("txt", [])
-    if isinstance(temp_str, list):
-        temp_string.extend(temp_str)
-    else:
-        temp_string.append(temp_str)
-    await append_args_to_list(txt, temp_string)
-
-    temp_domain = kwargs.get("domain", [])
-    if not isinstance(temp_domain, list):
-        temp_domain = [temp_domain]
-    temp_url = kwargs.get("url", [])
-    if isinstance(temp_url, list):
-        temp_domain.extend(temp_url)
-    else:
-        temp_domain.append(temp_url)
-    await append_args_to_list(url, temp_domain)
-
-    return {"txt": txt, "tgid": tgid, "bio": bio, "url": url}
-
-
-async def append_args_to_list(
-    option: list, args_list: str or list, tg_id: bool = False
-) -> list:
-    """Iter through the values and append if they're not in the list."""
-    if isinstance(args_list, list):
-        for i in args_list:
-            if tg_id:
-                value = i if isinstance(i, int) else await get_peer_id(i)
-                if value and value not in option:
-                    option.append(value)
-            else:
-                i = str(i)
-                if i not in option:
-                    option.append(i)
-    else:
-        if tg_id:
-            if not isinstance(args_list, int):
-                args_list = await get_peer_id(args_list)
-        else:
-            args_list = str(args_list)
-        if args_list not in option:
-            option.append(args_list)
-    return option
-
-
-async def get_peer_id(entity: str or int) -> int:
-    peer = None
-    try:
-        peer = await client.get_peer_id(entity)
-    except Exception as e:
-        LOGGER.debug(e)
-    return peer
-
-
-async def values_to_str(values_dict: dict) -> str:
-    text = ""
-    id_str = "[{0}](tg://user?id={0})"
-    for key, values in values_dict.items():
-        title = full_key_names.get(key, key)
-        text += f"**{title}:**\n  " if len(text) == 0 else f"\n\n**{title}**\n"
-        if key == "tgid":
-            text += ", ".join(id_str.format(x) for x in values)
-        else:
-            text += ", ".join(f"`{x}`" for x in values)
-    return text

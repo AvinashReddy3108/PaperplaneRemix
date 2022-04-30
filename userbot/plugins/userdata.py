@@ -6,13 +6,13 @@
 #
 
 import io
+
 import PIL
-
 from telethon import errors
-from telethon.utils import get_display_name, get_peer_id
 from telethon.tl import functions, types
+from telethon.utils import get_display_name, get_peer_id
 
-from userbot import client, LOGGER
+from userbot import LOGGER, client
 from userbot.helper_funcs.parser import Parser
 from userbot.utils.events import NewMessage
 

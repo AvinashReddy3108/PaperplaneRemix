@@ -12,12 +12,13 @@ import pathlib
 import sys
 
 import redis
-from telethon.tl import types
 from telethon.network.connection.tcpabridged import ConnectionTcpAbridged
+from telethon.tl import types
 
 from sessions.redis import RedisSession
-from .utils.config_helper import resolve_env
+
 from .utils.client import UserBotClient
+from .utils.config_helper import resolve_env
 from .utils.log_formatter import CustomFormatter, CustomMemoryHandler
 
 __version__ = "0.6"
@@ -51,8 +52,8 @@ if sys.platform.startswith("win"):
 else:
     os.system("clear")
 
-if sys.version_info < (3, 7, 3):
-    print("Please run this script with Python 3.7.3 or above." "\nExiting the script.")
+if sys.version_info < (3, 8, 1):
+    print("Please run this script with Python 3.8.1 or above." "\nExiting the script.")
     sys.exit(1)
 
 if config_file.exists():

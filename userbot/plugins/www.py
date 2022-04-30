@@ -9,16 +9,14 @@ import asyncio
 import concurrent
 import functools
 import sys
-from typing import Tuple
 
-from speedtest import Speedtest
 import wikipedia
-
+from speedtest import Speedtest
 from telethon.tl import functions
 
 from userbot import client
-from userbot.utils.helpers import get_chat_link, format_speed
 from userbot.utils.events import NewMessage
+from userbot.utils.helpers import format_speed, get_chat_link
 
 plugin_category = "www"
 
@@ -55,6 +53,15 @@ async def nearestdc(event: NewMessage.Event) -> None:
     await event.answer(text)
 
 
+async def _sub_shell(cmd: str) -> tuple[str, str]:
+    process = await asyncio.create_subprocess_shell(
+        cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+    )
+    stdout, stderr = await process.communicate()
+
+    return stdout.decode("UTF-8"), stderr.decode("UTF-8")
+
+
 @client.onMessage(
     command=("pingdc", plugin_category), outgoing=True, regex=r"pingdc(?: |$)(\d+)?"
 )
@@ -89,6 +96,12 @@ async def pingdc(event: NewMessage.Event) -> None:
         await event.answer(err)
         return
     await event.answer(f"DC {dc}'s average response: `{average}`")
+
+
+async def _run_sync(func: callable):
+    return await client.loop.run_in_executor(
+        concurrent.futures.ThreadPoolExecutor(), func
+    )
 
 
 @client.onMessage(
@@ -147,18 +160,3 @@ async def urban_dict(event: NewMessage.Event) -> None:
         await event.answer(f"**Error:**\n`{error}`")
         return
     await event.answer(f"**Text:** `{query}`\n\n**Result:**\n__{result}__")
-
-
-async def _sub_shell(cmd: str) -> Tuple[str, str]:
-    process = await asyncio.create_subprocess_shell(
-        cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-    )
-    stdout, stderr = await process.communicate()
-
-    return stdout.decode("UTF-8"), stderr.decode("UTF-8")
-
-
-async def _run_sync(func: callable):
-    return await client.loop.run_in_executor(
-        concurrent.futures.ThreadPoolExecutor(), func
-    )

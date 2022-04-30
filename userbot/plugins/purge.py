@@ -7,11 +7,16 @@
 
 
 from userbot import client
-from userbot.utils.helpers import get_chat_link
 from userbot.utils.events import NewMessage
-
+from userbot.utils.helpers import get_chat_link
 
 plugin_category = "user"
+
+
+async def _offset(event: NewMessage.Event) -> int:
+    if event.reply_to_msg_id:
+        return event.reply_to_msg_id - 1
+    return event.message.id
 
 
 @client.onMessage(
@@ -125,9 +130,3 @@ async def delete(event: NewMessage.Event) -> None:
     else:
         await reply.delete()
     await event.delete()
-
-
-async def _offset(event: NewMessage.Event) -> int:
-    if event.reply_to_msg_id:
-        return event.reply_to_msg_id - 1
-    return event.message.id

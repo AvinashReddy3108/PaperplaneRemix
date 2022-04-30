@@ -7,7 +7,7 @@
 
 import re
 from enum import Enum
-from typing import Tuple, Union
+from typing import Union
 
 caseConversions = (r"\U", r"\L", r"\E", r"\u", r"\l", r"\I", r"\F")
 endCaseConversions = {r"\U": r"\\EU", r"\L": r"\\EL", r"\I": r"\\EI", r"\F": r"\\EF"}
@@ -21,7 +21,7 @@ class UnknownFlagError(Exception):
         self.flag = flag
 
 
-async def match_splitter(match: re.Match) -> Tuple[str, str, str, str]:
+async def match_splitter(match: re.Match) -> tuple[str, str, str, str]:
     """Splits an :obj:`re.Match` to get the required attributes for substitution.
     Unescapes the slashes as well because this is Python.
 
@@ -57,7 +57,7 @@ async def match_splitter(match: re.Match) -> Tuple[str, str, str, str]:
     return li, fr, to, fl
 
 
-async def resolve_flags(fl: str) -> Tuple[int, Union[int, Enum]]:
+async def resolve_flags(fl: str) -> tuple[int, Union[int, Enum]]:
     """Split all flags from the string for substituion.
 
     Args:

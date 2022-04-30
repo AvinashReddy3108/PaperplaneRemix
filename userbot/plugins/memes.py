@@ -5,16 +5,15 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
-import aiohttp
 import io
-from typing import Tuple, Union, BinaryIO
-
-import asyncurban
-from cowpy import cow
 import random
 import re
-from PIL import Image, ImageEnhance, ImageOps
+from typing import BinaryIO, Union
 
+import aiohttp
+import asyncurban
+from cowpy import cow
+from PIL import Image, ImageEnhance, ImageOps
 from telethon.errors import rpcerrorlist
 
 from userbot import client
@@ -342,6 +341,22 @@ HIT = [
 ]
 
 WHERE = ["in the chest", "on the head", "on the butt", "on the crotch"]
+
+
+async def _request(
+    url: str, params: dict = None, data_type: str = None
+) -> Union[Union[dict, str, tuple[str, dict]], None]:
+    """Helps request data from APIs faster!"""
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, params=params) as response:
+            if response.status == 200:
+                if data_type == "json":
+                    return await response.json()
+                elif data_type == "text":
+                    return await response.text()
+                else:
+                    return await response.text(), await response.json()
+            return None
 
 
 @client.onMessage(command=("shibe", plugin_category), outgoing=True, regex=r"shibe$")
@@ -869,6 +884,10 @@ async def slap(event: NewMessage.Event) -> None:
         await event.answer(string, reply=True)
 
 
+def isEmoji(inputString: str) -> bool:
+    return bool(re.match(EMOJI_PATTERN, inputString))
+
+
 @client.onMessage(command=("f", plugin_category), outgoing=True, regex=r"f(?: |$)(.+)")
 async def respecc(event: NewMessage.Event) -> None:
     """
@@ -912,6 +931,48 @@ async def bt(event: NewMessage.Event) -> None:
             "/BLUETEXT /MUST /CLICK.\n"
             f"{random.choice(['/ARE /YOU', '/AM /I'])} /A /STUPID /ANIMAL /WHICH /IS /ATTRACTED /TO /COLOURS?"
         )
+
+
+async def _is_fryable_event(event: NewMessage.Event) -> bool:
+    """Checks if the given image/sticker is worthy of the fry or not!"""
+    if (
+        event.sticker
+        and event.sticker.mime_type != "application/x-tgsticker"
+        or event.photo
+    ):
+        return True
+    return bool(event.document and "image" in event.document.mime_type)
+
+
+# Copyright (c) 2017 Ovyerus; License: MIT
+async def deepfry(img: BinaryIO) -> BinaryIO:
+    """Deepfry logic!"""
+    colours = (
+        ((254, 0, 2), (255, 255, 15)),
+        ((36, 113, 229), (255,) * 3),
+    )
+
+    # Crush image to hell and back
+    img = img.convert("RGB")
+    width, height = img.width, img.height
+    img = img.resize((int(width**0.75), int(height**0.75)), resample=Image.LANCZOS)
+    img = img.resize((int(width**0.88), int(height**0.88)), resample=Image.BILINEAR)
+    img = img.resize((int(width**0.9), int(height**0.9)), resample=Image.BICUBIC)
+    img = img.resize((width, height), resample=Image.BICUBIC)
+
+    # Generate colour overlay
+    overlay = img.split()[0]
+    overlay = ImageEnhance.Contrast(overlay).enhance(2.0)
+    overlay = ImageEnhance.Color(overlay).enhance(1.75)
+    overlay = ImageEnhance.Brightness(overlay).enhance(1.5)
+    color = random.choice([colours[0], colours[1]])
+    overlay = ImageOps.colorize(overlay, color[0], color[1])
+
+    # Overlay red and yellow onto main image and sharpen the hell out of it
+    img = Image.blend(img, overlay, 0.75)
+    img = ImageEnhance.Sharpness(img).enhance(150)
+
+    return img
 
 
 @client.onMessage(
@@ -1016,65 +1077,3 @@ async def crai(event: NewMessage.Event) -> None:
         ";___" + event.matches[0].group(1) * random.randint(5, 10) + ";",
         parse_mode="html",
     )
-
-
-def isEmoji(inputString: str) -> bool:
-    return bool(re.match(EMOJI_PATTERN, inputString))
-
-
-async def _is_fryable_event(event: NewMessage.Event) -> bool:
-    """Checks if the given image/sticker is worthy of the fry or not!"""
-    if (
-        event.sticker
-        and event.sticker.mime_type != "application/x-tgsticker"
-        or event.photo
-    ):
-        return True
-    return bool(event.document and "image" in event.document.mime_type)
-
-
-# Copyright (c) 2017 Ovyerus; License: MIT
-async def deepfry(img: BinaryIO) -> BinaryIO:
-    """Deepfry logic!"""
-    colours = (
-        ((254, 0, 2), (255, 255, 15)),
-        ((36, 113, 229), (255,) * 3),
-    )
-
-    # Crush image to hell and back
-    img = img.convert("RGB")
-    width, height = img.width, img.height
-    img = img.resize((int(width**0.75), int(height**0.75)), resample=Image.LANCZOS)
-    img = img.resize((int(width**0.88), int(height**0.88)), resample=Image.BILINEAR)
-    img = img.resize((int(width**0.9), int(height**0.9)), resample=Image.BICUBIC)
-    img = img.resize((width, height), resample=Image.BICUBIC)
-
-    # Generate colour overlay
-    overlay = img.split()[0]
-    overlay = ImageEnhance.Contrast(overlay).enhance(2.0)
-    overlay = ImageEnhance.Color(overlay).enhance(1.75)
-    overlay = ImageEnhance.Brightness(overlay).enhance(1.5)
-    color = random.choice([colours[0], colours[1]])
-    overlay = ImageOps.colorize(overlay, color[0], color[1])
-
-    # Overlay red and yellow onto main image and sharpen the hell out of it
-    img = Image.blend(img, overlay, 0.75)
-    img = ImageEnhance.Sharpness(img).enhance(150)
-
-    return img
-
-
-async def _request(
-    url: str, params: dict = None, data_type: str = None
-) -> Union[Union[dict, str, Tuple[str, dict]], None]:
-    """Helps request data from APIs faster!"""
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, params=params) as response:
-            if response.status == 200:
-                if data_type == "json":
-                    return await response.json()
-                elif data_type == "text":
-                    return await response.text()
-                else:
-                    return await response.text(), await response.json()
-            return None

@@ -10,16 +10,15 @@ import dataclasses
 import inspect
 import logging
 import traceback
-from typing import Dict, List
 
-from telethon import events, TelegramClient
+from telethon import TelegramClient, events
 from telethon.tl import types
 
+from .custom import answer, resanswer
+from .events import MessageEdited, NewMessage
 from .FastTelethon import download_file, upload_file
 from .parser import parse_arguments
 from .pluginManager import PluginManager
-from .events import MessageEdited, NewMessage
-from .custom import answer, resanswer
 
 LOGGER = logging.getLogger(__name__)
 no_info = "There is no help available for this command!"
@@ -38,11 +37,11 @@ class Command:
 class UserBotClient(TelegramClient):
     """UserBot client with additional attributes inheriting TelegramClient"""
 
-    commandcategories: Dict[str, List[str]] = {}
-    commands: Dict[str, Command] = {}
+    commandcategories: dict[str, list[str]] = {}
+    commands: dict[str, Command] = {}
     config: configparser.ConfigParser = None
     database: bool = True
-    disabled_commands: Dict[str, Command] = {}
+    disabled_commands: dict[str, Command] = {}
     failed_imports: list = []
     logger: bool or types.Channel or types.User = False
     pluginManager: PluginManager = None

@@ -5,9 +5,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
-import re
 import logging
-from typing import Tuple, Union
+import re
+from typing import Union
 
 from telethon.tl import types
 
@@ -50,7 +50,7 @@ async def get_user_from_msg(event: NewMessage.Event) -> Union[int, str, None]:
 
 async def get_entity_from_msg(
     event: NewMessage.Event,
-) -> Tuple[Union[None, types.User], Union[None, bool, str], Union[None, bool, str]]:
+) -> tuple[Union[None, types.User], Union[None, bool, str], Union[None, bool, str]]:
     """Get a User entity and/or a reason from the event's regex pattern"""
     exception = False
     entity = None
