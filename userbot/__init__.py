@@ -52,8 +52,8 @@ if sys.platform.startswith("win"):
 else:
     os.system("clear")
 
-if sys.version_info < (3, 8, 1):
-    print("Please run this script with Python 3.8.1 or above." "\nExiting the script.")
+if sys.version_info < (3, 9, 1):
+    print("Please run this script with Python 3.9 or above." "\nExiting the script.")
     sys.exit(1)
 
 if config_file.exists():
