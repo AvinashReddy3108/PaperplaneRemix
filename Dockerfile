@@ -26,9 +26,10 @@ COPY requirements.txt ./
 RUN python3 -m pip install --upgrade pip && \
     python3 -m pip install --upgrade -r requirements.txt
 
-COPY . /usr/src/app/PaperplaneRemix/
-
 # Cleanup
 RUN rm -rf /var/lib/apt/lists /var/cache/apt/archives "$(pip cache dir)" /tmp/*
+
+# # Bundle source code
+COPY . /usr/src/app/PaperplaneRemix/
 
 ENTRYPOINT ["python", "-m", "userbot"]
