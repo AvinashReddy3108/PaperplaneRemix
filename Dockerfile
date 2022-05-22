@@ -11,7 +11,6 @@ RUN apt update && \
     apt upgrade -y && \
     apt install -y bash curl git libjpeg62-turbo-dev libwebp-dev ffmpeg neofetch
 
-COPY . /usr/src/app/PaperplaneRemix/
 WORKDIR /usr/src/app/PaperplaneRemix/
 
 # "Dirty Fix" for Heroku Dynos to track updates via 'git'.
@@ -23,10 +22,13 @@ WORKDIR /usr/src/app/PaperplaneRemix/
 #    fi
 
 # Install PIP packages
+COPY requirements.txt ./
 RUN python3 -m pip install --upgrade pip && \
     python3 -m pip install --upgrade -r requirements.txt
 
+COPY . /usr/src/app/PaperplaneRemix/
+
 # Cleanup
-RUN rm -rfv /var/lib/apt/lists /var/cache/apt/archives "$(pip cache dir)" /tmp/*
+RUN rm -rf /var/lib/apt/lists /var/cache/apt/archives "$(pip cache dir)" /tmp/*
 
 ENTRYPOINT ["python", "-m", "userbot"]
