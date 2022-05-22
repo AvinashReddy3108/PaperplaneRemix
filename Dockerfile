@@ -29,7 +29,7 @@ RUN python3 -m pip install --upgrade pip && \
 # Cleanup
 RUN rm -rf /var/lib/apt/lists /var/cache/apt/archives "$(pip cache dir)" /tmp/*
 
-# # Bundle source code
+# Bundle sauce for obvious reasons
 COPY . /usr/src/app/PaperplaneRemix/
 
 ENTRYPOINT ["python", "-m", "userbot"]
