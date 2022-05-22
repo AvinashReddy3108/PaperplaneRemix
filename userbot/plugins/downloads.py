@@ -124,18 +124,19 @@ async def upload(event: NewMessage.Event) -> None:
         for f in downloads.glob("*.*"):
             if f.match(match) and f.is_file():
                 target_files.append(f)
-    # Un-comment this for recursive file fetching from the bot's root dir
-    """for f in pathlib.Path('.').glob('**/*.*'):
+
+    # Recursive file fetching from the bot's root dir
+    for f in pathlib.Path(".").glob("**/*.*"):
         if f in target_files:
             continue
-        if not f.match('*/__pycache__/*') and f.match(match) and f.is_file():
-            target_files.append(f)"""
+        if not f.match("*/__pycache__/*") and f.match(match) and f.is_file():
+            target_files.append(f)
 
     if not target_files:
         await event.answer("`Couldn't find what you were looking for.`")
         return
 
-    files = "\n".join(f"`{await _get_file_name(f)}`" for f in target_files)
+    files = "\n".join([f"`{await _get_file_name(f)}`" for f in target_files])
     if len(target_files) > 1:
         await event.answer(f"**Found multiple files for {match}:**\n{files}")
         return
