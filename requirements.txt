@@ -1,7 +1,7 @@
 aiohttp[speedups] ~= 3.5.4
 asyncurban ~= 0.3.3
 beautifulsoup4 ~= 4.8.1
-covid ~= 2.2.9
+covid ~= 2.5.2
 cowpy ~= 1.1.0
 gitpython ~= 3.0.3
 hachoir ~= 3.0a5
