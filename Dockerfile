@@ -27,18 +27,18 @@ ENV PATH="/app/venv/bin:$PATH"
 COPY requirements.txt ./
 RUN python -m pip install --no-cache-dir --upgrade pip wheel setuptools && \
     python -m pip install --no-cache-dir --upgrade -r requirements.txt && \
-    rm -rf "$(pip cache dir)" && rm -rf /tmp/*
+    rm -rf /tmp/*
 
 WORKDIR /app/src
 
 # Bundle sauce for obvious reasons
 COPY . .
 
-# "Dirty Fix" for Heroku Dynos to track updates via 'git'.
-# Fork/Clone maintainers may change the clone URL to match the location of their repository. [#ThatsHerokuForYa!]
+# "Dirty Fix" for some PaaS Runners to track updates via 'git'.
+# Fork/Clone maintainers may change the clone URL to match the location of their repository.
 RUN if [ ! -d .git ] ; then \
-   git clone --no-checkout "https://github.com/AvinashReddy3108/PaperplaneRemix.git" /tmp/dirty/PaperplaneRemix/ && \
-   mv -u /tmp/dirty/PaperplaneRemix/.git /PaperplaneRemix && rm -rf /tmp/*; \
-   fi
+        git clone --no-checkout "https://github.com/AvinashReddy3108/PaperplaneRemix.git" /tmp/dirty/PaperplaneRemix/ && \
+        mv -u /tmp/dirty/PaperplaneRemix/.git /PaperplaneRemix && rm -rf /tmp/*; \
+    fi
 
 ENTRYPOINT ["python", "-m", "userbot"]
