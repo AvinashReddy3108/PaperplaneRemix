@@ -5,31 +5,40 @@
 ##
 ## SPDX-License-Identifier: GPL-3.0-or-later
 ##
-FROM python:3.9-slim
+FROM python:3-slim
 
-RUN apt update && \
-    apt upgrade -y && \
-    apt install -y bash curl git libjpeg62-turbo-dev libwebp-dev ffmpeg neofetch
+# Sane Environment variables
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONFAULTHANDLER 1
 
-WORKDIR /usr/src/app/PaperplaneRemix/
+# APT Packages
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends curl g++ git libjpeg62-turbo-dev libwebp-dev ffmpeg neofetch zlib1g-dev && \
+    apt-get clean
 
-# "Dirty Fix" for Heroku Dynos to track updates via 'git'.
-# Fork/Clone maintainers may change the clone URL to match
-# the location of their repository. [#ThatsHerokuForYa!]
-#RUN if [ ! -d /usr/src/app/PaperplaneRemix/.git ] ; then \
-#    git clone --no-checkout "https://github.com/AvinashReddy3108/PaperplaneRemix.git" /tmp/dirty/PaperplaneRemix/ && \
-#    mv -vu /tmp/dirty/PaperplaneRemix/.git /usr/src/app/PaperplaneRemix; \
-#    fi
+# Virtual Environment
+RUN python -m venv /app/venv
+ENV PATH="/app/venv/bin:$PATH"
 
 # Install PIP packages
 COPY requirements.txt ./
-RUN python3 -m pip install --upgrade pip && \
-    python3 -m pip install --upgrade -r requirements.txt
+RUN python -m pip install --no-cache-dir --upgrade pip wheel setuptools && \
+    python -m pip install --no-cache-dir --upgrade -r requirements.txt && \
+    rm -rf "$(pip cache dir)" && rm -rf /tmp/*
 
-# Cleanup
-RUN rm -rf /var/lib/apt/lists /var/cache/apt/archives "$(pip cache dir)" /tmp/*
+WORKDIR /app/src
 
 # Bundle sauce for obvious reasons
-COPY . /usr/src/app/PaperplaneRemix/
+COPY . .
+
+# "Dirty Fix" for Heroku Dynos to track updates via 'git'.
+# Fork/Clone maintainers may change the clone URL to match the location of their repository. [#ThatsHerokuForYa!]
+RUN if [ ! -d .git ] ; then \
+   git clone --no-checkout "https://github.com/AvinashReddy3108/PaperplaneRemix.git" /tmp/dirty/PaperplaneRemix/ && \
+   mv -u /tmp/dirty/PaperplaneRemix/.git /PaperplaneRemix && rm -rf /tmp/*; \
+   fi
 
 ENTRYPOINT ["python", "-m", "userbot"]
