@@ -31,8 +31,7 @@ async def covid19(event: NewMessage.Event) -> None:
     `{prefix}covid` or `{prefix}covid USA India` or `{prefix}covid countries`
     """
     covid = Covid(source="worldometers")
-    match = event.matches[0].group(1)
-    if match:
+    if match := event.matches[0].group(1):
         strings = []
         failed = []
         args, _ = await client.parse_arguments(match)
@@ -53,8 +52,10 @@ async def covid19(event: NewMessage.Event) -> None:
         if strings:
             await event.answer("\n\n".join(strings))
         if failed:
-            string = "`Couldn't find the following countries:` "
-            string += ", ".join(f"`{x}`" for x in failed)
+            string = "`Couldn't find the following countries:` " + ", ".join(
+                f"`{x}`" for x in failed
+            )
+
             await event.answer(string, reply=True)
     else:
         active = covid.get_total_active_cases()

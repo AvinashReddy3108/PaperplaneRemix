@@ -130,8 +130,7 @@ async def logsDump(event: NewMessage.Event) -> None:
             if not level:
                 await event.answer("**Invalid log level specified!**")
                 return
-    dump = loggingHandler.dumps(level)
-    if dump:
+    if dump := loggingHandler.dumps(level):
         output = io.BytesIO("\n".join(dump).encode())
         output.name = "logs.txt"
         await event.answer(file=output)

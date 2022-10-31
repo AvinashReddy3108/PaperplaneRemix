@@ -82,17 +82,18 @@ class NewMessage(events.NewMessage):
             exp, flags = self.regex
             exp = exp.format(prefix=prefix)
 
-            if not self.disable_prefix:
-                pattern = re.compile("(?i)^" + prefix + exp, flags=flags).finditer
-            else:
-                pattern = re.compile(exp, flags=flags).finditer
+            pattern = (
+                re.compile(exp, flags=flags).finditer
+                if self.disable_prefix
+                else re.compile(f"(?i)^{prefix}{exp}", flags=flags).finditer
+            )
 
             text = event.message.message or ""
-            matches = list(pattern(text)) or None
-            if not matches:
-                return
-            event.matches = matches
+            if matches := list(pattern(text)) or None:
+                event.matches = matches
 
+            else:
+                return
         if self.require_admin:
             text = "`I need admin rights to be able to use this command!`"
             if not isinstance(event._chat_peer, types.PeerUser):

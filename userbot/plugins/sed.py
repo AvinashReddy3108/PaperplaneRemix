@@ -137,8 +137,9 @@ async def regex_ninja(event: NewMessage.Event) -> None:
 )
 async def ninja(event: NewMessage.Event) -> None:
     """Deletes our sed messages if regexninja is enabled"""
-    ninja = client.config["userbot"].getboolean("userbot_regexninja", False)
-    if ninja:
+    if ninja := client.config["userbot"].getboolean(
+        "userbot_regexninja", False
+    ):
         async for bot in client.iter_participants(
             event.chat_id, filter=ChannelParticipantsBots
         ):

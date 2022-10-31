@@ -14,9 +14,7 @@ plugin_category = "user"
 
 
 async def _offset(event: NewMessage.Event) -> int:
-    if event.reply_to_msg_id:
-        return event.reply_to_msg_id - 1
-    return event.message.id
+    return event.reply_to_msg_id - 1 if event.reply_to_msg_id else event.message.id
 
 
 @client.onMessage(
@@ -86,7 +84,7 @@ async def delme(event: NewMessage.Event) -> None:
     skip = kwargs.get("skip", 0)
 
     if not amount:
-        amount = 1 if not event.reply_to_msg_id else None
+        amount = None if event.reply_to_msg_id else 1
 
     reverse = bool(event.reply_to_msg_id)
     messages = await client.get_messages(
@@ -119,14 +117,13 @@ async def delete(event: NewMessage.Event) -> None:
         await event.answer("`There's nothing for me to delete!`")
         return
 
-    if reply.sender_id != (await client.get_me()).id:
-        if event.is_group and (
+    if reply.sender_id == (await client.get_me()).id:
+        await reply.delete()
+    elif event.is_group and (
             event.chat.creator or event.chat.admin_rights.delete_messages
         ):
-            await reply.delete()
-        else:
-            await event.answer("`I don't have enough rights in here!`")
-            return
-    else:
         await reply.delete()
+    else:
+        await event.answer("`I don't have enough rights in here!`")
+        return
     await event.delete()

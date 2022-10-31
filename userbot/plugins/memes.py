@@ -879,8 +879,11 @@ async def slap(event: NewMessage.Event) -> None:
     if slapz:
         await event.answer("\n".join(slapz))
     if escaped:
-        string = "`Unfortunately, these guys escaped the beating:` "
-        string += ", ".join(f"`{x}`" for x in escaped)
+        string = (
+            "`Unfortunately, these guys escaped the beating:` "
+            + ", ".join(f"`{x}`" for x in escaped)
+        )
+
         await event.answer(string, reply=True)
 
 
@@ -899,20 +902,8 @@ async def respecc(event: NewMessage.Event) -> None:
     paytext = event.matches[0].group(1)
     if not isEmoji(paytext):
         return
-    pay = "{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}".format(
-        paytext * 8,
-        paytext * 8,
-        paytext * 2,
-        paytext * 2,
-        paytext * 2,
-        paytext * 6,
-        paytext * 6,
-        paytext * 2,
-        paytext * 2,
-        paytext * 2,
-        paytext * 2,
-        paytext * 2,
-    )
+    pay = f"{paytext * 8}\n{paytext * 8}\n{paytext * 2}\n{paytext * 2}\n{paytext * 2}\n{paytext * 6}\n{paytext * 6}\n{paytext * 2}\n{paytext * 2}\n{paytext * 2}\n{paytext * 2}\n{paytext * 2}"
+
     await event.answer(pay)
 
 

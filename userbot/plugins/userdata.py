@@ -80,15 +80,14 @@ async def whois(event: NewMessage.Event) -> None:
             failed.append(user)
 
     if users:
-        await event.answer("**USERS**" + users, reply=True)
+        await event.answer(f"**USERS**{users}", reply=True)
     if chats:
-        await event.answer("**CHATS**" + chats, reply=True)
+        await event.answer(f"**CHATS**{chats}", reply=True)
     if channels:
-        await event.answer("**CHANNELS**" + channels, reply=True)
+        await event.answer(f"**CHANNELS**{channels}", reply=True)
 
     if failed:
-        failedtext = "**Unable to fetch:**\n"
-        failedtext += ", ".join(f"`{u}`" for u in failed)
+        failedtext = "**Unable to fetch:**\n" + ", ".join(f"`{u}`" for u in failed)
         await event.answer(failedtext)
     elif not (users or chats or channels):
         await event.answer("__Something went wrong!__", self_destruct=2)
@@ -344,8 +343,10 @@ async def whichid(event: NewMessage.Event) -> None:
         if strings:
             text = ",\n".join(strings)
         if failed:
-            ftext = "**Users which weren't resolved:**\n"
-            ftext += ", ".join(f"`{f}`" for f in failed)
+            ftext = "**Users which weren't resolved:**\n" + ", ".join(
+                f"`{f}`" for f in failed
+            )
+
             await event.answer(ftext, reply=True)
     if text:
         await event.answer(text)

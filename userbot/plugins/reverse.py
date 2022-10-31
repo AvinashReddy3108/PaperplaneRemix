@@ -134,7 +134,7 @@ async def _get_similar_links(link: str, lim: int = 2):
                         gifs.append(link)
                     else:
                         links.append(await response.read())
-            if counter >= int(lim):
+            if counter >= lim:
                 break
 
     return links, gifs
@@ -169,8 +169,11 @@ async def reverse(event: NewMessage.Event) -> None:
         if (reply.video or reply.gif) and ffmpeg:
             message = f"{event.chat_id}:{event.message.id}"
             await client.download_media(reply, "media.mp4")
-            filters = "fps=10,scale=320:-1:flags=lanczos,"
-            filters += "split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse"
+            filters = (
+                "fps=10,scale=320:-1:flags=lanczos,"
+                + "split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse"
+            )
+
             process = await asyncio.create_subprocess_shell(
                 f'ffmpeg -i media.mp4 -t 25 -vf "{filters}" -loop 0 media.gif',
                 stdout=asyncio.subprocess.PIPE,
@@ -203,16 +206,15 @@ async def reverse(event: NewMessage.Event) -> None:
         return
 
     await event.answer("`Parsing the results...`")
-    match = await _scrape_url(fetchUrl + "&hl=en")
+    match = await _scrape_url(f"{fetchUrl}&hl=en")
     if isinstance(match, urllib.error.HTTPError):
         await event.answer(f"`{match.code}: {match.reason}`")
         return
-    guess = match["best_guess"]
     imgspage = match["similar_images"]
     matching_text = match["matching_text"]
     matching = match["matching"]
 
-    if guess:
+    if guess := match["best_guess"]:
         text = f"**Possible related search:** [{guess}]({fetchUrl})"
         if imgspage:
             text += f"\n\n[Visually similar images]({imgspage})"

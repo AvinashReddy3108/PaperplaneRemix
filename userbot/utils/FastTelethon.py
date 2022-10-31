@@ -307,9 +307,7 @@ class ParallelTransferrer:
 
         part = 0
         while part < part_count:
-            tasks = []
-            for sender in self.senders:
-                tasks.append(self.loop.create_task(sender.next()))
+            tasks = [self.loop.create_task(sender.next()) for sender in self.senders]
             for task in tasks:
                 data = await task
                 if not data:
@@ -329,10 +327,10 @@ parallel_transfer_locks: defaultdict[int, asyncio.Lock] = defaultdict(
 
 def stream_file(file_to_stream: BinaryIO, chunk_size=1024):
     while True:
-        data_read = file_to_stream.read(chunk_size)
-        if not data_read:
+        if data_read := file_to_stream.read(chunk_size):
+            yield data_read
+        else:
             break
-        yield data_read
 
 
 async def _internal_transfer_to_telegram(
@@ -399,5 +397,6 @@ async def upload_file(
     file: BinaryIO,
     progress_callback: callable = None,
 ) -> TypeInputFile:
-    res = (await _internal_transfer_to_telegram(client, file, progress_callback))[0]
-    return res
+    return (
+        await _internal_transfer_to_telegram(client, file, progress_callback)
+    )[0]

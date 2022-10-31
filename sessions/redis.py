@@ -47,7 +47,7 @@ class RedisSession(MemorySession):
             session_name if isinstance(session_name, str) else session_name.decode()
         )
         self.redis_connection = redis_connection
-        self.sess_prefix = "telethon:session:{}".format(self.session_name)
+        self.sess_prefix = f"telethon:session:{self.session_name}"
         self.feed_session()
 
         self._files = {}
@@ -55,9 +55,9 @@ class RedisSession(MemorySession):
         self._update_states = {}
 
     def _get_sessions(self, strip_prefix=False):
-        key_pattern = "{}:auth".format(self.sess_prefix)
+        key_pattern = f"{self.sess_prefix}:auth"
         try:
-            sessions = self.redis_connection.keys(key_pattern + "*")
+            sessions = self.redis_connection.keys(f"{key_pattern}*")
             return [
                 s.decode().replace(key_pattern, "") if strip_prefix else s.decode()
                 for s in sessions
@@ -102,7 +102,7 @@ class RedisSession(MemorySession):
             "takeout_id": self.takeout_id or b"",
         }
 
-        key = "{}:auth".format(self.sess_prefix)
+        key = f"{self.sess_prefix}:auth"
         try:
             self.redis_connection.hmset(key, s)
         except Exception as ex:
@@ -118,9 +118,8 @@ class RedisSession(MemorySession):
             self._auth_key = AuthKey(data=auth_key)
             return
 
-        key_pattern = "{}:auth".format(self.sess_prefix)
-        s = self.redis_connection.hgetall(key_pattern)
-        if s:
+        key_pattern = f"{self.sess_prefix}:auth"
+        if s := self.redis_connection.hgetall(key_pattern):
             auth_key = s.get(b"auth_key") or auth_key
             self._auth_key = AuthKey(s.get(auth_key))
 

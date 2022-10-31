@@ -128,7 +128,7 @@ async def rmbg(event: NewMessage.Event) -> None:
         error = response.json()["errors"][0]
         code = error.get("code", False)
         title = error.get("title", "No title?")
-        body = code + ": " + title if code else title
+        body = f"{code}: {title}" if code else title
         text = f"`[{response.status_code}] {body}`"
         await event.answer(text)
 
@@ -150,8 +150,7 @@ async def resolver(event: NewMessage.Event) -> None:
         return
     text = f"`Couldn't resolve:` {link}"
     for link_type, pattern in invite_links.items():
-        match = pattern.match(link)
-        if match:
+        if match := pattern.match(link):
             valid = match.group(1)
             if link_type == "private":
                 creatorid, cid, _ = utils.resolve_invite_link(valid)
@@ -266,8 +265,7 @@ async def paste_stuff(event: NewMessage.Event) -> None:
 
     `{prefix}paste` in reply to a document/message or **{prefix}paste (text)**
     """
-    match = event.matches[0].group(1)
-    if match:
+    if match := event.matches[0].group(1):
         text = match.strip()
     elif event.reply_to_msg_id:
         reply = await event.get_reply_message()
@@ -303,7 +301,7 @@ async def git_repo(event: NewMessage.Event) -> None:
         repo = git.Repo(".")
         remote_url = repo.remote().url.replace(".git", "/")
         if remote_url[-1] != "/":
-            remote_url = remote_url + "/"
+            remote_url = f"{remote_url}/"
         repo.__del__()
     except Exception as e:
         LOGGER.info("Couldnt fetch the repo link.")

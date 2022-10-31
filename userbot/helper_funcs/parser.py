@@ -104,9 +104,6 @@ class Parser:
             online = full_chat.online_count
 
         chat_id = get_peer_id(full_chat.id)
-        title = chats.title
-        creator = chats.creator
-        left = chats.left
         username = chats.username
         dc_id = profile_pic.dc_id if hasattr(profile_pic, "dc_id") else None
         about = full_chat.about
@@ -118,7 +115,7 @@ class Parser:
             text += f"  **ID:** [{chat_id}](tg://resolve?domain={username})"
         else:
             text += f"  **ID:** `{chat_id}`"
-        if title:
+        if title := chats.title:
             text += f"\n  **Title:** `{title}`"
         if about:
             about = re.sub(r"(@\w{5,32})", r"`\1`", about, count=0)
@@ -127,9 +124,9 @@ class Parser:
             text += f"\n  **Username:** @{username}"
         if participants:
             text += f"\n  **Total participants:** `{participants}`"
-        if creator:
+        if creator := chats.creator:
             text += f"\n  **Creator:** `{creator}`"
-        if left:
+        if left := chats.left:
             text += f"\n  **Left:** `{left}`"
         if dc_id:
             text += f"\n  **DC ID:** `{dc_id}`"

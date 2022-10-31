@@ -10,15 +10,15 @@ import logging.handlers
 import os
 
 HEROKU = os.environ.get("DYNO", False)
-CCRI = "\033[48;5;124m" if not HEROKU else ""  # CRITICAL
-CERR = "\033[38;5;124m" if not HEROKU else ""  # ERROR
-CWAR = "\033[38;5;202m" if not HEROKU else ""  # WARNING
-CINF = "\033[38;5;15m" if not HEROKU else ""  # INFO
-CDEB = "\033[38;5;28m" if not HEROKU else ""  # DEBUG
-CEND = "\033[0m" if not HEROKU else ""  # ANSI END
-CORA = "\033[33;1m" if not HEROKU else ""  # ORANGE
-CBOT = "\033[94;1m" if not HEROKU else ""  # BOT (blue?)
-CUSR = "\033[38;5;118m" if not HEROKU else ""  # USER (white?)
+CCRI = "" if HEROKU else "\033[48;5;124m"
+CERR = "" if HEROKU else "\033[38;5;124m"
+CWAR = "" if HEROKU else "\033[38;5;202m"
+CINF = "" if HEROKU else "\033[38;5;15m"
+CDEB = "" if HEROKU else "\033[38;5;28m"
+CEND = "" if HEROKU else "\033[0m"
+CORA = "" if HEROKU else "\033[33;1m"
+CBOT = "" if HEROKU else "\033[94;1m"
+CUSR = "" if HEROKU else "\033[38;5;118m"
 
 
 class CustomPercentStyle(logging.PercentStyle):
@@ -31,7 +31,7 @@ class CustomPercentStyle(logging.PercentStyle):
         super().format(record)
         if self._fmt == self.default_format:
             if HEROKU:
-                first = "[%s] " % (record.levelname[:1])
+                first = f"[{record.levelname[:1]}] "
             else:
                 first = "[%(asctime)s / %(levelname)s] "
             if record.name == "root":

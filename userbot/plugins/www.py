@@ -86,7 +86,7 @@ async def pingdc(event: NewMessage.Event) -> None:
         average = out.split("Average = ")[1]
     else:
         out, err = await _sub_shell(cmd + " | awk -F '/' 'END {print $5}'")
-        average = out.strip() + "ms"
+        average = f"{out.strip()}ms"
 
     if len(out.strip()) == 0:
         await event.answer("`Make sure your system's routing access isn't deprecated.`")
@@ -116,11 +116,8 @@ async def speedtest(event: NewMessage.Event) -> None:
 
     `{prefix}speedtest` of **{prefix}speedtest (bits|bytes)**
     """
-    unit = ("bit", 1)
     arg = event.matches[0].group(1)
-    if arg and arg.lower() == "byte":
-        unit = ("byte", 8)
-
+    unit = ("byte", 8) if arg and arg.lower() == "byte" else ("bit", 1)
     s = Speedtest()
     speed_event = await event.answer(testing % s.results.client)
     await _run_sync(s.get_servers)

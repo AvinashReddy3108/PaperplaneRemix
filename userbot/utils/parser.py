@@ -56,7 +56,7 @@ async def parse_arguments(
     for match in KWARGS.finditer(arguments):
         key = match.group("key")
         val = await _parse_arg(re.sub(r"[\'\"]", "", match.group("val")))
-        keyword_args.update({key: val})
+        keyword_args[key] = val
     arguments = KWARGS.sub("", arguments)
 
     args = [await _parse_arg(val.group(2)) for val in ARGS.finditer(arguments)]

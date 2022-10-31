@@ -30,7 +30,7 @@ LOGGER = logging.getLogger("userbot")
 def printUser(entity: types.User) -> None:
     """Print the user's first name + last name upon start"""
     user = get_display_name(entity)
-    LOGGER.warning("Successfully logged in as {}".format(user))
+    LOGGER.warning(f"Successfully logged in as {user}")
 
 
 def printVersion(version: int, prefix: str) -> None:
@@ -38,16 +38,14 @@ def printVersion(version: int, prefix: str) -> None:
     if not prefix:
         prefix = "."
     LOGGER.warning(
-        "UserBot v{} is running, test it by sending {}ping in"
-        " any chat.".format(version, prefix)
+        f"UserBot v{version} is running, test it by sending {prefix}ping in any chat."
     )
 
 
 async def disable_commands(client: UserBotClient, commands: str) -> None:
     commands = commands.split(", ")
     for command in commands:
-        target = client.commands.get(command, False)
-        if target:
+        if target := client.commands.get(command, False):
             client.remove_event_handler(target.func)
             client.disabled_commands.update({command: target})
             del client.commands[command]
@@ -183,21 +181,22 @@ async def get_chat_link(
         extra = f"[{name}](tg://user?id={entity.id})"
     else:
         if hasattr(entity, "username") and entity.username is not None:
-            username = "@" + entity.username
+            username = f"@{entity.username}"
         else:
             username = entity.id
         if reply is not None:
-            if isinstance(username, str) and username.startswith("@"):
-                username = username[1:]
-            else:
-                username = f"c/{username}"
+            username = (
+                username[1:]
+                if isinstance(username, str) and username.startswith("@")
+                else f"c/{username}"
+            )
+
             extra = f"[{entity.title}](https://t.me/{username}/{reply})"
+        elif isinstance(username, int):
+            username = f"`{username}`"
+            extra = f"{entity.title} ( {username} )"
         else:
-            if isinstance(username, int):
-                username = f"`{username}`"
-                extra = f"{entity.title} ( {username} )"
-            else:
-                extra = f"[{entity.title}](tg://resolve?domain={username})"
+            extra = f"[{entity.title}](tg://resolve?domain={username})"
     return extra
 
 
