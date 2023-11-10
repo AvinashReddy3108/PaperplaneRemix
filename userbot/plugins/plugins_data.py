@@ -22,8 +22,7 @@ def load_data(name: str) -> dict:
 def dump_data(instance) -> dict:
     data_dict = {}
     for i in dataclasses.fields(instance):
-        attr = getattr(instance, i.name, None)
-        if attr:
+        if attr := getattr(instance, i.name, None):
             data_dict[i.name] = base64.b64encode(msgpack.packb(attr)).decode()
     return data_dict
 

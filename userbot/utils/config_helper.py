@@ -50,7 +50,9 @@ def resolve_env(config: configparser.ConfigParser):
         config["database"]["redis_password"] = redis_password
 
     userbot = {
-        "userbot_regexninja": strtobool(os.getenv("userbot_regexninja", "False")),
+        "userbot_regexninja": strtobool(
+            os.getenv("userbot_regexninja", "False")
+        ),
         "self_destruct_msg": strtobool(os.getenv("self_destruct_msg", "True")),
         "pm_permit": strtobool(os.getenv("pm_permit", "False")),
         "console_logger_level": os.getenv("console_logger_level", None),
@@ -60,26 +62,20 @@ def resolve_env(config: configparser.ConfigParser):
         "default_animated_sticker_pack": os.getenv(
             "default_animated_sticker_pack", None
         ),
+    } | {
+        userbot_var[12:]: os.getenv(userbot_var, None)
+        for userbot_var in list(os.environ)
+        if userbot_var.startswith("ext_userbot_")
     }
-    userbot.update(
-        {
-            userbot_var[12:]: os.getenv(userbot_var, None)
-            for userbot_var in list(os.environ)
-            if userbot_var.startswith("ext_userbot_")
-        }
-    )
 
     api_keys = {
         "api_key_heroku": os.getenv("api_key_heroku", None),
         "api_key_removebg": os.getenv("api_key_removebg", None),
+    } | {
+        api_key_var[12:]: os.getenv(api_key_var, None)
+        for api_key_var in list(os.environ)
+        if api_key_var.startswith("ext_api_key_")
     }
-    api_keys.update(
-        {
-            api_key_var[12:]: os.getenv(api_key_var, None)
-            for api_key_var in list(os.environ)
-            if api_key_var.startswith("ext_api_key_")
-        }
-    )
 
     plugins = {
         "repos": os.getenv("repos", None),

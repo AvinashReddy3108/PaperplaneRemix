@@ -20,8 +20,6 @@ from userbot.plugins.plugins_data import Blacklist, GlobalBlacklist
 from userbot.utils.events import NewMessage
 
 plugin_category = "blacklisting"
-redis = client.database
-
 blacklisted_text = (
     "**Automatically banned** {user_link} **because they're blacklisted!.**"
 )
@@ -88,7 +86,7 @@ blacklistedUsers: dict[int, tuple[str, Union[str, int]]] = {}
 whitelistedUsers: list[int] = []
 whitelistedChats: list[int] = []
 
-if redis:
+if redis := client.database:
     local_keys = redis.keys("blacklists:-*")
     if redis.exists("blacklists:global"):
         globalData = msgpack.unpackb(redis.get("blacklists:global"))
@@ -147,16 +145,15 @@ async def append(
             else:
                 gval = added
             setattr(GlobalBlacklist, option, gval)
-        else:
-            if blkey in localBlacklists:
-                lval = getattr(localBlacklists[blkey], option, None)
-                if lval:
-                    lval.extend(added)
-                else:
-                    lval = added
-                setattr(localBlacklists[blkey], option, lval)
+        elif blkey in localBlacklists:
+            lval = getattr(localBlacklists[blkey], option, None)
+            if lval:
+                lval.extend(added)
             else:
-                localBlacklists[blkey] = Blacklist(**{option: added})
+                lval = added
+            setattr(localBlacklists[blkey], option, lval)
+        else:
+            localBlacklists[blkey] = Blacklist(**{option: added})
 
     return added, skipped
 
@@ -196,8 +193,7 @@ async def unappend(
     blkey = key if key.isalpha() else int(key)
     if removed:
         if blkey == "global":
-            gval = getattr(GlobalBlacklist, option, None)
-            if gval:
+            if gval := getattr(GlobalBlacklist, option, None):
                 for value in removed:
                     if value in gval:
                         gval.remove(value)
@@ -205,17 +201,15 @@ async def unappend(
                     setattr(GlobalBlacklist, option, gval)
                 else:
                     setattr(GlobalBlacklist, option, None)
-        else:
-            if blkey in localBlacklists:
-                lval = getattr(localBlacklists[blkey], option, None)
+        elif blkey in localBlacklists:
+            if lval := getattr(localBlacklists[blkey], option, None):
+                for value in removed:
+                    if value in lval:
+                        lval.remove(value)
                 if lval:
-                    for value in removed:
-                        if value in lval:
-                            lval.remove(value)
-                    if lval:
-                        setattr(localBlacklists[blkey], option, lval)
-                    else:
-                        setattr(localBlacklists[blkey], option, None)
+                    setattr(localBlacklists[blkey], option, lval)
+                else:
+                    setattr(localBlacklists[blkey], option, None)
 
     return removed, skipped
 
@@ -268,9 +262,8 @@ async def get_values(args: list, kwargs: dict) -> dict[str, list]:
         for i in args:
             if isinstance(i, list):
                 txt += [str(o) for o in i if o not in txt]
-            else:
-                if i not in txt:
-                    txt.append(str(i))
+            elif i not in txt:
+                txt.append(str(i))
 
     temp_id = kwargs.get("id", [])
     if not isinstance(temp_id, list):
@@ -373,11 +366,11 @@ async def blacklister(event: NewMessage.Event) -> None:
 
     for option, values in parsed.items():
         if values:
-            added, failed = await append("blacklists:" + key, option, values)
+            added, failed = await append(f"blacklists:{key}", option, values)
             if added:
-                added_values.update({option: added})
+                added_values[option] = added
             if failed:
-                skipped_values.update({option: failed})
+                skipped_values[option] = failed
 
     if added_values:
         text = f"**New blacklists for {key}:**\n"
@@ -432,32 +425,27 @@ async def unblacklister(event: NewMessage.Event) -> None:
 
     if index and bltype:
         if glb:
-            gval = getattr(GlobalBlacklist, bltype, None)
-            if gval:
+            if gval := getattr(GlobalBlacklist, bltype, None):
                 if len(gval) < index:
                     await event.answer("`Invalid index!`")
                     return
-                removed, skipped = await unappend(
-                    "blacklists:" + key, bltype, gval[index]
-                )
-                removed_values.update({bltype: removed})
-        else:
-            if key in localBlacklists:
-                lval = getattr(localBlacklists[key], bltype, None)
-                if lval:
-                    if len(lval) < index:
-                        await event.answer("`Invalid index!`")
-                        return
-                    await unappend("blacklists:" + key, bltype, lval[index])
-                    removed_values.update({bltype: removed})
+                removed, skipped = await unappend(f"blacklists:{key}", bltype, gval[index])
+                removed_values[bltype] = removed
+        elif key in localBlacklists:
+            if lval := getattr(localBlacklists[key], bltype, None):
+                if len(lval) < index:
+                    await event.answer("`Invalid index!`")
+                    return
+                await unappend(f"blacklists:{key}", bltype, lval[index])
+                removed_values[bltype] = removed
     else:
         for option, values in parsed.items():
             if values:
-                removed, skipped = await unappend("blacklists:" + key, option, values)
+                removed, skipped = await unappend(f"blacklists:{key}", option, values)
                 if removed:
-                    removed_values.update({option: removed})
+                    removed_values[option] = removed
                 if skipped:
-                    skipped_values.update({option: skipped})
+                    skipped_values[option] = skipped
 
     if removed_values:
         text = f"**Removed blacklists for {key}:**\n"
@@ -507,16 +495,15 @@ async def whitelister(event: NewMessage.Event) -> None:
                     chats.append(entity)
             except Exception:
                 skipped.append(f"`{user}`")
+    elif event.reply_to_msg_id:
+        wl = (await event.get_reply_message()).sender_id
+        users.append(await client.get_entity(wl))
     else:
-        if event.reply_to_msg_id:
-            wl = (await event.get_reply_message()).sender_id
-            users.append(await client.get_entity(wl))
+        entity = await event.get_chat()
+        if event.is_private:
+            users.append(entity)
         else:
-            entity = await event.get_chat()
-            if event.is_private:
-                users.append(entity)
-            else:
-                chats.append(entity)
+            chats.append(entity)
 
     if users:
         usertext = ""
@@ -601,16 +588,15 @@ async def unwhitelister(event: NewMessage.Event) -> None:
                     chats.append(entity.id)
             except Exception:
                 skipped.append(f"`{user}`")
+    elif event.reply_to_msg_id:
+        entity = (await event.get_reply_message()).sender_id
+        users.append(entity)
     else:
-        if event.reply_to_msg_id:
-            entity = (await event.get_reply_message()).sender_id
-            users.append(entity)
+        entity = await event.get_chat()
+        if event.is_private:
+            users.append(entity.id)
         else:
-            entity = await event.get_chat()
-            if event.is_private:
-                users.append(entity.id)
-            else:
-                chats.append(entity.id)
+            chats.append(entity.id)
 
     if users and whitelistedUsers:
         count = 0
@@ -689,17 +675,15 @@ async def unblacklistuser(event: NewMessage.Event) -> None:
                     skipped.append(f"`{user}`")
             except Exception:
                 skipped.append(f"`{user}`")
+    elif event.reply_to_msg_id:
+        entity = (await event.get_reply_message()).sender_id
+        users.append(entity)
     else:
-        if event.reply_to_msg_id:
-            entity = (await event.get_reply_message()).sender_id
-            users.append(entity)
-        else:
-            entity = await event.get_chat()
-            if event.is_private:
-                users.append(entity.id)
+        entity = await event.get_chat()
+        if event.is_private:
+            users.append(entity.id)
 
     if users and blacklistedUsers:
-        text = "**Un-blacklisted users:**\n"
         targets = []
         for user in users:
             if user in blacklistedUsers:
@@ -709,11 +693,10 @@ async def unblacklistuser(event: NewMessage.Event) -> None:
             redis.set("blacklist:users", msgpack.packb(blacklistedUsers))
         else:
             redis.delete("blacklist:users")
-        text += ", ".join(targets)
+        text = "**Un-blacklisted users:**\n" + ", ".join(targets)
         await event.answer(text, log=("unblacklist", text))
     if skipped:
-        text = "**Skipped users:**\n"
-        text += ", ".join(skipped)
+        text = "**Skipped users:**\n" + ", ".join(skipped)
         await event.answer(text, reply=True)
 
 
@@ -766,8 +749,7 @@ async def listbls(event: NewMessage.Event) -> None:
     if bl_type is not None and index is not None:
         index = int(index)
         if glb:
-            blked = getattr(GlobalBlacklist, bl_type.lower(), None)
-            if blked:
+            if blked := getattr(GlobalBlacklist, bl_type.lower(), None):
                 if len(blked) >= index:
                     bl = blked[index]
                     text = f"{bl_type} global blacklist: `{bl}`"
@@ -779,8 +761,9 @@ async def listbls(event: NewMessage.Event) -> None:
             if event.chat_id not in localBlacklists:
                 await event.answer("__There are no blacklists set here.__")
                 return
-            blked = getattr(localBlacklists[event.chat_id], bl_type.lower(), None)
-            if blked:
+            if blked := getattr(
+                localBlacklists[event.chat_id], bl_type.lower(), None
+            ):
                 if len(blked) >= index:
                     bl = blked[index]
                     text = f"{bl_type} blacklist: `{bl}`"
@@ -796,10 +779,10 @@ async def listbls(event: NewMessage.Event) -> None:
             if values:
                 if glb:
                     attr = getattr(GlobalBlacklist, option, None)
-                else:
-                    if event.chat_id not in localBlacklists:
-                        break
+                elif event.chat_id in localBlacklists:
                     attr = getattr(localBlacklists[event.chat_id], option, None)
+                else:
+                    break
                 if attr:
                     for v in values:
                         if v in attr:
@@ -807,30 +790,31 @@ async def listbls(event: NewMessage.Event) -> None:
                         else:
                             not_blacklisted.append(v)
         if blacklisted:
-            text = "**Already blacklisted values:**\n"
-            text += ", ".join(f"`{b}`" for b in blacklisted)
+            text = "**Already blacklisted values:**\n" + ", ".join(
+                f"`{b}`" for b in blacklisted
+            )
+
             await event.answer(text, reply=True)
         if not_blacklisted:
-            text = "**Not blacklisted values:**\n"
-            text += ", ".join(f"`{b}`" for b in not_blacklisted)
+            text = "**Not blacklisted values:**\n" + ", ".join(
+                f"`{b}`" for b in not_blacklisted
+            )
+
             await event.answer(text, reply=True)
         if args and len(args) == 1:
             text = None
             arg = args[0].lower()
             if glb:
-                attr = getattr(GlobalBlacklist, arg, None)
-                if attr:
+                if attr := getattr(GlobalBlacklist, arg, None):
                     values = ", ".join(attr)
                     text = f"**GLobal {arg} blacklists:**\n```{values}```"
                 else:
                     text = f"__There are no global {arg} blacklists.__"
+            elif attr := getattr(localBlacklists[event.chat_id], option, None):
+                values = ", ".join(attr)
+                text = f"**{arg.title()} blacklists:**\n```{values}```"
             else:
-                attr = getattr(localBlacklists[event.chat_id], option, None)
-                if attr:
-                    values = ", ".join(attr)
-                    text = f"**{arg.title()} blacklists:**\n```{values}```"
-                else:
-                    text = f"__There are no {arg} blacklists.__"
+                text = f"__There are no {arg} blacklists.__"
             if text:
                 await event.answer(text)
     else:

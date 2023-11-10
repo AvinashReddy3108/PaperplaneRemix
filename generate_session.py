@@ -38,10 +38,9 @@ async def install_pip_package(package: str) -> bool:
 try:
     import telethon
     from telethon.errors import AuthKeyError, InvalidBufferError
-except (ModuleNotFoundError, ImportError):
+except ImportError:
     print("Installing Telethon...")
-    pip = loop.run_until_complete(install_pip_package("telethon"))
-    if pip:
+    if pip := loop.run_until_complete(install_pip_package("telethon")):
         print("Successfully installed Telethon. Run the script again.")
     else:
         print(
@@ -113,10 +112,9 @@ else:
 if redis:
     try:
         import redis
-    except (ModuleNotFoundError, ImportError):
+    except ImportError:
         print("Installing Redis...")
-        pip = loop.run_until_complete(install_pip_package("redis"))
-        if pip:
+        if pip := loop.run_until_complete(install_pip_package("redis")):
             print("Successfully installed Redis. Run the script again.")
         else:
             print(

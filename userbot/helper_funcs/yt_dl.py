@@ -30,7 +30,7 @@ class YTdlLogger(object):
 
     def debug(self, msg: str) -> None:
         """Logs debug messages with yt-dlp tag to UserBot logger."""
-        LOGGER.debug("yt-dlp: " + msg)
+        LOGGER.debug(f"yt-dlp: {msg}")
         f = None
         if audio.search(msg):
             f = audio.match(msg).group(1)
@@ -43,15 +43,15 @@ class YTdlLogger(object):
 
     def warning(self, msg: str) -> None:
         """Logs warning messages with yt-dlp tag to UserBot logger."""
-        LOGGER.warning("yt-dlp: " + msg)
+        LOGGER.warning(f"yt-dlp: {msg}")
 
     def error(self, msg: str) -> None:
         """Logs error messages with yt-dlp tag to UserBot logger."""
-        LOGGER.error("yt-dlp: " + msg)
+        LOGGER.error(f"yt-dlp: {msg}")
 
     def critical(self, msg: str) -> None:
         """Logs critical messages with yt-dlp tag to UserBot logger."""
-        LOGGER.critical("yt-dlp: " + msg)
+        LOGGER.critical(f"yt-dlp: {msg}")
 
 
 class ProgressHook:
@@ -85,17 +85,16 @@ class ProgressHook:
         """
         if d["status"] == "downloading":
             filen = d.get("filename", "Unknown filename")
-            prcnt = d.get("_percent_str", None)
-            ttlbyt = d.get("_total_bytes_str", None)
-            spdstr = d.get("_speed_str", None)
-            etastr = d.get("_eta_str", None)
+            prcnt = d.get("_percent_str")
+            ttlbyt = d.get("_total_bytes_str")
+            spdstr = d.get("_speed_str")
+            etastr = d.get("_eta_str")
 
             if not prcnt or not ttlbyt or not spdstr or not etastr:
                 return
 
-            finalStr = "Downloading {}: {} of {} at {} ETA: {}".format(
-                filen, prcnt, ttlbyt, spdstr, etastr
-            )
+            finalStr = f"Downloading {filen}: {prcnt} of {ttlbyt} at {spdstr} ETA: {etastr}"
+
             LOGGER.debug(finalStr)
             if float(prcnt[:-1]) - self.downloaded >= self.update:
                 # Avoid spamming recents
@@ -113,8 +112,8 @@ class ProgressHook:
         elif d["status"] == "finished":
             filen = d.get("filename", "Unknown filename")
             filen1 = re.sub(r"YT_DL\\(.+)_\d+\.", r"\1.", filen)
-            ttlbyt = d.get("_total_bytes_str", None)
-            elpstr = d.get("_elapsed_str", None)
+            ttlbyt = d.get("_total_bytes_str")
+            elpstr = d.get("_elapsed_str")
             downloads.update({filen.split(".")[0]: filen})
 
             if not ttlbyt or not elpstr:
@@ -131,7 +130,7 @@ class ProgressHook:
             self.tasks.clear()
 
         elif d["status"] == "error":
-            finalStr = "Error: " + str(d)
+            finalStr = f"Error: {d}"
             LOGGER.error(finalStr)
 
 
@@ -168,10 +167,7 @@ async def list_formats(info_dict: dict) -> str:
         table[-1][-1] += (" " if table[-1][-1] else "") + "(best)"
 
     header_line = ["format code", "extension", "resolution"]
-    return "Available formats for {}:\n{}".format(
-        info_dict["title"],
-        yt_dlp.render_table(header_line, table),
-    )
+    return f'Available formats for {info_dict["title"]}:\n{yt_dlp.render_table(header_line, table)}'
 
 
 async def extract_info(
@@ -253,7 +249,7 @@ async def extract_info(
             if old_f.samefile(new_f):
                 os.remove(str(new_f.absolute()))
             else:
-                newname = str(old_f.stem) + "_OLD"
+                newname = f"{str(old_f.stem)}_OLD"
                 old_f.replace(old_f.with_name(newname).with_suffix(old_f.suffix))
         path = new_f.parent.parent / npath
         new_f.rename(new_f.parent.parent / npath)

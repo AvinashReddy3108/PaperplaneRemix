@@ -38,8 +38,7 @@ async def download(event: NewMessage.Event) -> None:
     """
     name = NAME
     path = None
-    match = event.matches[0].group(3)
-    if match:
+    if match := event.matches[0].group(3):
         path = pathlib.Path(match.strip())
 
     if not event.reply_to_msg_id:
@@ -62,7 +61,7 @@ async def download(event: NewMessage.Event) -> None:
 
     if path and path.exists():
         if path.is_file():
-            newname = str(path.stem) + "_OLD"
+            newname = f"{str(path.stem)}_OLD"
             path.rename(path.with_name(newname).with_suffix(path.suffix))
             file_name = path
         else:
@@ -121,9 +120,9 @@ async def upload(event: NewMessage.Event) -> None:
         elif dmatch.exists():
             target_files.append(dmatch)
     if not target_files:
-        for f in downloads.glob("*.*"):
-            if f.match(match) and f.is_file():
-                target_files.append(f)
+        target_files.extend(
+            f for f in downloads.glob("*.*") if f.match(match) and f.is_file()
+        )
 
     # Recursive file fetching from the bot's root dir
     for f in pathlib.Path(".").glob("**/*.*"):

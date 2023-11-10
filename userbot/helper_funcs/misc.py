@@ -43,8 +43,7 @@ ChatAdminRights = {
 async def parse_admin_rights(AdminRights: types.ChatAdminRights) -> str:
     text = []
     for attr, string in ChatAdminRights.items():
-        right = getattr(AdminRights, attr, False)
-        if right:
+        if right := getattr(AdminRights, attr, False):
             text.append(f"{string} {right}")
     return "\n".join(text)
 
@@ -52,8 +51,7 @@ async def parse_admin_rights(AdminRights: types.ChatAdminRights) -> str:
 async def parse_banned_rights(BannedRights: types.ChatBannedRights) -> str:
     text = []
     for attr, string in ChatBannedRights.items():
-        right = getattr(BannedRights, attr, False)
-        if right:
+        if right := getattr(BannedRights, attr, False):
             if attr == "until_date":
                 text.append(f"{string} {right.ctime()} (UTC)")
             else:

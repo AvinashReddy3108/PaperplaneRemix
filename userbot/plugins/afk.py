@@ -128,7 +128,6 @@ async def out_listner(event: NewMessage.Event) -> None:
     if AFK.privates:
         total_mentions = 0
         to_log = []
-        pr_log = "**Pings/PMs:**\n"
         for key, value in AFK.privates.items():
             await _update_notif_settings(key, value["PeerNotifySettings"])
             total_mentions += len(value["mentions"])
@@ -138,11 +137,10 @@ async def out_listner(event: NewMessage.Event) -> None:
         pr_text = "`Received {} message{} from {} private chat{}.`".format(
             *(await _correct_grammer(total_mentions, len(AFK.privates)))
         )
-        pr_log += "\n\n".join("  " + t for t in to_log)
+        pr_log = "**Pings/PMs:**\n" + "\n\n".join(f"  {t}" for t in to_log)
     if AFK.groups:
         total_mentions = 0
         to_log = []
-        gr_log = "\n**Tags/Mentions:**\n"
         for key, value in AFK.groups.items():
             await _update_notif_settings(key, value["PeerNotifySettings"])
             total_mentions += len(value["mentions"])
@@ -159,8 +157,7 @@ async def out_listner(event: NewMessage.Event) -> None:
         gr_text = "`Received {} mention{} from {} group{}.`".format(
             *(await _correct_grammer(total_mentions, len(AFK.groups)))
         )
-        gr_log += "\n\n".join("  " + t for t in to_log)
-
+        gr_log = "\n**Tags/Mentions:**\n" + "\n\n".join(f"  {t}" for t in to_log)
     main_text = "\n\n".join([pr_text, gr_text]).strip()
     if not client.logger:
         main_text += "\n`Use a logger group for more detailed AFK mentions!`"
@@ -249,14 +246,16 @@ async def inc_listner(event: NewMessage.Event) -> None:
             plugin="afk",
             name="currently_afk_reason",
             formats={"elapsed": elapsed, "reason": reason},
-            reply_to=event if not event.is_private else None,
+            reply_to=None if event.is_private else event,
         )
+
     else:
         result = await event.resanswer(
             f"**{random.choice(AFKMEMEZ)}**\n__Last seen: {elapsed} ago.__",
             plugin="afk",
             name="currently_afk",
             formats={"elapsed": elapsed},
-            reply_to=event if not event.is_private else None,
+            reply_to=None if event.is_private else event,
         )
+
     AFK.sent.setdefault(chat.id, []).append((result.id, result.date))

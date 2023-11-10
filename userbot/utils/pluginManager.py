@@ -203,8 +203,7 @@ class PluginManager:
         if tmp:
             tmp = _split_plugins(tmp)
             for url in tmp:
-                match = github_patern.search(url)
-                if match:
+                if match := github_patern.search(url):
                     repos.append(match.group(1))
         for repo in repos:
             tree = requests.get(
@@ -262,9 +261,7 @@ class PluginManager:
                         mod_name = splat[0] if len(splat) == 1 else splat[1]
                         if mod_name in helpers:
                             LOGGER.debug(f"Overwrote {mod_name} from {repo}/{filen}")
-                        helpers.update(
-                            {mod_name: (raw_pattern.format(repo, filen), filen)}
-                        )
+                        helpers[mod_name] = (raw_pattern.format(repo, filen), filen)
                         LOGGER.debug(f"Found {mod_name} in {repo}/{filen}!")
                     continue
 
@@ -278,9 +275,7 @@ class PluginManager:
                         continue
                     elif plugin_name in plugins:
                         LOGGER.debug(f"Overwrote {plugin_name} from {repo}/{filen}")
-                    plugins.update(
-                        {plugin_name: (raw_pattern.format(repo, filen), filen)}
-                    )
+                    plugins[plugin_name] = (raw_pattern.format(repo, filen), filen)
                     LOGGER.debug(f"Found {plugin} in {repo}/{filen}!")
 
         with open(rconfig_path, "w") as configfile:
@@ -293,8 +288,8 @@ class PluginManager:
         to_overwrite: Union[None, str] = None
         callbacks: list[Callback] = []
         ppath = self.plugin_path.absolute() / name.replace(".", "/") / ".py"
-        ubotpath = "userbot.plugins." + name
-        log = "Successfully imported {}".format(name)
+        ubotpath = f"userbot.plugins.{name}"
+        log = f"Successfully imported {name}"
 
         for plugin in self.active_plugins:
             if plugin.name == name:
@@ -309,7 +304,7 @@ class PluginManager:
                     path, SourcelessPluginLoader(ubotpath, content, path), origin=path
                 )
                 match = github_raw_pattern.search(path)
-                log += " from {}".format(match.group(1))
+                log += f" from {match.group(1)}"
             else:
                 # Local files use SourceFileLoader
                 spec = importlib.util.find_spec(path)
@@ -319,13 +314,15 @@ class PluginManager:
             # To make plugins impoartable use "sys.modules[path] = module".
             sys.modules[ubotpath] = module
 
-            for n, cb in vars(module).items():
+            callbacks.extend(
+                Callback(n, cb)
+                for n, cb in vars(module).items()
                 if (
                     inspect.iscoroutinefunction(cb)
                     and not n.startswith("_")
                     and events._get_handlers(cb)
-                ):
-                    callbacks.append(Callback(n, cb))
+                )
+            )
 
             self.active_plugins.append(Plugin(name, callbacks, ppath, module))
             LOGGER.info(log)
@@ -336,10 +333,10 @@ class PluginManager:
 
     def _import_helper(self, name: str, path: str, content: str) -> None:
         """Import file and bytecode plugins."""
-        ubotpath = "userbot." + name
+        ubotpath = f"userbot.{name}"
         ppath = root / (ubotpath.replace(".", "/") + ".py")
         match = github_raw_pattern.search(path).group(1)
-        log = "Successfully imported helper {} from {}".format(name, match)
+        log = f"Successfully imported helper {name} from {match}"
         if ppath.exists():
             LOGGER.info("Cannot overwrite %s helper from %s", ubotpath, match)
             return
@@ -378,7 +375,7 @@ class PluginManager:
                 _, oldurl, _ = to_import[name]
                 to_import.pop(name)
                 LOGGER.debug(f"Overwrote {oldurl} with {url}")
-            to_import.update({name: (path, url, resp.content)})
+            to_import[name] = (path, url, resp.content)
 
         for name, raw in repo_helpers.items():
             url, path = raw

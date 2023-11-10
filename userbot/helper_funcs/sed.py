@@ -34,9 +34,9 @@ async def match_splitter(match: re.Match) -> tuple[str, str, str, str]:
             A tuple of strings containing
             line, regexp, replacement and flags respectively.
     """
-    li = match.group(1)
-    fr = match.group(3)
-    to = match.group(4) or ""
+    li = match[1]
+    fr = match[3]
+    to = match[4] or ""
     to = re.sub(r"\\/", "/", to)
     for c in caseConversions:
         case = re.escape(c)
@@ -46,13 +46,13 @@ async def match_splitter(match: re.Match) -> tuple[str, str, str, str]:
             if not tmp:
                 break
             start, end = tmp.span()
-            group = tmp.group(1) or ""
+            group = tmp[1] or ""
             if group:
                 group = r"\g<0>" if group == "0" else "\\" + group
                 group += endCaseConversions.get(c, "")
             to = to.replace(to[start:end], case + group)
     to = re.sub(r"(?<!\\)\\0", r"\g<0>", to)
-    fl = match.group(5) or ""
+    fl = match[5] or ""
 
     return li, fr, to, fl
 
@@ -113,8 +113,7 @@ async def convertCharacterCase(string: str, case: str) -> str:
             The replaced string on success, None otherwise.
     """
     case = re.escape(case)
-    match = re.search(case, string)
-    if match:
+    if match := re.search(case, string):
         start, end = match.span()
         repl = string[end]
         tmp = repl.upper() if case == r"\\u" else repl.lower()
@@ -138,14 +137,12 @@ async def convertStringCase(string: str, case: str) -> str:
     opp = r"\\L" if case == r"\\U" else r"\\U"
     trmintr = endCaseConversions.get(case)
     exp = "({}).+?({}|{}|{}|$)".format(re.escape(case), trmintr, opp, r"\\E")
-    match = re.search(exp, string, flags=re.DOTALL)
-    if match:
+    if match := re.search(exp, string, flags=re.DOTALL):
         start, end = match.span()
-        toStrip = match.group(1)
-        terminator = match.group(2)
-        if terminator:
+        toStrip = match[1]
+        if terminator := match[2]:
             tend = -2 if terminator == r"\E" else -3
-            tmp = match.group(0)
+            tmp = match[0]
             if toStrip == r"\U":
                 string = string[:start] + tmp.upper()[2:tend] + string[end:]
             else:
@@ -174,14 +171,12 @@ async def convertWordCase(string: str, case: str) -> str:
     """
     trmintr = endCaseConversions.get(case)
     exp = "({}).+?({}|{}|$)".format(re.escape(case), trmintr, r"\\E")
-    match = re.search(exp, string, flags=re.DOTALL)
-    if match:
+    if match := re.search(exp, string, flags=re.DOTALL):
         start, end = match.span()
-        toStrip = match.group(1)
-        terminator = match.group(2)
-        if terminator:
+        toStrip = match[1]
+        if terminator := match[2]:
             tend = -2 if terminator == r"\E" else -3
-            tmp = match.group(0)
+            tmp = match[0]
             tmp1 = tmp[2:tend]
             if toStrip == r"\F":
                 repl = tmp1[0].upper() + tmp1[1:].lower()

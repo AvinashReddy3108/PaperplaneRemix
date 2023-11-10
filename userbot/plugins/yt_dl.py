@@ -86,7 +86,9 @@ async def fix_attributes(
     if video and isinstance(video, types.DocumentAttributeVideo):
         new_attributes.append(video)
 
-    for attr in attributes:
+    new_attributes.extend(
+        attr
+        for attr in attributes
         if (
             isinstance(attr, types.DocumentAttributeAudio)
             and not audio
@@ -94,8 +96,9 @@ async def fix_attributes(
             and not video
             or not isinstance(attr, types.DocumentAttributeAudio)
             and not isinstance(attr, types.DocumentAttributeVideo)
-        ):
-            new_attributes.append(attr)
+        )
+    )
+
     return new_attributes, mime_type
 
 
@@ -186,12 +189,10 @@ async def yt_dl(event):
             else:
                 warnings.append(f"```{await client.get_traceback(info)}```")
         if fmts:
-            text = "**Formats:**\n"
-            text += ",\n\n".join(f"```{f}```" for f in fmts)
+            text = "**Formats:**\n" + ",\n\n".join(f"```{f}```" for f in fmts)
             await event.answer(text)
         if warnings:
-            text = "**Warnings:**\n"
-            text += ",\n\n".join(f"```{w}```" for w in warnings)
+            text = "**Warnings:**\n" + ",\n\n".join(f"```{w}```" for w in warnings)
             reply = bool(fmts)
             await event.answer(text, reply=reply)
         return
@@ -212,7 +213,7 @@ async def yt_dl(event):
             executor=concurrent.futures.ThreadPoolExecutor(),
         )
         if isinstance(output, str):
-            result = warning + output if not ffmpeg else output
+            result = output if ffmpeg else warning + output
             warnings.append(result)
         elif isinstance(output, BaseException):
             warnings.append(f"```{await client.get_traceback(output)}```")
@@ -226,7 +227,7 @@ async def yt_dl(event):
                 url = info.get("webpage_url", None)
                 href = f"[{title}]({url})"
                 text = success.format(href)
-                result = warning + text if not ffmpeg else text
+                result = text if ffmpeg else warning + text
 
                 dl = io.open(path, "rb")
                 if progress:
@@ -261,12 +262,10 @@ async def yt_dl(event):
                     os.remove(thumb)
                 if auto_delete:
                     os.remove(path)
-            else:
-                if thumb:
-                    os.remove(thumb)
+            elif thumb:
+                os.remove(thumb)
     if warnings:
-        text = "**Warnings:**\n"
-        text += ",\n\n".join(warnings)
+        text = "**Warnings:**\n" + ",\n\n".join(warnings)
         await event.answer(text)
     else:
         await event.delete()

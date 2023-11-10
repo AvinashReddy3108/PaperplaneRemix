@@ -141,7 +141,7 @@ async def updater(event: NewMessage.Event) -> None:
 
     remote_url = repo.remote().url.replace(".git", "/")
     if remote_url[-1] != "/":
-        remote_url = remote_url + "/"
+        remote_url = f"{remote_url}/"
 
     now = datetime.datetime.now(datetime.timezone.utc)
     def_changelog = changelog = "**PaperplaneRemix changelog:**"
@@ -177,11 +177,15 @@ async def updater(event: NewMessage.Event) -> None:
     heroku_api_key = client.config["api_keys"].get("api_key_heroku", False)
     if os.getenv("DYNO", False) and heroku_api_key:
         heroku_conn = heroku3.from_key(heroku_api_key)
-        app = None
-        for heroku_app in heroku_conn.apps():
-            if "api_key_heroku" in heroku_app.config():
-                app = heroku_app
-                break
+        app = next(
+            (
+                heroku_app
+                for heroku_app in heroku_conn.apps()
+                if "api_key_heroku" in heroku_app.config()
+            ),
+            None,
+        )
+
         if app is None:
             await event.answer(
                 "`I seem to be running the userbot on Heroku "
@@ -210,9 +214,9 @@ async def updater(event: NewMessage.Event) -> None:
                 for x in list(os.environ)
                 if x.startswith("ext_userbot_")
             }
-            for flag in userbot_config:
+            for flag, value in userbot_config.items():
                 if flag in heroku_ext_flags:
-                    app.config().update({f"ext_userbot_{flag}": userbot_config[flag]})
+                    app.config().update({f"ext_userbot_{flag}": value})
                     app.config().update({flag: None})
 
             app.config().update(

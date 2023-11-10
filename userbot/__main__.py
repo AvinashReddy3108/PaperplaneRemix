@@ -18,7 +18,7 @@ from .utils import helpers, pluginManager
 
 LOGGER = logging.getLogger("userbot")
 print(userbot.__copyright__)
-print("Licensed under the terms of the " + userbot.__license__)
+print(f"Licensed under the terms of the {userbot.__license__}")
 
 
 def wakeup():

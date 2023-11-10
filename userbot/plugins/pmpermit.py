@@ -121,29 +121,28 @@ async def pm_incoming(event: NewMessage.Event) -> None:
             name="newdefault",
             formats={"remaining": count},
         )
+    elif count == 1:
+        out = await event.resanswer(warning, plugin="pmpermit", name="warning")
+    elif (
+        lastmsg
+        and event.text == lastmsg
+        or re.search(esc_newdefault, event.text)
+        or re.search(esc_default, event.text)
+        or re.search(esc_samedefault, event.text)
+    ):
+        pass
+    elif lastmsg:
+        out = await event.resanswer(
+            samedefault,
+            plugin="pmpermit",
+            name="samedefault",
+            formats={"remaining": count},
+        )
+        lastoutmsg = out.id
     else:
-        if count == 1:
-            out = await event.resanswer(warning, plugin="pmpermit", name="warning")
-        elif (
-            lastmsg
-            and event.text == lastmsg
-            or re.search(esc_newdefault, event.text)
-            or re.search(esc_default, event.text)
-            or re.search(esc_samedefault, event.text)
-        ):
-            pass
-        elif lastmsg:
-            out = await event.resanswer(
-                samedefault,
-                plugin="pmpermit",
-                name="samedefault",
-                formats={"remaining": count},
-            )
-            lastoutmsg = out.id
-        else:
-            out = await event.resanswer(
-                default, plugin="pmpermit", name="default", formats={"remaining": count}
-            )
+        out = await event.resanswer(
+            default, plugin="pmpermit", name="default", formats={"remaining": count}
+        )
 
     if not lastoutmsg and out:
         sent.append(out.id)
@@ -364,8 +363,7 @@ async def approved(event: NewMessage.Event) -> None:
     `{prefix}approved`
     """
     if approvedUsers:
-        text = "**Approved users:**\n"
-        text += ", ".join(f"`{i}`" for i in approvedUsers)
+        text = "**Approved users:**\n" + ", ".join(f"`{i}`" for i in approvedUsers)
         await event.answer(text)
     else:
         await event.answer("`I haven't approved anyone to PM me yet.`")

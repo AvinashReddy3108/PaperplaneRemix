@@ -24,7 +24,7 @@ from .utils.log_formatter import CustomFormatter, CustomMemoryHandler
 __version__ = "0.6"
 __license__ = "GNU General Public License v3.0"
 __author__ = "Avinash Reddy <https://github.com/AvinashReddy3108>"
-__copyright__ = "PaperplaneRemix Copyright (C) 2022 " + __author__
+__copyright__ = f"PaperplaneRemix Copyright (C) 2022 {__author__}"
 root = pathlib.Path(__file__).parent.parent
 
 session = "userbot"
@@ -150,13 +150,15 @@ def verifyLoggerGroup(client: UserBotClient) -> None:
 
     try:
         entity = client.loop.run_until_complete(client.get_entity(LOGGER_CHAT_ID))
-        if not isinstance(entity, types.User):
-            if not entity.creator:
-                if entity.default_banned_rights.send_messages:
-                    disable_logger(
-                        "Permissions missing to send messages "
-                        "for the specified Logger group."
-                    )
+        if (
+            not isinstance(entity, types.User)
+            and not entity.creator
+            and entity.default_banned_rights.send_messages
+        ):
+            disable_logger(
+                "Permissions missing to send messages "
+                "for the specified Logger group."
+            )
         client.logger = entity
     except ValueError:
         disable_logger("Logger group ID cannot be found. " "Make sure it's correct.")

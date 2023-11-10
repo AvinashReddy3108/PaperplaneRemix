@@ -50,7 +50,7 @@ async def evaluate(event: NewMessage.Event) -> None:
             result = result.stringify()
     result = str(result) if result else "Success?"
     await event.answer(
-        "```" + result + "```",
+        f"```{result}```",
         log=("eval", f"Successfully evaluated {expression} in {extra}!"),
         reply=True,
     )
@@ -98,7 +98,7 @@ async def terminal(event: NewMessage.Event) -> None:
     **{prefix}term (command)**
         **Example:** `{prefix}term echo 123`
     """
-    message = str(event.chat_id) + ":" + str(event.message.id)
+    message = f"{str(event.chat_id)}:{str(event.message.id)}"
     if client.running_processes.get(message, False):
         await event.answer("A process for this event is already running!", reply=True)
         return
@@ -115,8 +115,7 @@ async def terminal(event: NewMessage.Event) -> None:
     client.running_processes.update({message: process})
     stdout, stderr = await process.communicate()
 
-    not_killed = client.running_processes.get(message, False)
-    if not_killed:
+    if not_killed := client.running_processes.get(message, False):
         del client.running_processes[message]
 
     text = f"[TERM] Return code: {process.returncode}\n"
@@ -129,10 +128,11 @@ async def terminal(event: NewMessage.Event) -> None:
     extra = await get_chat_link(event, event.id)
     if stdout or stderr:
         await event.answer(
-            "```" + text + "```",
+            f"```{text}```",
             log=("term", f"Successfully executed {cmd} in {extra}!"),
             reply=True,
         )
+
     else:
         await event.answer("`Nice, get off the void.\nNo output for you!`")
 
@@ -154,10 +154,8 @@ async def killandterminate(event: NewMessage.Event) -> None:
         return
 
     reply = await event.get_reply_message()
-    message = str(reply.chat_id) + ":" + str(reply.id)
-    running_process = client.running_processes.get(message, False)
-
-    if running_process:
+    message = f"{str(reply.chat_id)}:{str(reply.id)}"
+    if running_process := client.running_processes.get(message, False):
         # If we ever want to wait for it to complete. (Most likely never)
         """try:
             await running_process.wait()
